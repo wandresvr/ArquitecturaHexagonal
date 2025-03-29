@@ -1,11 +1,13 @@
 package com.wilson.order.domain.model;
+import com.wilson.order.domain.valueobjects.OrderTotal;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Order {
 
     private  String orderId;
-    private List<String> productsOrder;
+    private List<Product> productsOrder = new ArrayList<>();
     private String customerId;
     private String orderStatus;
     private String orderDate;
@@ -13,41 +15,12 @@ public class Order {
     private String deliveryAddress;
     private String paymentMethod;
     private String paymentStatus;
-    private String orderTotal;
-    private String orderDiscount;
-    private String orderShipping;
-    private String orderTrackingNumber;
+    private OrderTotal orderTotal;
     private String orderNotes;
-    private String orderCreatedBy;
-    private String orderUpdatedBy;
-    private String orderCreatedAt;
-    private String orderUpdatedAt;
-    private String orderCancelledAt;
-    private String orderCancelledBy;
-    private String orderCancelledReason;
 
-    public class InnerOrder {
-        private String orderId;
-        private String orderStatus;
-        private String orderDate;
-        private String deliveryDate;
-        private String deliveryAddress;
-        private String paymentMethod;
-        private String paymentStatus;
-        private String orderTotal;
-        private String orderDiscount;
-        private String orderTax;
-        private String orderShipping;
-        private String orderTrackingNumber;
-        private String orderTrackingUrl;
-        private String orderNotes;
-        private String orderCreatedBy;
-    
-        
-    }
 
-    public Order(String orderId, List<String> productsOrder, String customerId, String orderStatus, String orderDate,
-            String deliveryDate, String deliveryAddress, String paymentMethod, String paymentStatus, String orderTotal,
+    public Order(String orderId, List<Product> productsOrder, String customerId, String orderStatus, String orderDate,
+            String deliveryDate, String deliveryAddress, String paymentMethod, String paymentStatus, OrderTotal orderTotal,
             String orderDiscount, String orderTax, String orderShipping, String orderTrackingNumber,
             String orderTrackingUrl, String orderNotes, String orderCreatedBy) {
         this.orderId = orderId;
@@ -60,12 +33,7 @@ public class Order {
         this.paymentMethod = paymentMethod;
         this.paymentStatus = paymentStatus;
         this.orderTotal = orderTotal;
-        this.orderDiscount = orderDiscount;
-        this.orderShipping = orderShipping;
-        this.orderTrackingNumber = orderTrackingNumber;
         this.orderNotes = orderNotes;
-        this.orderCreatedBy = orderCreatedBy;
-
     }
     public String getOrderId() {
         return orderId;
@@ -73,11 +41,12 @@ public class Order {
     public void setOrderId(String orderId) {
         this.orderId = orderId;
     }
-    public List<String> getProductsOrder() {
-        return productsOrder;
+    public List<Product> addProductsOrder(Product product) {
+        this.productsOrder.add(product);
+        return this.productsOrder;
     }
-    public void setProductsOrder(List<String> productsOrder) {
-        this.productsOrder = productsOrder;
+    public void removeProductsOrder(Product product) {
+        this.productsOrder.remove(product);
     }
     public String getCustomerId() {
         return customerId;
@@ -121,11 +90,12 @@ public class Order {
     public void setPaymentStatus(String paymentStatus) {
         this.paymentStatus = paymentStatus;
     }
-    public String getOrderTotal() {
-        return orderTotal;
+
+    public String getOrderNotes() {
+        return orderNotes;
     }
-    public void setOrderTotal(String orderTotal) {
-        this.orderTotal = orderTotal;
+    public void setOrderNotes(String orderNotes) {
+        this.orderNotes = orderNotes;
     }
 
 
