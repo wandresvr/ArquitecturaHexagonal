@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.time.LocalDateTime;
@@ -15,20 +16,27 @@ import java.util.UUID;
 import com.wilson.order.domain.valueobjects.AddressShipping;
 import com.wilson.order.domain.valueobjects.OrderTotal;
 
+@Entity
+@Table(name = "orders")
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class Order {
 
+    @Id
     private UUID orderId;
 
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "order_id")
     @Builder.Default
     private List<OrderTotal> products = new ArrayList<>();
 
     private String orderStatus;
     private LocalDateTime orderDate;
     private String orderNotes;
+    
+    @Embedded
     private AddressShipping deliveryAddress;
 
 
