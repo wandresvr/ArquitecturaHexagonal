@@ -1,5 +1,8 @@
 # Sistema de Gestión de Pedidos de Restaurante
 
+### Wilson Andrés Vargas Rojas
+### Yeison Fabian Suarez Alba
+
 Una cadena de restaurantes necesita un sistema para gestionar pedidos en línea.
 El sistema debe manejar la creación de pedidos, gestionar el inventario de
 ingredientes y facilitar la comunicación entre el área de recepción de pedidos y la
