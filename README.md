@@ -159,13 +159,23 @@ curl -X POST http://localhost:8080/api/orders \
 ## Screens
 
 * Uso mediante Postman:
-![Logo](Screens/postman.png)
+<p align="left">
+  <img src="Screens/postman.png" width="200">
+</p>
 
 * Tabla de productos:
-![Logo](Screens/product.png)
+<p align="left">
+  <img src="Screens/product.png" width="200">
+</p>
+
 
 * Tabla de ordenes:
-![Logo](Screens/order.png)
+<p align="left">
+  <img src="Screens/order.png" width="200">
+</p>
+
 
 * Tabla de la relación productos y ordenes:
-![Logo](Screens/rproductorder.png)
+<p align="left">
+  <img src="Screens/rproductorder.png" width="200">
+</p>
