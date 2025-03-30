@@ -99,8 +99,8 @@ classDiagram
     OrderTotal "1" *-- "1" Product : 
     Order "1" *-- "1" AddressShipping : 
     Order "1" *-- "1" Client : 
-    ProductRepository "1" *-- "*" Product : 
-    OrderRepository "1" *-- "*" Order : 
+    ProductRepository <|.. Product : 
+    OrderRepository  <|..  Order : 
 ```
 
 ## Endpoint
@@ -116,7 +116,7 @@ classDiagram
     - quantity (Number): Cantidad de ese producto.
 
 ## Ejemplo Body:
-```
+``` json
 {
   "customerName": "Juan Pérez",
   "products": [
@@ -159,9 +159,13 @@ curl -X POST http://localhost:8080/api/orders \
 ## Screens
 
 * Uso mediante Postman:
+![Logo](screens/postman.png)
 
 * Tabla de productos:
+![Logo](screens/product.png)
 
 * Tabla de ordenes:
+![Logo](screens/order.png)
 
 * Tabla de la relación productos y ordenes:
+![Logo](screens/rproductorder.png)
