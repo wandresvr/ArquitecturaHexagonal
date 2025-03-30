@@ -5,13 +5,13 @@ El sistema debe manejar la creación de pedidos, gestionar el inventario de
 ingredientes y facilitar la comunicación entre el área de recepción de pedidos y la
 cocina.
 
-## API con Java Spring Boot y Arquitectura Hexagonal
+- ## API con Java Spring Boot y Arquitectura Hexagonal
 Este proyecto es una implementación de dos API en la que se ha desarrollado utilizando Java Spring Boot como framework principal, siguiendo los principios de arquitectura hexagonal para fomentar una separación clara entre las capas de dominio, infraestructura y aplicaciones.
 
-## Uso de Lombok
+- ## Uso de Lombok
 El proyecto utiliza Lombok, una biblioteca de Java que ayuda a reducir el código repetitivo y hacer el código más limpio y mantenible. Con Lombok, se automatiza la generación de métodos comunes. Esto mejora la productividad y la legibilidad del código.
 
-## Uso de PostgresSQL
+- ## Uso de PostgresSQL
 El proyecto usa PostgresSQL como base de datos, en el archivo ``` aplication.properties ``` se encuentran los parámetros de configuración de la conexión.
  
 # 1. API Gestion de pedidos
@@ -20,7 +20,6 @@ Tiene esta estructura:
 
 
 ## Estructura:
-
 
 ```plaintext
 
@@ -42,6 +41,67 @@ Tiene esta estructura:
 ```
 
 ## Diagrama UML del Dominio:
+
+``` mermaid
+classDiagram
+    class Order {
+        +UUID orderId
+        +List~OrderTotal~ products
+        +String orderStatus
+        +LocalDateTime orderDate
+        +String orderNotes
+        +AddressShipping deliveryAddress
+        +addProduct(Product, BigDecimal)
+        +removeProduct(Product)
+        +calculateTotalValue() BigDecimal
+    }
+
+    class Product {
+        +UUID id
+        +String name
+        +BigDecimal price
+    }
+
+    class OrderTotal {
+        +Product product
+        +BigDecimal quantity
+        +calculateValue() BigDecimal
+    }
+
+    class AddressShipping {
+        +String street
+        +String city
+        +String state
+        +String zipCode
+        +String country
+    }
+
+    class Client {
+        +String clientId
+        +String clientName
+        +String clientAddress
+        +String clientPhone
+        +String clientEmail
+        +String clientStatus
+    }
+
+    class ProductRepository {
+        <<interface>>
+        +findById(UUID) Optional~Product~
+    }
+
+    class OrderRepository {
+        <<interface>>
+        +save(Order) Order
+    }
+
+    Order "1" *-- "*" OrderTotal : 
+    OrderTotal "1" *-- "1" Product : 
+    Order "1" *-- "1" AddressShipping : 
+    Order "1" *-- "1" Client : 
+    ProductRepository "1" *-- "*" Product : 
+    OrderRepository "1" *-- "*" Order : 
+```
 
 ## Endpoint
 ``` POST /api/orders ```
