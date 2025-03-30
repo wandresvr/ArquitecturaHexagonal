@@ -6,5 +6,5 @@ import java.util.List;
 @Data
 public class CreateOrderRequestDto {
     private String customerName;
-    private List<CreateOrderProductDto> ingredients;
+    private List<CreateOrderProductDto> products;
 } 

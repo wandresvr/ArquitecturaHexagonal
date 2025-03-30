@@ -24,13 +24,13 @@ public class OrderController {
 
     @PostMapping
     public ResponseEntity<Order> createOrder(@RequestBody CreateOrderRequestDto request) {
-        Map<UUID, BigDecimal> ingredientQuantities = request.getIngredients().stream()
+        Map<UUID, BigDecimal> productQuantities = request.getProducts().stream()
                 .collect(Collectors.toMap(
-                        CreateOrderProductDto::getIngredientId,
+                        CreateOrderProductDto::getProductId,
                         CreateOrderProductDto::getQuantity
                 ));
 
-        Order order = createOrderUseCase.createOrder(request.getCustomerName(), ingredientQuantities);
+        Order order = createOrderUseCase.createOrder(request.getCustomerName(), productQuantities);
         return ResponseEntity.ok(order);
     }
 } 

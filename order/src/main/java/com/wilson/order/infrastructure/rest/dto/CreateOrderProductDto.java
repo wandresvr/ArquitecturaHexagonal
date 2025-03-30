@@ -6,6 +6,6 @@ import java.util.UUID;
 
 @Data
 public class CreateOrderProductDto {
-    private UUID ingredientId;
+    private UUID productId;
     private BigDecimal quantity;
 } 
