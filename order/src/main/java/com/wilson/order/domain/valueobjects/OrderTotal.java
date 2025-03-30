@@ -1,5 +1,6 @@
 package com.wilson.order.domain.valueobjects;
 
+import com.wilson.order.domain.model.Order;
 import com.wilson.order.domain.model.Product;
 
 import lombok.AllArgsConstructor;
@@ -21,7 +22,11 @@ public class OrderTotal {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id")
+    private Order order;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
     private Product product;
     

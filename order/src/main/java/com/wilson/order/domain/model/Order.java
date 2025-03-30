@@ -28,7 +28,7 @@ public class Order {
     private UUID orderId;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "order_id")
+    @JoinColumn(name = "order_id", insertable = false, updatable = false)
     @Builder.Default
     private List<OrderTotal> products = new ArrayList<>();
 
@@ -45,6 +45,7 @@ public class Order {
         OrderTotal orderTotal = OrderTotal.builder()
                 .product(product)
                 .quantity(quantity)
+                .order(this)
                 .build();
         products.add(orderTotal);
     }
