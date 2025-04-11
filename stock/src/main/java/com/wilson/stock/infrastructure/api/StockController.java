@@ -12,6 +12,7 @@ import com.wilson.stock.domain.entities.Ingredient;
 import com.wilson.stock.infrastructure.api.dto.CreateRecipeRequestDto;
 import com.wilson.stock.infrastructure.api.dto.CreateIngredientRequestDto;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -23,13 +24,13 @@ public class StockController {
     private final IngredientUseCase ingredientUseCase;
 
     @PostMapping("/recipes")
-    public ResponseEntity<Recipe> createRecipe(@RequestBody CreateRecipeRequestDto request) {
+    public ResponseEntity<Recipe> createRecipe(@Valid @RequestBody CreateRecipeRequestDto request) {
         Recipe recipe = createRecipeUseCase.createRecipe(request);
         return ResponseEntity.ok(recipe);
     }
 
     @PostMapping("/ingredients")
-    public ResponseEntity<Ingredient> createIngredient(@RequestBody CreateIngredientRequestDto request) {
+    public ResponseEntity<Ingredient> createIngredient(@Valid @RequestBody CreateIngredientRequestDto request) {
         Ingredient ingredient = ingredientUseCase.createIngredient(request);
         return ResponseEntity.ok(ingredient);
     }
@@ -41,6 +42,10 @@ public class StockController {
 
     @GetMapping("/ingredients/{id}")
     public ResponseEntity<Ingredient> getIngredientById(@PathVariable UUID id) {
-        return ResponseEntity.ok(ingredientUseCase.getIngredientById(id));
+        try {
+            return ResponseEntity.ok(ingredientUseCase.getIngredientById(id));
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 } 

@@ -2,8 +2,8 @@ package com.wilson.stock.domain.entities;
 
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-import lombok.Setter;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.UUID;
 
@@ -20,10 +20,10 @@ import com.wilson.stock.domain.valueobjects.Unit;
 
 @Entity
 @Table(name = "ingredients")
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Setter
-@Getter
 public class Ingredient {
     @Id
     private UUID id;

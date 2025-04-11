@@ -2,53 +2,52 @@ package com.wilson.stock.domain.entities;
 
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-import lombok.Setter;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.UUID;
 import java.math.BigDecimal;
-import java.util.Set;
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
+import jakarta.persistence.JoinColumn;
 
+import com.wilson.stock.domain.valueobjects.Quantity;
 import com.wilson.stock.domain.valueobjects.Unit;
 
 @Entity
 @Table(name = "recipes")
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Setter
-@Getter
 public class Recipe {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
     
-    @Column(nullable = false)
     private String name;
     
     private String description;
     
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<RecipeIngredient> ingredients = new HashSet<>();
+    private List<RecipeIngredient> ingredients = new ArrayList<>();
     
-    public Recipe addIngredient(Ingredient ingredient, BigDecimal quantity, String unitValue) {
+    public void addIngredient(Ingredient ingredient, BigDecimal quantity, String unit) {
         RecipeIngredient recipeIngredient = new RecipeIngredient();
         recipeIngredient.setId(UUID.randomUUID());
-        recipeIngredient.setRecipe(this);
         recipeIngredient.setIngredient(ingredient);
-        recipeIngredient.setQuantity(quantity);
-        recipeIngredient.setUnit(new Unit(unitValue));
-        this.ingredients.add(recipeIngredient);
-        return this;
+        Quantity quantityObj = new Quantity();
+        quantityObj.setValue(quantity);
+        recipeIngredient.setQuantity(quantityObj);
+        Unit unitObj = new Unit();
+        unitObj.setValue(unit);
+        recipeIngredient.setUnit(unitObj);
+        ingredients.add(recipeIngredient);
     }
 }
