@@ -36,7 +36,7 @@ public class Order {
 
     private String orderStatus;
     private LocalDateTime orderDate;
-    private String orderNotes;
+    //private String orderNotes;
     
     @Embedded
     private AddressShipping deliveryAddress;
@@ -44,13 +44,17 @@ public class Order {
     @Embedded
     private OrderTotalValue total;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "client_id")
+    private Client client;
+
     public void setDeliveryAddress(AddressShipping deliveryAddress) {
         this.deliveryAddress = deliveryAddress;
     }
 
     @PrePersist
     @PreUpdate
-    private void calculateTotal() {
+    protected void calculateTotal() {
         if (products != null && !products.isEmpty()) {
             BigDecimal totalAmount = products.stream()
                     .map(OrderItem::calculateValue)

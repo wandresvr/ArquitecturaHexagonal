@@ -1,5 +1,6 @@
 package com.wilson.order.domain.model;
 
+import com.wilson.order.domain.exception.ProductValidationException;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,6 +26,17 @@ public class Product {
     private String description;
     private BigDecimal price;
     private Integer stock;
+
+    @PrePersist
+    @PreUpdate
+    public void validate() {
+        if (price != null && price.compareTo(BigDecimal.ZERO) < 0) {
+            throw new ProductValidationException("Price cannot be negative");
+        }
+        if (stock != null && stock < 0) {
+            throw new ProductValidationException("Stock cannot be negative");
+        }
+    }
 
     public UUID getId() { return id; }
     public String getName() { return name; }

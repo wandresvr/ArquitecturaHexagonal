@@ -2,6 +2,7 @@ package com.wilson.order.application.services;
 
 import com.wilson.order.application.ports.inputs.GetProductUseCase;
 import com.wilson.order.application.ports.outputs.ProductRepositoryPort;
+import com.wilson.order.domain.exception.ProductNotFoundException;
 import com.wilson.order.domain.model.Product;
 import org.springframework.stereotype.Service;
 
@@ -19,8 +20,11 @@ public class GetProductService implements GetProductUseCase {
 
     @Override
     public Product getProduct(UUID id) {
+        if (id == null) {
+            throw new IllegalArgumentException("Product ID cannot be null");
+        }
         return productRepositoryPort.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+                .orElseThrow(() -> new ProductNotFoundException("Product not found"));
     }
 
     @Override

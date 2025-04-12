@@ -1,9 +1,10 @@
-package com.wilson.order.infrastructure.rest.dto;
+package com.wilson.order.application.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
 import java.math.BigDecimal;
 import java.util.UUID;
 
@@ -11,7 +12,10 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreateOrderProductDto {
-    private UUID productId;
-    private BigDecimal quantity;
+public class ProductDTO {
+    private UUID id;
+    private String name;
+    private String description;
+    private BigDecimal price;
+    private Integer stock;
 } 
