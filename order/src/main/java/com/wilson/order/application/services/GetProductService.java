@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.Optional;
 
 @Service
 public class GetProductService implements GetProductUseCase {
@@ -19,12 +20,11 @@ public class GetProductService implements GetProductUseCase {
     }
 
     @Override
-    public Product getProduct(UUID id) {
+    public Optional<Product> getProduct(UUID id) {
         if (id == null) {
             throw new IllegalArgumentException("Product ID cannot be null");
         }
-        return productRepositoryPort.findById(id)
-                .orElseThrow(() -> new ProductNotFoundException("Product not found"));
+        return productRepositoryPort.findById(id);
     }
 
     @Override

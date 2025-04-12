@@ -45,15 +45,16 @@ class GetProductServiceTest {
         when(productRepositoryPort.findById(productId)).thenReturn(Optional.of(expectedProduct));
 
         // Act
-        Product result = getProductService.getProduct(productId);
+        Optional<Product> result = getProductService.getProduct(productId);
 
         // Assert
-        assertNotNull(result);
-        assertEquals(productId, result.getId());
-        assertEquals("Test Product", result.getName());
-        assertEquals("Test Description", result.getDescription());
-        assertEquals(new BigDecimal("99.99"), result.getPrice());
-        assertEquals(100, result.getStock());
+        assertTrue(result.isPresent());
+        Product product = result.get();
+        assertEquals(productId, product.getId());
+        assertEquals("Test Product", product.getName());
+        assertEquals("Test Description", product.getDescription());
+        assertEquals(new BigDecimal("99.99"), product.getPrice());
+        assertEquals(100, product.getStock());
         
         // Verify mock interactions
         verify(productRepositoryPort, times(1)).findById(productId);
@@ -61,17 +62,16 @@ class GetProductServiceTest {
     }
 
     @Test
-    void shouldThrowExceptionWhenProductNotFound() {
+    void shouldReturnEmptyWhenProductNotFound() {
         // Arrange
         UUID productId = UUID.randomUUID();
         when(productRepositoryPort.findById(productId)).thenReturn(Optional.empty());
 
-        // Act & Assert
-        ProductNotFoundException exception = assertThrows(ProductNotFoundException.class, () -> {
-            getProductService.getProduct(productId);
-        });
-        
-        assertEquals("Product not found", exception.getMessage());
+        // Act
+        Optional<Product> result = getProductService.getProduct(productId);
+
+        // Assert
+        assertFalse(result.isPresent());
         
         // Verify mock interactions
         verify(productRepositoryPort, times(1)).findById(productId);

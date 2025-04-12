@@ -12,7 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreateOrderRequestDto {
-    private String customerName;
+    private CreateClientDto client;
     private List<CreateOrderProductDto> products;
     private AddressShippingDto shippingAddress;
 } 

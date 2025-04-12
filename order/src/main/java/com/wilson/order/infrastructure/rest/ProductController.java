@@ -3,8 +3,8 @@ package com.wilson.order.infrastructure.rest;
 import com.wilson.order.application.ports.inputs.CreateProductUseCase;
 import com.wilson.order.application.ports.inputs.GetProductUseCase;
 import com.wilson.order.domain.model.Product;
-import com.wilson.order.infrastructure.rest.dto.CreateProductRequestDto;
 import com.wilson.order.infrastructure.rest.dto.ProductDto;
+import com.wilson.order.infrastructure.rest.mapper.ProductMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,40 +19,32 @@ import java.util.stream.Collectors;
 public class ProductController {
     private final CreateProductUseCase createProductUseCase;
     private final GetProductUseCase getProductUseCase;
+    private final ProductMapper productMapper;
 
     @PostMapping
-    public ResponseEntity<ProductDto> createProduct(@RequestBody CreateProductRequestDto request) {
+    public ResponseEntity<ProductDto> createProduct(@RequestBody ProductDto request) {
         Product product = createProductUseCase.createProduct(
                 request.getName(),
                 request.getDescription(),
                 request.getPrice(),
                 request.getStock()
         );
-        return ResponseEntity.ok(mapToDto(product));
+        return ResponseEntity.ok(productMapper.toDto(product));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ProductDto> getProduct(@PathVariable UUID id) {
-        Product product = getProductUseCase.getProduct(id);
-        return ResponseEntity.ok(mapToDto(product));
+        return getProductUseCase.getProduct(id)
+                .map(product -> ResponseEntity.ok(productMapper.toDto(product)))
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping
     public ResponseEntity<List<ProductDto>> getAllProducts() {
         List<Product> products = getProductUseCase.getAllProducts();
         List<ProductDto> productDtos = products.stream()
-                .map(this::mapToDto)
+                .map(productMapper::toDto)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(productDtos);
-    }
-
-    private ProductDto mapToDto(Product product) {
-        return ProductDto.builder()
-                .id(product.getId())
-                .name(product.getName())
-                .description(product.getDescription())
-                .price(product.getPrice())
-                .stock(product.getStock())
-                .build();
     }
 } 

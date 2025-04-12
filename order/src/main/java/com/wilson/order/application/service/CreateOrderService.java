@@ -2,8 +2,9 @@ package com.wilson.order.application.service;
 
 import com.wilson.order.application.ports.inputs.CreateOrderUseCase;
 import com.wilson.order.application.ports.outputs.OrderRepositoryPort;
-import com.wilson.order.domain.valueobjects.AddressShipping;
+import com.wilson.order.domain.model.Client;
 import com.wilson.order.domain.model.Order;
+import com.wilson.order.domain.valueobjects.AddressShipping;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,11 +19,12 @@ public class CreateOrderService implements CreateOrderUseCase {
     private final OrderRepositoryPort orderRepositoryPort;
 
     @Override
-    public Order createOrder(String customerName, Map<UUID, BigDecimal> productQuantities, AddressShipping shippingAddress) {
+    public Order createOrder(Client client, Map<UUID, BigDecimal> productQuantities, AddressShipping shippingAddress) {
         Order order = Order.builder()
                 .orderStatus("CREATED")
                 .orderDate(java.time.LocalDateTime.now())
                 .deliveryAddress(shippingAddress)
+                .client(client)
                 .build();
 
         return orderRepositoryPort.save(order);
