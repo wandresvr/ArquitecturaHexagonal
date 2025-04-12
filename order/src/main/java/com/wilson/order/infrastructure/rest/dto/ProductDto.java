@@ -5,14 +5,17 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
+import java.math.BigDecimal;
+import java.util.UUID;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreateOrderRequestDto {
-    private String customerName;
-    private List<CreateOrderProductDto> products;
-    private AddressShippingDto shippingAddress;
+public class ProductDto {
+    private UUID id;
+    private String name;
+    private String description;
+    private BigDecimal price;
+    private Integer stock;
 } 

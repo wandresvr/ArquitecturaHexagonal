@@ -5,14 +5,14 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreateOrderRequestDto {
-    private String customerName;
-    private List<CreateOrderProductDto> products;
-    private AddressShippingDto shippingAddress;
+public class AddressShippingDto {
+    private String street;
+    private String city;
+    private String state;
+    private String zipCode;
+    private String country;
 } 

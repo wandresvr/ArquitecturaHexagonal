@@ -1,15 +1,14 @@
 package com.wilson.order.infrastructure.rest;
 
 import com.wilson.order.application.ports.inputs.CreateOrderUseCase;
+import com.wilson.order.domain.valueobjects.AddressShipping;
 import com.wilson.order.domain.model.Order;
+import com.wilson.order.infrastructure.rest.dto.AddressShippingDto;
 import com.wilson.order.infrastructure.rest.dto.CreateOrderRequestDto;
 import com.wilson.order.infrastructure.rest.dto.CreateOrderProductDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.Map;
@@ -30,7 +29,19 @@ public class OrderController {
                         CreateOrderProductDto::getQuantity
                 ));
 
-        Order order = createOrderUseCase.createOrder(request.getCustomerName(), productQuantities);
+        AddressShipping addressShipping = AddressShipping.builder()
+                .street(request.getShippingAddress().getStreet())
+                .city(request.getShippingAddress().getCity())
+                .state(request.getShippingAddress().getState())
+                .zipCode(request.getShippingAddress().getZipCode())
+                .country(request.getShippingAddress().getCountry())
+                .build();
+
+        Order order = createOrderUseCase.createOrder(
+                request.getCustomerName(), 
+                productQuantities,
+                addressShipping
+        );
         return ResponseEntity.ok(order);
     }
 } 
