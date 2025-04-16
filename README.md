@@ -28,25 +28,17 @@ El proyecto lanza varios tres contenedores donde se encuentra la APIs y la base 
 1. [API Gestión de pedidos](order)
   * Estructura
   * Diagrama del dominio
-  * Endpoints
   * Headers
-  * Parámetros
-  * Ejemplo body
-  * Ejemplo usando Curl
+  * Endpoints
   * Lanzamiento del docker
   * Ajustes del docker
   * Casos de prueba
-  * Cobertura
 2. [API Gestión de inventarios](stock)
   * Estructura
   * Diagrama del dominio
-  * Endpoints
   * Headers
-  * Parámetros
-  * Ejemplo body
-  * Ejemplo usando Curl
+  * Endpoints
   * Lanzamiento del docker
   * Ajustes del docker
-  2* Casos de prueba
-  * Cobertura
+  * Casos de prueba
 3. [Notas](#notas)
