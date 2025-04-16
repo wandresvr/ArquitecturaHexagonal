@@ -1,4 +1,4 @@
-package com.wilson.order.application.service;
+package com.wilson.order.application.services;
 
 import com.wilson.order.application.ports.inputs.CreateOrderUseCase;
 import com.wilson.order.application.ports.outputs.OrderRepositoryPort;
@@ -29,4 +29,4 @@ public class CreateOrderService implements CreateOrderUseCase {
 
         return orderRepositoryPort.save(order);
     }
-} 
+}

@@ -3,12 +3,13 @@
 ### Wilson Andrés Vargas Rojas
 ### Yeison Fabian Suarez Alba
 
+## Contexto:
 Una cadena de restaurantes necesita un sistema para gestionar pedidos en línea.
 El sistema debe manejar la creación de pedidos, gestionar el inventario de
 ingredientes y facilitar la comunicación entre el área de recepción de pedidos y la
 cocina.
 
-- ## API con Java Spring Boot y Arquitectura Hexagonal
+- ## APIs creadas con Java Spring Boot y Arquitectura Hexagonal
 Este proyecto es una implementación de dos API en la que se ha desarrollado utilizando Java Spring Boot como framework principal, siguiendo los principios de arquitectura hexagonal para fomentar una separación clara entre las capas de dominio, infraestructura y aplicaciones.
 
 - ## Uso de Lombok
@@ -36,7 +37,7 @@ El proyecto lanza varios tres contenedores donde se encuentra la APIs y la base 
   * Ajustes del docker
   * Casos de prueba
   * Cobertura
-2. [API Gestión de inventarios]()
+2. [API Gestión de inventarios](stock)
   * Estructura
   * Diagrama del dominio
   * Endpoints

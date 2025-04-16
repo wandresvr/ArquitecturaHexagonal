@@ -2,7 +2,21 @@
 
 # API Gestion de pedidos
 Esta desarrollada usando Sprint Booot, Gradle y Lombok, usa una arquitecura hexagonal. 
-Tiene esta estructura:
+
+# Contenido
+
+* Estructura
+* Diagrama del dominio
+* Headers
+* Endpoints
+  * Parámetros
+  * Ejemplo body
+  * Ejemplo usando Curl
+  * Notas
+* Lanzamiento del docker
+* Ajustes del docker
+* Casos de prueba
+* Cobertura
 
 
 ## Estructura:
@@ -14,15 +28,19 @@ Tiene esta estructura:
 │ │ ├── application/
 │ │ │ ├── ports/
 │ │ │ │ └── inputs/
-│ │ │ └── service/
+│ │ │ │ └── outputs/
+│ │ │ └── services/
 │ │ ├── domain/
 │ │ │ ├── exception/
 │ │ │ ├── model/
 │ │ │ ├── repository/
 │ │ │ └── valueobjects/
 │ │ └── infrastructure/
-│ │ │ ├── rest/dto/
-│ │ │ └── repository/
+│ │ │ ├── config/
+│ │ │ ├── rest/
+│ │ │ │ ├── dto/
+│ │ │ │ ├── mapper/
+│ │ │ └── persistence/
 
 ```
 
@@ -89,79 +107,137 @@ classDiagram
     OrderRepository  <|..  Order : 
 ```
 
-## Endpoint
-``` POST /api/orders ```
-
 ## Headers
 ``` Content-Type: application/json ```
 
-## Parámetros
-- customerName (String): Nombre del cliente que realiza la orden.
-- products (Array): Lista de productos en la orden con:
-    - productId (UUID): Identificador único del producto.
-    - quantity (Number): Cantidad de ese producto.
+# Endpoints
+  
+## 1. Ingresar Ordenes de pedido
+``` POST /api/orders ```
 
-## Ejemplo Body:
+### Parámetros:
+
+- client (Dictionary): Información del cliente con:
+  - name (String): Nombre del cliente
+  - email (String): Correo del cliente
+  - phone (String): Teléfono del cliente
+- products (Array): Lista de productos en la orden con:
+  - productId (UUID): Identificador único del producto.
+  - quantity (Number): Cantidad de ese producto.
+- shippingAddress (Dictionary): Información de envio con:
+  - street (String): Dirección
+  - city (String): Ciudad
+  - state (String): Departamento/estado/provincia
+  - zipCode (String): Código postal
+  - country (String): País
+
+### Ejemplo Body:
 ``` json
 {
-  "customerName": "Juan Pérez",
-  "products": [
-    {
-      "productId": "123e4567-e89b-12d3-a456-426614174000",
-      "quantity": 2
+    "client": {
+        "name": "Juan Pérez",
+        "email": "juan@example.com",
+        "phone": "1234567890"
     },
-    {
-      "productId": "987fcdeb-51a2-43d7-9b56-254415f67890",
-      "quantity": 1
+    "products": [
+        {
+            "productId": "123e4567-e89b-12d3-a456-426614174000",
+            "quantity": 2
+        }
+    ],
+    "shippingAddress": {
+        "street": "123 Main St",
+        "city": "New York",
+        "state": "NY",
+        "zipCode": "10001",
+        "country": "USA"
     }
-  ]
 }
 ```
 
-## Ejemplo usando curl:
+### Ejemplo usando curl:
 ``` sh
 curl -X POST http://localhost:8080/api/orders \
 -H "Content-Type: application/json" \
 -d '{
-  "customerName": "Juan Pérez",
-  "products": [
-    {
-      "productId": "123e4567-e89b-12d3-a456-426614174000",
-      "quantity": 2
+    "client": {
+        "name": "Juan Pérez",
+        "email": "juan@example.com",
+        "phone": "1234567890"
     },
-    {
-      "productId": "987fcdeb-51a2-43d7-9b56-254415f67890",
-      "quantity": 1
+    "products": [
+        {
+            "productId": "123e4567-e89b-12d3-a456-426614174000",
+            "quantity": 2
+        }
+    ],
+    "shippingAddress": {
+        "street": "123 Main St",
+        "city": "New York",
+        "state": "NY",
+        "zipCode": "10001",
+        "country": "USA"
     }
-  ]
 }'
 ```
 
-## Notas:
+### Notas:
 
 - Se debe tener productos en la base de datos creados antes de crear ordenes.
 - La relación entre la orden y los productos se encuentran en la tabla ```Total_Order```.
 
-## Screens
 
-* Uso mediante Postman:
-<p align="left">
-  <img src="Screens/postman.png" width="600">
-</p>
+## 2. Crear un producto
+  ``` POST /api/product ```
 
-* Tabla de productos:
-<p align="left">
-  <img src="Screens/product.png" width="600">
-</p>
+### Parámetros:
 
-
-* Tabla de ordenes:
-<p align="left">
-  <img src="Screens/order.png" width="600">
-</p>
+- name (String): Nombre del producto
+- description (String): Descripción del producto
+- price (Float): Precio del producto por unidad
+- stock (Int): Cantidad del producto en stock
 
 
-* Tabla de la relación productos y ordenes:
-<p align="left">
-  <img src="Screens/rproductorder.png" width="600">
-</p>
+### Ejemplo Body:
+
+``` json
+{
+    "name": "Pizza Margarita",
+    "description": "Pizza clásica italiana",
+    "price": 15.99,
+    "stock": 50
+}
+```
+
+### Ejemplo usando curl:
+
+``` sh
+curl -X POST http://localhost:8080/api/products \
+-H "Content-Type: application/json" \
+-d '{
+    "name": "Pizza Margarita",
+    "description": "Pizza clásica italiana",
+    "price": 15.99,
+    "stock": 50
+}'
+```
+
+### 3. Obtener un producto
+``` GET /api/product/{product} ```
+
+### Parámetros:
+{product} : id del producto
+
+### Ejemplo usando curl:
+
+``` sh
+curl -X GET http://localhost:8080/api/products/123e4567-e89b-12d3-a456-426614174000
+```
+
+### Notas:
+- Para obtener todos los productos sólo se debe omitir el parametro
+
+Ejemplo:
+``` sh
+curl -X GET http://localhost:8080/api/products/
+```
