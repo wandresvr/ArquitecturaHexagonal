@@ -24,7 +24,7 @@ El proyecto lanza varios tres contenedores donde se encuentra la APIs y la base 
  
 # Tabla de contenido
 
-1. [API Gestión de pedidos](api-gestión-de-pedidos)
+1. [API Gestión de pedidos](#api-gestión-de-pedidos)
   1.1. Estructura
   1.2. Diagrama del dominio
   1.3. Endpoints
@@ -48,7 +48,7 @@ El proyecto lanza varios tres contenedores donde se encuentra la APIs y la base 
   2.9. Ajustes del docker
   2.10. Casos de prueba
   2.11. Cobertura
-3. [Notas](notas)
+3. [Notas](#notas)
 
 <br>
 
