@@ -16,8 +16,43 @@ El proyecto utiliza Lombok, una biblioteca de Java que ayuda a reducir el códig
 
 - ## Uso de PostgresSQL
 El proyecto usa PostgresSQL como base de datos, en el archivo ``` aplication.properties ``` se encuentran los parámetros de configuración de la conexión.
+
+- ## Uso de Docker
+El proyecto lanza varios tres contenedores donde se encuentra la APIs y la base de datos.
+
+<br>
  
-# 1. API Gestion de pedidos
+# Tabla de contenido
+
+1. [API Gestión de pedidos](api-gestión-de-pedidos)
+  1.1. Estructura
+  1.2. Diagrama del dominio
+  1.3. Endpoints
+  1.4. Headers
+  1.5. Parámetros
+  1.6. Ejemplo body
+  1.7. Ejemplo usando Curl
+  1.8. Lanzamiento del docker
+  1.9. Ajustes del docker
+  1.10. Casos de prueba
+  1.11. Cobertura
+2. [API Gestión de inventarios]()
+  2.1. Estructura
+  2.2. Diagrama del dominio
+  2.3. Endpoints
+  2.4. Headers
+  2.5. Parámetros
+  2.6. Ejemplo body
+  2.7. Ejemplo usando Curl
+  2.8. Lanzamiento del docker
+  2.9. Ajustes del docker
+  2.10. Casos de prueba
+  2.11. Cobertura
+3. [Notas](notas)
+
+<br>
+
+# API Gestion de pedidos
 Esta desarrollada usando Sprint Booot, Gradle y Lombok, usa una arquitecura hexagonal. 
 Tiene esta estructura:
 
