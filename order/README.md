@@ -14,9 +14,15 @@ Esta desarrollada usando Sprint Booot, Gradle y Lombok, usa una arquitecura hexa
   * Ejemplo usando Curl
   * Notas
 * Lanzamiento del docker
+  * Construir la imagen
+  * Ejecutar el docker
+  * Iniciar tanto el servicio como la base de datos
 * Ajustes del docker
+  * Variables de entorno de PostgreSQL:
+  * Versión de PostgreSQL:
 * Casos de prueba
-* Cobertura
+  * Ejecución
+  * Cobertura
 
 
 ## Estructura:
@@ -222,7 +228,7 @@ curl -X POST http://localhost:8080/api/products \
 }'
 ```
 
-### 3. Obtener un producto
+## 3. Obtener un producto
 ``` GET /api/product/{product} ```
 
 ### Parámetros:
@@ -241,3 +247,50 @@ Ejemplo:
 ``` sh
 curl -X GET http://localhost:8080/api/products/
 ```
+
+## Lanzamiento del docker
+
+### Construir la imagen
+Primero se debe construir la imagen con:
+``` sh
+docker build -t order-service .
+```
+
+### Ejecutar el docker
+``` sh
+docker run -p 8080:8080 order-service
+```
+
+### Iniciar tanto el servicio como la base de datos
+``` sh
+docker-compose up
+```
+
+### Notas:
+- Docker debe estar instalado
+- El servicio corre en el puerto 8080
+
+## Ajustes del docker
+### Variables de entorno de PostgreSQL:
+- Nombre de la base de datos (POSTGRES_DB)
+- Usuario de PostgreSQL (POSTGRES_USER)
+- Contraseña de PostgreSQL (POSTGRES_PASSWORD)
+
+### Versión de PostgreSQL:
+   - Actualmente se usa postgres 15
+
+## Casos de prueba
+
+### Ejecución
+Para ejecutar los casos de prueba solo se debe ejecutar:
+``` sh
+./gradlew test
+```
+
+### Cobertura
+Para validar la cobertura se debe ejecutar:
+``` sh
+./gradlew clean test jacocoTestReport
+```
+
+se creará la carpeta [coverage](coverage), para ver la cobertura abra el archivo de[reporte](coverage/index.html) (index.html)

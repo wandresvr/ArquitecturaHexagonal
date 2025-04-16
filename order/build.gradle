@@ -57,8 +57,14 @@ jacoco {
 jacocoTestReport {
 	dependsOn test
 	reports {
-		xml.required = true
-		html.required = true
+		xml {
+			required = true
+			destination = file("${project.projectDir}/coverage/jacocoTestReport.xml")
+		}
+		html {
+			required = true
+			destination = file("${project.projectDir}/coverage/html")
+		}
 	}
 	afterEvaluate {
 		classDirectories.setFrom(files(classDirectories.files.collect {
