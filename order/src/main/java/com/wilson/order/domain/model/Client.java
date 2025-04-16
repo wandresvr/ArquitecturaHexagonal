@@ -1,70 +1,41 @@
 package com.wilson.order.domain.model;
 
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.util.UUID;
+
+@Entity
+@Table(name = "clients")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Client {
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
-    private String clientId;
-    private String clientName;
-    private String clientAddress;
-    private String clientPhone;
-    private String clientEmail;
-    private String clientStatus;
+    private String name;
+    private String email;
+    private String phone;
 
-    public Client(String clientId, String clientName, String clientAddress, String clientPhone, String clientEmail,
-            String clientStatus) {
-        this.clientId = clientId;
-        this.clientName = clientName;
-        this.clientAddress = clientAddress;
-        this.clientPhone = clientPhone;
-        this.clientEmail = clientEmail;
-        this.clientStatus = clientStatus;
+    @PrePersist
+    @PreUpdate
+    public void validate() {
+        if (name == null || name.trim().isEmpty()) {
+            throw new IllegalArgumentException("El nombre del cliente no puede estar vacío");
+        }
+        if (email == null || email.trim().isEmpty()) {
+            throw new IllegalArgumentException("El email del cliente no puede estar vacío");
+        }
+        if (phone == null || phone.trim().isEmpty()) {
+            throw new IllegalArgumentException("El teléfono del cliente no puede estar vacío");
+        }
     }
-
-    public String getClientId() {
-        return clientId;
-    }
-
-    public void setClientId(String clientId) {
-        this.clientId = clientId;
-    }
-
-    public String getClientName() {
-        return clientName;
-    }
-
-    public void setClientName(String clientName) {
-        this.clientName = clientName;
-    }
-
-    public String getClientAddress() {
-        return clientAddress;
-    }
-
-    public void setClientAddress(String clientAddress) {
-        this.clientAddress = clientAddress;
-    }
-
-    public String getClientPhone() {
-        return clientPhone;
-    }
-
-    public void setClientPhone(String clientPhone) {
-        this.clientPhone = clientPhone;
-    }
-
-    public String getClientEmail() {
-        return clientEmail;
-    }
-
-    public void setClientEmail(String clientEmail) {
-        this.clientEmail = clientEmail;
-    }
-
-    public String getClientStatus() {
-        return clientStatus;
-    }
-
-    public void setClientStatus(String clientStatus) {
-        this.clientStatus = clientStatus;
-    }
-
 }
