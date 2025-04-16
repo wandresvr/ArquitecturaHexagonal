@@ -293,4 +293,4 @@ Para validar la cobertura se debe ejecutar:
 ./gradlew clean test jacocoTestReport
 ```
 
-se creará la carpeta [coverage](coverage), para ver la cobertura abra el archivo de[reporte](coverage/index.html) (index.html)
+se creará la carpeta [coverage](coverage), para ver la cobertura abra el archivo de [reporte](coverage/html/index.html) (index.html) dentro de un navegador
