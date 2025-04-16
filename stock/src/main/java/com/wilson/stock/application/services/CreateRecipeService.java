@@ -1,25 +1,16 @@
-package com.wilson.stock.application;
+package com.wilson.stock.application.services;
 
-//import com.wilson.order.domain.exception.ProductNotFoundException;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.Map;
 import java.util.UUID;
 
 import com.wilson.stock.application.ports.input.CreateRecipeUseCase;
 import com.wilson.stock.infrastructure.api.dto.CreateRecipeRequestDto;
-import com.wilson.stock.infrastructure.api.dto.CreateRecipeIngredientDto;
 import com.wilson.stock.domain.entities.Ingredient;
 import com.wilson.stock.domain.entities.Recipe;
 import com.wilson.stock.domain.repository.IngredientRepository;
 import com.wilson.stock.domain.repository.RecipeRepository;
-import com.wilson.stock.domain.valueobjects.Quantity;
-import com.wilson.stock.domain.valueobjects.Unit;
 
 @Service
 @RequiredArgsConstructor
@@ -42,4 +33,4 @@ public class CreateRecipeService implements CreateRecipeUseCase {
 
         return recipeRepository.save(recipe);
     }
-} 
+}

@@ -1,4 +1,4 @@
-# API Gestion de pedidos
+# API Gestion de inventario
 Esta desarrollada usando Sprint Booot, Gradle y Lombok, usa una arquitecura hexagonal. 
 
 # Contenido
@@ -29,23 +29,19 @@ Esta desarrollada usando Sprint Booot, Gradle y Lombok, usa una arquitecura hexa
 
 ├── order/src/
 │ ├── main/
-│ │ ├── java/com/wilson/order/
+│ │ ├── java/com/wilson/stock/
 │ │ │ ├── application/
 │ │ │ │ ├── ports/
 │ │ │ │ │ └── inputs/
 │ │ │ │ │ └── outputs/
 │ │ │ │ └── services/
 │ │ │ ├── domain/
-│ │ │ │ ├── exception/
-│ │ │ │ ├── model/
+│ │ │ │ ├── entitites/
 │ │ │ │ ├── repository/
 │ │ │ │ └── valueobjects/
-│ │ │ ├── infrastructure/
-│ │ │ │ ├── config/
-│ │ │ │ ├── rest/
-│ │ │ │ │ ├── dto/
-│ │ │ │ │ ├── mapper/
-│ │ │ │ └── persistence/
+│ │ │ ├── infrastructure/api
+│ │ │ │ ├── dto/
+│ │ │ │ ├── exception/
 │ ├── test/
 ├── coverage/
 
@@ -56,63 +52,44 @@ Esta desarrollada usando Sprint Booot, Gradle y Lombok, usa una arquitecura hexa
 
 ``` mermaid
 classDiagram
-    class Order {
-        +UUID orderId
-        +List~OrderTotal~ products
-        +String orderStatus
-        +LocalDateTime orderDate
-        +String orderNotes
-        +AddressShipping deliveryAddress
-        +addProduct(Product, BigDecimal)
-        +removeProduct(Product)
-        +calculateTotalValue() BigDecimal
+    class Recipe {
+        -UUID id
+        -String name
+        -String description
+        -List<RecipeIngredient> ingredients
+        +addIngredient(Ingredient, BigDecimal, String)
     }
-
-    class Product {
-        +UUID id
-        +String name
-        +BigDecimal price
+    
+    class Ingredient {
+        -UUID id
+        -String name
+        -String description
+        -Quantity quantity
+        -Unit unit
     }
-
-    class OrderTotal {
-        +Product product
-        +BigDecimal quantity
-        +calculateValue() BigDecimal
+    
+    class RecipeIngredient {
+        -UUID id
+        -Recipe recipe
+        -Ingredient ingredient
+        -Quantity quantity
+        -Unit unit
     }
-
-    class AddressShipping {
-        +String street
-        +String city
-        +String state
-        +String zipCode
-        +String country
+    
+    class Quantity {
+        -BigDecimal value
     }
-
-    class Client {
-        +String clientId
-        +String clientName
-        +String clientAddress
-        +String clientPhone
-        +String clientEmail
-        +String clientStatus
+    
+    class Unit {
+        -String value
     }
-
-    class ProductRepository {
-        <<interface>>
-        +findById(UUID) Optional~Product~
-    }
-
-    class OrderRepository {
-        <<interface>>
-        +save(Order) Order
-    }
-
-    Order "1" *-- "*" OrderTotal : 
-    OrderTotal "1" *-- "1" Product : 
-    Order "1" *-- "1" AddressShipping : 
-    Order "1" *-- "1" Client : 
-    ProductRepository <|.. Product : 
-    OrderRepository  <|..  Order : 
+    
+    Recipe "1" -- "*" RecipeIngredient
+    RecipeIngredient "*" -- "1" Ingredient
+    RecipeIngredient -- Quantity
+    RecipeIngredient -- Unit
+    Ingredient -- Quantity
+    Ingredient -- Unit
 ```
 
 ## Headers
@@ -120,134 +97,106 @@ classDiagram
 
 # Endpoints
   
-## 1. Ingresar Ordenes de pedido
-``` POST /api/orders ```
+## 1. Crear una nueva receta
+``` POST /api/stock ```
 
 ### Parámetros:
 
-- client (Dictionary): Información del cliente con:
-  - name (String): Nombre del cliente
-  - email (String): Correo del cliente
-  - phone (String): Teléfono del cliente
-- products (Array): Lista de productos en la orden con:
-  - productId (UUID): Identificador único del producto.
-  - quantity (Number): Cantidad de ese producto.
-- shippingAddress (Dictionary): Información de envio con:
-  - street (String): Dirección
-  - city (String): Ciudad
-  - state (String): Departamento/estado/provincia
-  - zipCode (String): Código postal
-  - country (String): País
+- recipeNme (String): Nombre de la receta
+- ingredients (Array): Array de ingredientes con:
+  - ingredientId (UUID): Identificador único del ingrediente
+  - quantity (Float): Cantidad del ingrediente
+  - unit (String): Tipo de unidad del ingrediente
 
 ### Ejemplo Body:
 ``` json
 {
-    "client": {
-        "name": "Juan Pérez",
-        "email": "juan@example.com",
-        "phone": "1234567890"
-    },
-    "products": [
+    "recipeName": "Pan",
+    "ingredients": [
         {
-            "productId": "123e4567-e89b-12d3-a456-426614174000",
-            "quantity": 2
+            "ingredientId": "123e4567-e89b-12d3-a456-426614174000",
+            "quantity": 500.0,
+            "unit": "gramos"
         }
-    ],
-    "shippingAddress": {
-        "street": "123 Main St",
-        "city": "New York",
-        "state": "NY",
-        "zipCode": "10001",
-        "country": "USA"
-    }
+    ]
 }
 ```
 
 ### Ejemplo usando curl:
 ``` sh
-curl -X POST http://localhost:8080/api/orders \
+curl -X POST http://localhost:8080/api/stock/recipes \
 -H "Content-Type: application/json" \
 -d '{
-    "client": {
-        "name": "Juan Pérez",
-        "email": "juan@example.com",
-        "phone": "1234567890"
-    },
-    "products": [
+    "recipeName": "Pan",
+    "ingredients": [
         {
-            "productId": "123e4567-e89b-12d3-a456-426614174000",
-            "quantity": 2
+            "ingredientId": "123e4567-e89b-12d3-a456-426614174000",
+            "quantity": 500,
+            "unit": "gramos"
         }
-    ],
-    "shippingAddress": {
-        "street": "123 Main St",
-        "city": "New York",
-        "state": "NY",
-        "zipCode": "10001",
-        "country": "USA"
-    }
+    ]
 }'
 ```
 
 ### Notas:
 
-- Se debe tener productos en la base de datos creados antes de crear ordenes.
-- La relación entre la orden y los productos se encuentran en la tabla ```Total_Order```.
+- Se debe tener ingredientes en la base de datos creados antes de crear una receta.
+- La relación entre la receta y los ingredientes se encuentran en la tabla ```recipe_ingredients```.
 
 
-## 2. Crear un producto
-  ``` POST /api/product ```
+## 2. Crear un ingrediente
+  ``` POST /api/ingredient ```
 
 ### Parámetros:
 
-- name (String): Nombre del producto
-- description (String): Descripción del producto
-- price (Float): Precio del producto por unidad
-- stock (Int): Cantidad del producto en stock
+- name (String): Nombre del ingrediente
+- description (String): Descripción del ingrediente
+- quantity (Float): Cantidad del producto
+- unit (String): Tipo de unidad
 
 
 ### Ejemplo Body:
 
 ``` json
 {
-    "name": "Pizza Margarita",
-    "description": "Pizza clásica italiana",
-    "price": 15.99,
-    "stock": 50
+    "name": "Harina",
+    "description": "Harina de trigo",
+    "quantity": 1000,
+    "unit": "gramos"
 }
 ```
 
 ### Ejemplo usando curl:
 
 ``` sh
-curl -X POST http://localhost:8080/api/products \
+curl -X POST http://localhost:8080/api/stock/ingredients \
 -H "Content-Type: application/json" \
 -d '{
-    "name": "Pizza Margarita",
-    "description": "Pizza clásica italiana",
-    "price": 15.99,
-    "stock": 50
+    "name": "Harina",
+    "description": "Harina de trigo",
+    "quantity": 1000,
+    "unit": "gramos"
 }'
 ```
 
-## 3. Obtener un producto
-``` GET /api/product/{product} ```
+## 3. Obtener un ingrediente
+``` GET /api/product/{ingredient} ```
 
 ### Parámetros:
-{product} : id del producto
+{ingredient} : id del ingrediente
 
 ### Ejemplo usando curl:
 
 ``` sh
-curl -X GET http://localhost:8080/api/products/123e4567-e89b-12d3-a456-426614174000
+curl -X GET http://localhost:8080/api/stock/ingredients/123e4567-e89b-12d3-a456-426614174000
 ```
 
 ### Notas:
-- Para obtener todos los productos sólo se debe omitir el parametro
+- Para obtener todos los ingredientes sólo se debe omitir el parametro.
 
 Ejemplo:
 ``` sh
-curl -X GET http://localhost:8080/api/products/
+curl -X GET http://localhost:8080/api/stock/ingredients/
 ```
 
 ## Lanzamiento del docker
@@ -255,12 +204,12 @@ curl -X GET http://localhost:8080/api/products/
 ### Construir la imagen
 Primero se debe construir la imagen con:
 ``` sh
-docker build -t order-service .
+docker build -t stock-service .
 ```
 
 ### Ejecutar el docker
 ``` sh
-docker run -p 8080:8080 order-service
+docker run -p 8080:8080 stock-service
 ```
 
 ### Iniciar tanto el servicio como la base de datos
@@ -295,4 +244,4 @@ Para validar la cobertura se debe ejecutar:
 ./gradlew clean test jacocoTestReport
 ```
 
-se creará la carpeta [coverage](coverage), para ver la cobertura abra el archivo de [reporte](coverage/html/index.html) (index.html) dentro de un navegador
+se creará la carpeta [coverage](coverage), para ver la cobertura abra el archivo de [reporte](coverage/html/index.html) (index.html) dentro de un navegador.

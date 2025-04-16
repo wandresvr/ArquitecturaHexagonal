@@ -14,6 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.wilson.stock.application.services.IngredientService;
 import com.wilson.stock.domain.entities.Ingredient;
 import com.wilson.stock.domain.repository.IngredientRepository;
 import com.wilson.stock.infrastructure.api.dto.CreateIngredientRequestDto;
@@ -123,4 +124,4 @@ class IngredientServiceTest {
         });
         verify(ingredientRepository).findById(id);
     }
-} 
+}

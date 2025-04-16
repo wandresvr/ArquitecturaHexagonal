@@ -15,6 +15,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.wilson.stock.application.services.CreateRecipeService;
 import com.wilson.stock.domain.entities.Ingredient;
 import com.wilson.stock.domain.entities.Recipe;
 import com.wilson.stock.domain.entities.RecipeIngredient;
@@ -97,4 +98,4 @@ class CreateRecipeServiceTest {
             createRecipeService.createRecipe(requestDto);
         });
     }
-} 
+}

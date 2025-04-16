@@ -1,4 +1,4 @@
-package com.wilson.stock.application;
+package com.wilson.stock.application.services;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,4 +43,4 @@ public class IngredientService implements IngredientUseCase {
         return ingredientRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Ingredient not found: " + id));
     }
-} 
+}
