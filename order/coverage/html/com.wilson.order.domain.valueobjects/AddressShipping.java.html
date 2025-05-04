@@ -3,20 +3,20 @@
 import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Embeddable
-@Getter
-<span class="nc" id="L11">@NoArgsConstructor</span>
-<span class="fc" id="L12">@AllArgsConstructor</span>
-<span class="pc" id="L13">@Builder</span>
+<span class="nc bnc" id="L10" title="All 46 branches missed.">@Data</span>
+<span class="pc" id="L11">@Builder</span>
+<span class="nc" id="L12">@NoArgsConstructor</span>
+<span class="fc" id="L13">@AllArgsConstructor</span>
 public class AddressShipping {
 <span class="fc" id="L15">    private String street;</span>
 <span class="fc" id="L16">    private String city;</span>
 <span class="fc" id="L17">    private String state;</span>
-<span class="fc" id="L18">    private String zipCode;</span>
-<span class="fc" id="L19">    private String country;</span>
+<span class="fc" id="L18">    private String country;</span>
+<span class="fc" id="L19">    private String zipCode;</span>
 
     public static class AddressShippingBuilder {
         private String street;
@@ -66,7 +66,7 @@ public class AddressShipping {
         }
 
         public AddressShipping build() {
-<span class="fc" id="L69">            return new AddressShipping(street, city, state, zipCode, country);</span>
+<span class="fc" id="L69">            return new AddressShipping(street, city, state, country, zipCode);</span>
         }
     }
 }

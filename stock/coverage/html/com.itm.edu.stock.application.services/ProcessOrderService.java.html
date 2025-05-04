@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ProcessOrderService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">stock</a> &gt; <a href="index.source.html" class="el_package">com.itm.edu.stock.application.services</a> &gt; <span class="el_source">ProcessOrderService.java</span></div><h1>ProcessOrderService.java</h1><pre class="source lang-java linenums">package com.itm.edu.stock.application.services;
+
+import com.itm.edu.common.dto.OrderMessageDTO;
+import com.itm.edu.common.dto.ProductOrderDTO;
+import com.itm.edu.stock.application.ports.input.ProcessOrderUseCase;
+import com.itm.edu.stock.domain.entities.Recipe;
+import com.itm.edu.stock.domain.entities.Ingredient;
+import com.itm.edu.stock.domain.exception.BusinessException;
+import com.itm.edu.stock.domain.repository.RecipeRepository;
+import com.itm.edu.stock.domain.repository.IngredientRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import java.math.BigDecimal;
+
+@Service
+<span class="fc" id="L17">@RequiredArgsConstructor</span>
+public class ProcessOrderService implements ProcessOrderUseCase {
+
+    private final RecipeRepository recipeRepository;
+    private final IngredientRepository ingredientRepository;
+
+    @Override
+    @Transactional
+    public void processOrder(OrderMessageDTO orderMessage) {
+<span class="nc bnc" id="L26" title="All 2 branches missed.">        for (ProductOrderDTO line : orderMessage.getProducts()) {</span>
+            // 1) Recupera la receta según productId
+<span class="nc" id="L28">            Recipe recipe = recipeRepository</span>
+<span class="nc" id="L29">                .findByProductId(line.getProductId())</span>
+<span class="nc" id="L30">                .orElseThrow(() -&gt;</span>
+<span class="nc" id="L31">                    new BusinessException(&quot;Receta no encontrada para producto &quot; + line.getProductId()));</span>
+
+            // 2) Valida y descuenta ingredientes
+<span class="nc" id="L34">            recipe.getIngredients().forEach(req -&gt; {</span>
+<span class="nc" id="L35">                Ingredient ing = ingredientRepository</span>
+<span class="nc" id="L36">                    .findById(req.getIngredient().getId())</span>
+<span class="nc" id="L37">                    .orElseThrow(() -&gt;</span>
+<span class="nc" id="L38">                        new BusinessException(&quot;Ingrediente no encontrado: &quot; + req.getIngredient().getId()));</span>
+<span class="nc" id="L39">                BigDecimal needed = req.getQuantity().getValue()</span>
+<span class="nc" id="L40">                    .multiply(BigDecimal.valueOf(line.getQuantity()));</span>
+<span class="nc bnc" id="L41" title="All 2 branches missed.">                if (ing.getQuantity().isLessThan(needed)) {</span>
+<span class="nc" id="L42">                    throw new BusinessException(&quot;Stock insuficiente de &quot; + ing.getName());</span>
+                }
+<span class="nc" id="L44">                ing.setQuantity(ing.getQuantity().subtract(needed));</span>
+<span class="nc" id="L45">                ingredientRepository.save(ing);</span>
+<span class="nc" id="L46">            });</span>
+<span class="nc" id="L47">        }</span>
+<span class="nc" id="L48">    }</span>
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

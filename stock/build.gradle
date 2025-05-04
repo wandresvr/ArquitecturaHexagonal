@@ -5,7 +5,7 @@ plugins {
 	id 'jacoco'
 }
 
-group = 'com.wilson'
+group = 'com.itm.edu'
 version = '0.0.1-SNAPSHOT'
 
 java {
@@ -19,6 +19,8 @@ configurations {
 }
 
 repositories {
+	maven { url 'https://jitpack.io' }
+	mavenLocal()
 	mavenCentral()
 }
 
@@ -35,12 +37,20 @@ dependencies {
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'com.h2database:h2'
+
+	// RabbitMQ
+	implementation 'org.springframework.boot:spring-boot-starter-amqp'
+	implementation 'org.springframework.amqp:spring-rabbit:3.1.1'
+
+	// Common DTO
+	//implementation 'com.itm.edu:common:1.0.0'
+	implementation 'com.github.wandresvr:ArquitecuraHexagonal:1.0.0-common'
 }
 
 tasks.named('test') {
 	useJUnitPlatform()
 	finalizedBy jacocoTestReport
-	systemProperty 'spring.profiles.active', 'test'
+	systemProperty 'spring.profiles.active', 'test'	
 }
 
 jacocoTestReport {
