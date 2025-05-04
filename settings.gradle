@@ -1,0 +1,3 @@
+rootProject.name = 'ProyectoMicroservicios'
+include 'order'
+include 'stock' 
