@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CreateOrderService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">order</a> &gt; <a href="index.source.html" class="el_package">com.itm.edu.order.application.services</a> &gt; <span class="el_source">CreateOrderService.java</span></div><h1>CreateOrderService.java</h1><pre class="source lang-java linenums">package com.itm.edu.order.application.services;
+
+import com.itm.edu.common.dto.OrderMessageDTO;
+import com.itm.edu.common.dto.ProductOrderDTO;
+import com.itm.edu.order.application.ports.inputs.CreateOrderUseCase;
+import com.itm.edu.order.application.ports.outputs.OrderPublisherPort;
+import com.itm.edu.order.domain.exception.ProductNotFoundException;
+import com.itm.edu.order.domain.model.Client;
+import com.itm.edu.order.domain.model.Order;
+import com.itm.edu.order.domain.model.Product;
+import com.itm.edu.order.domain.repository.OrderRepository;
+import com.itm.edu.order.domain.repository.ProductRepository;
+import com.itm.edu.order.domain.valueobjects.AddressShipping;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.util.Map;
+import java.util.UUID;
+
+@Service
+<span class="nc" id="L23">@RequiredArgsConstructor</span>
+public class CreateOrderService implements CreateOrderUseCase {
+
+    private final ProductRepository productRepository;
+    private final OrderRepository orderRepository;
+    private final OrderPublisherPort orderPublisher;  // ← el puerto
+
+    @Override
+    @Transactional
+    public Order createOrder(Client client,
+                             Map&lt;UUID, BigDecimal&gt; productQuantities,
+                             AddressShipping shippingAddress) {
+
+        // 1) Construir y guardar la orden
+<span class="nc" id="L37">        Order order = Order.builder()</span>
+<span class="nc" id="L38">                .orderId(UUID.randomUUID())</span>
+<span class="nc" id="L39">                .orderDate(java.time.LocalDateTime.now())</span>
+<span class="nc" id="L40">                .deliveryAddress(shippingAddress)</span>
+<span class="nc" id="L41">                .client(client)</span>
+<span class="nc" id="L42">                .build();</span>
+
+<span class="nc" id="L44">        productQuantities.forEach((productId, quantity) -&gt; {</span>
+<span class="nc" id="L45">            Product product = productRepository.findById(productId)</span>
+<span class="nc" id="L46">                .orElseThrow(() -&gt; new ProductNotFoundException(&quot;Product not found: &quot; + productId));</span>
+<span class="nc" id="L47">            order.addProduct(product, quantity);</span>
+<span class="nc" id="L48">        });</span>
+
+<span class="nc" id="L50">        Order saved = orderRepository.save(order);</span>
+
+        // 2) Mapear a DTO (common-dto)
+<span class="nc" id="L53">        OrderMessageDTO message = OrderMessageDTO.builder()</span>
+<span class="nc" id="L54">            .orderId(saved.getOrderId())</span>
+<span class="nc" id="L55">            .products(saved.getProducts().stream()</span>
+<span class="nc" id="L56">                .&lt;ProductOrderDTO&gt;map(line -&gt; ProductOrderDTO.builder()</span>
+<span class="nc" id="L57">                    .productId(line.getProduct().getId())</span>
+<span class="nc" id="L58">                    .quantity(line.getQuantity().intValue())</span>
+<span class="nc" id="L59">                    .build())</span>
+<span class="nc" id="L60">                .toList())</span>
+<span class="nc" id="L61">            .build();</span>
+
+        // 3) Publicar usando el puerto
+<span class="nc" id="L64">        orderPublisher.publish(message);</span>
+
+<span class="nc" id="L66">        return saved;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

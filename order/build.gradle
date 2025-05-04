@@ -54,7 +54,7 @@ dependencies {
 
 	// Dto para sincronizar microservicios
 	//implementation 'com.itm.edu:common:1.0.0'
-	implementation 'com.github.wandresvr:ArquitecuraHexagonal:1.0.0-common'
+	implementation 'com.github.wandresvr:ArquitecuraHexagonal:v1.0.0'
 }
 
 tasks.named('test') {

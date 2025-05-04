@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CreateProductService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">order</a> &gt; <a href="index.source.html" class="el_package">com.itm.edu.order.application.services</a> &gt; <span class="el_source">CreateProductService.java</span></div><h1>CreateProductService.java</h1><pre class="source lang-java linenums">package com.itm.edu.order.application.services;
+
+import com.itm.edu.order.application.ports.inputs.CreateProductUseCase;
+import com.itm.edu.order.application.ports.outputs.ProductRepositoryPort;
+import com.itm.edu.order.domain.model.Product;
+import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+
+import java.math.BigDecimal;
+
+@Service
+public class CreateProductService implements CreateProductUseCase {
+
+    private final ProductRepositoryPort productRepositoryPort;
+
+<span class="fc" id="L16">    public CreateProductService(ProductRepositoryPort productRepositoryPort) {</span>
+<span class="fc" id="L17">        this.productRepositoryPort = productRepositoryPort;</span>
+<span class="fc" id="L18">    }</span>
+
+    @Override
+    public Product createProduct(String name, String description, BigDecimal price, Integer stock) {
+<span class="fc" id="L22">        validateProductParameters(name, description, price, stock);</span>
+
+<span class="fc" id="L24">        Product product = Product.builder()</span>
+<span class="fc" id="L25">                .name(name)</span>
+<span class="fc" id="L26">                .description(description)</span>
+<span class="fc" id="L27">                .price(price)</span>
+<span class="fc" id="L28">                .stock(stock)</span>
+<span class="fc" id="L29">                .build();</span>
+        
+<span class="fc" id="L31">        return productRepositoryPort.save(product);</span>
+    }
+
+    private void validateProductParameters(String name, String description, BigDecimal price, Integer stock) {
+<span class="fc bfc" id="L35" title="All 2 branches covered.">        if (!StringUtils.hasText(name)) {</span>
+<span class="fc" id="L36">            throw new IllegalArgumentException(&quot;Product name cannot be null or empty&quot;);</span>
+        }
+
+<span class="fc bfc" id="L39" title="All 2 branches covered.">        if (!StringUtils.hasText(description)) {</span>
+<span class="fc" id="L40">            throw new IllegalArgumentException(&quot;Product description cannot be null or empty&quot;);</span>
+        }
+
+<span class="fc bfc" id="L43" title="All 2 branches covered.">        if (price == null) {</span>
+<span class="fc" id="L44">            throw new IllegalArgumentException(&quot;Product price cannot be null&quot;);</span>
+        }
+
+<span class="fc bfc" id="L47" title="All 2 branches covered.">        if (price.compareTo(BigDecimal.ZERO) &lt; 0) {</span>
+<span class="fc" id="L48">            throw new IllegalArgumentException(&quot;Product price cannot be negative&quot;);</span>
+        }
+
+<span class="fc bfc" id="L51" title="All 2 branches covered.">        if (stock == null) {</span>
+<span class="fc" id="L52">            throw new IllegalArgumentException(&quot;Product stock cannot be null&quot;);</span>
+        }
+
+<span class="fc bfc" id="L55" title="All 2 branches covered.">        if (stock &lt; 0) {</span>
+<span class="fc" id="L56">            throw new IllegalArgumentException(&quot;Product stock cannot be negative&quot;);</span>
+        }
+<span class="fc" id="L58">    }</span>
+} 
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

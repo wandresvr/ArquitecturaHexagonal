@@ -3,6 +3,7 @@ plugins {
 	id 'org.springframework.boot' version '3.2.3'
 	id 'io.spring.dependency-management' version '1.1.4'
 	id 'jacoco'
+	id 'maven-publish'
 }
 
 group = 'com.itm.edu'
@@ -20,8 +21,8 @@ configurations {
 
 repositories {
 	maven { url 'https://jitpack.io' }
-	mavenLocal()
 	mavenCentral()
+	mavenLocal() 
 }
 
 dependencies {
@@ -42,15 +43,15 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-amqp'
 	implementation 'org.springframework.amqp:spring-rabbit:3.1.1'
 
-	// Common DTO
+	// Dto para sincronizar microservicios
 	//implementation 'com.itm.edu:common:1.0.0'
-	implementation 'com.github.wandresvr:ArquitecuraHexagonal:1.0.0-common'
+	implementation 'com.github.wandresvr:ArquitecuraHexagonal:v1.0.0'
 }
 
 tasks.named('test') {
 	useJUnitPlatform()
 	finalizedBy jacocoTestReport
-	systemProperty 'spring.profiles.active', 'test'	
+	systemProperty 'spring.profiles.active', 'test'
 }
 
 jacocoTestReport {
@@ -59,5 +60,13 @@ jacocoTestReport {
 		xml.required = false
 		csv.required = false
 		html.outputLocation = file("${project.rootDir}/coverage/html")
+	}
+}
+
+publishing {
+	publications {
+		mavenJava(MavenPublication) {
+			from components.java
+		}
 	}
 }
