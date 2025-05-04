@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Ingredient.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">stock</a> &gt; <a href="index.source.html" class="el_package">com.itm.edu.stock.domain.entities</a> &gt; <span class="el_source">Ingredient.java</span></div><h1>Ingredient.java</h1><pre class="source lang-java linenums">package com.itm.edu.stock.domain.entities;
+
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.util.UUID;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.AttributeOverrides;
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.Column;
+
+import com.itm.edu.stock.domain.valueobjects.Quantity;
+import com.itm.edu.stock.domain.valueobjects.Unit;
+
+@Entity
+@Table(name = &quot;ingredients&quot;)
+@Getter
+<span class="fc" id="L24">@Setter</span>
+<span class="fc" id="L25">@NoArgsConstructor</span>
+<span class="fc" id="L26">@AllArgsConstructor</span>
+public class Ingredient {
+    @Id
+<span class="fc" id="L29">    private UUID id;</span>
+<span class="fc" id="L30">    private String name;</span>
+<span class="fc" id="L31">    private String description;</span>
+    
+    @Embedded
+    @AttributeOverrides({
+        @AttributeOverride(name = &quot;value&quot;, column = @Column(name = &quot;quantity_value&quot;))
+    })
+<span class="fc" id="L37">    private Quantity quantity;</span>
+    
+    @Embedded
+    @AttributeOverrides({
+        @AttributeOverride(name = &quot;value&quot;, column = @Column(name = &quot;unit_value&quot;))
+    })
+<span class="fc" id="L43">    private Unit unit;</span>
+} 
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

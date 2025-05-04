@@ -27,7 +27,6 @@ repositories {
 	mavenLocal() 
 }
 
-
 dependencies {
 	// Spring Boot
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
@@ -53,7 +52,7 @@ dependencies {
 	implementation 'org.springframework.amqp:spring-rabbit:3.1.1'
 
 	// Dto para sincronizar microservicios
-	implementation 'com.itm.edu:common:1.0.0'
+	implementation 'com.github.wandresvr:ArquitecuraHexagonal:v1.0.0'
 }
 
 tasks.named('test') {
