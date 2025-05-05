@@ -82,4 +82,15 @@ public class Order {
                 .map(OrderItem::calculateValue)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
+
+    @Override
+    public String toString() {
+        return "Order{" +
+                "orderId=" + orderId +
+                ", orderDate=" + orderDate +
+                ", orderStatus='" + orderStatus + '\'' +
+                ", orderNotes='" + orderNotes + '\'' +
+                ", total=" + total +
+                '}';
+    }
 }

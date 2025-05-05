@@ -1,30 +1,66 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RabbitMQConfig.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">stock</a> &gt; <a href="index.source.html" class="el_package">com.itm.edu.stock.infrastructure.config</a> &gt; <span class="el_source">RabbitMQConfig.java</span></div><h1>RabbitMQConfig.java</h1><pre class="source lang-java linenums">package com.itm.edu.stock.infrastructure.config;
 
-import org.springframework.amqp.core.*;
+import org.springframework.amqp.core.Binding;
+import org.springframework.amqp.core.BindingBuilder;
+import org.springframework.amqp.core.DirectExchange;
+import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.rabbit.annotation.EnableRabbit;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-<span class="fc" id="L10">public class RabbitMQConfig {</span>
+@EnableRabbit
+<span class="fc" id="L18">public class RabbitMQConfig {</span>
+
     public static final String ORDER_QUEUE       = &quot;order.queue&quot;;
     public static final String ORDER_EXCHANGE    = &quot;order.exchange&quot;;
     public static final String ORDER_ROUTING_KEY = &quot;order.key&quot;;
 
-    @Bean Queue orderQueue() {
-<span class="fc" id="L16">        return new Queue(ORDER_QUEUE, true);</span>
+    @Bean
+    public Queue orderQueue() {
+<span class="fc" id="L26">        return new Queue(ORDER_QUEUE, true);</span>
     }
-    @Bean DirectExchange orderExchange() {
-<span class="fc" id="L19">        return new DirectExchange(ORDER_EXCHANGE);</span>
+
+    @Bean
+    public DirectExchange orderExchange() {
+<span class="fc" id="L31">        return new DirectExchange(ORDER_EXCHANGE);</span>
     }
-    @Bean Binding orderBinding(Queue q, DirectExchange ex) {
-<span class="fc" id="L22">        return BindingBuilder.bind(q).to(ex).with(ORDER_ROUTING_KEY);</span>
+
+    @Bean
+    public Binding orderBinding(Queue orderQueue, DirectExchange orderExchange) {
+<span class="fc" id="L36">        return BindingBuilder</span>
+<span class="fc" id="L37">            .bind(orderQueue)</span>
+<span class="fc" id="L38">            .to(orderExchange)</span>
+<span class="fc" id="L39">            .with(ORDER_ROUTING_KEY);</span>
     }
 
     @Bean
     public MessageConverter jsonMessageConverter() {
-<span class="fc" id="L27">        return new Jackson2JsonMessageConverter();</span>
+<span class="fc" id="L44">        return new Jackson2JsonMessageConverter();</span>
+    }
+
+    @Bean
+    public RabbitTemplate rabbitTemplate(ConnectionFactory cf,
+                                         MessageConverter jsonMessageConverter) {
+<span class="fc" id="L50">        RabbitTemplate template = new RabbitTemplate(cf);</span>
+<span class="fc" id="L51">        template.setMessageConverter(jsonMessageConverter);</span>
+<span class="fc" id="L52">        return template;</span>
+    }
+
+    @Bean
+    public SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory(
+            ConnectionFactory cf,
+            MessageConverter jsonMessageConverter) {
+<span class="fc" id="L59">        SimpleRabbitListenerContainerFactory factory =</span>
+            new SimpleRabbitListenerContainerFactory();
+<span class="fc" id="L61">        factory.setConnectionFactory(cf);</span>
+<span class="fc" id="L62">        factory.setMessageConverter(jsonMessageConverter);</span>
+<span class="fc" id="L63">        return factory;</span>
     }
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

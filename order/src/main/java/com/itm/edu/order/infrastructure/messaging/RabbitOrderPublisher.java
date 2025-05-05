@@ -17,7 +17,14 @@ public class RabbitOrderPublisher implements OrderPublisherPort {
 
     @Override
     public void publish(OrderMessageDTO orderMessage) {
-        rabbitTemplate.convertAndSend(ORDER_EXCHANGE, ORDER_ROUTING_KEY, orderMessage);
+        try {
+            rabbitTemplate.convertAndSend(ORDER_EXCHANGE, ORDER_ROUTING_KEY, orderMessage);
+            System.out.println("Message sent: " + orderMessage);
+        } catch (Exception e) {
+            System.err.println("Error sending message: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
     }
 }
 

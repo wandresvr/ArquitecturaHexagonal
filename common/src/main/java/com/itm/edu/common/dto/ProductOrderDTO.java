@@ -1,6 +1,7 @@
 package com.itm.edu.common.dto;
 
 import lombok.*;
+import java.io.Serializable;
 import java.util.UUID;
 
 /**
@@ -11,7 +12,9 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProductOrderDTO {
+public class ProductOrderDTO implements Serializable {
+    private static final long serialVersionUID = 1L;
+    
     /** Identificador del producto */
     private UUID productId;
     /** Cantidad solicitada */

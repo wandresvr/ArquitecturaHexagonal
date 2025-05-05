@@ -17,8 +17,15 @@ public class RabbitOrderPublisher implements OrderPublisherPort {
 
     @Override
     public void publish(OrderMessageDTO orderMessage) {
-<span class="nc" id="L20">        rabbitTemplate.convertAndSend(ORDER_EXCHANGE, ORDER_ROUTING_KEY, orderMessage);</span>
-<span class="nc" id="L21">    }</span>
+        try {
+<span class="nc" id="L21">            rabbitTemplate.convertAndSend(ORDER_EXCHANGE, ORDER_ROUTING_KEY, orderMessage);</span>
+<span class="nc" id="L22">            System.out.println(&quot;Message sent: &quot; + orderMessage);</span>
+<span class="nc" id="L23">        } catch (Exception e) {</span>
+<span class="nc" id="L24">            System.err.println(&quot;Error sending message: &quot; + e.getMessage());</span>
+<span class="nc" id="L25">            e.printStackTrace();</span>
+<span class="nc" id="L26">            throw e;</span>
+<span class="nc" id="L27">        }</span>
+<span class="nc" id="L28">    }</span>
 }
 
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

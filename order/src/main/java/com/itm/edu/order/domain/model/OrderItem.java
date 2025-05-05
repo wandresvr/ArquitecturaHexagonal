@@ -34,4 +34,14 @@ public class OrderItem {
     public BigDecimal calculateValue() {
         return product.getPrice().multiply(quantity);
     }
+
+    @Override
+    public String toString() {
+        return "OrderItem{" +
+                "id=" + id +
+                ", productId=" + product.getId() +
+                ", quantity=" + quantity +
+                ", value=" + calculateValue() +
+                '}';
+    }
 } 

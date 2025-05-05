@@ -82,5 +82,16 @@ public class Order {
 <span class="fc" id="L82">                .map(OrderItem::calculateValue)</span>
 <span class="fc" id="L83">                .reduce(BigDecimal.ZERO, BigDecimal::add);</span>
     }
+
+    @Override
+    public String toString() {
+<span class="nc" id="L88">        return &quot;Order{&quot; +</span>
+                &quot;orderId=&quot; + orderId +
+                &quot;, orderDate=&quot; + orderDate +
+                &quot;, orderStatus='&quot; + orderStatus + '\'' +
+                &quot;, orderNotes='&quot; + orderNotes + '\'' +
+                &quot;, total=&quot; + total +
+                '}';
+    }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

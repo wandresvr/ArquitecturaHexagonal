@@ -50,6 +50,7 @@ dependencies {
 	// RabbitMQ
 	implementation 'org.springframework.boot:spring-boot-starter-amqp'
 	implementation 'org.springframework.amqp:spring-rabbit:3.1.1'
+	implementation 'com.fasterxml.jackson.core:jackson-databind'
 
 	// Dto para sincronizar microservicios
 	implementation 'com.github.wandresvr:ArquitecuraHexagonal:v1.0.0'

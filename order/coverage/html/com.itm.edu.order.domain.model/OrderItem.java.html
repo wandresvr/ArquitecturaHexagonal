@@ -34,5 +34,15 @@ public class OrderItem {
     public BigDecimal calculateValue() {
 <span class="fc" id="L35">        return product.getPrice().multiply(quantity);</span>
     }
+
+    @Override
+    public String toString() {
+<span class="nc" id="L40">        return &quot;OrderItem{&quot; +</span>
+                &quot;id=&quot; + id +
+<span class="nc" id="L42">                &quot;, productId=&quot; + product.getId() +</span>
+                &quot;, quantity=&quot; + quantity +
+<span class="nc" id="L44">                &quot;, value=&quot; + calculateValue() +</span>
+                '}';
+    }
 } 
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

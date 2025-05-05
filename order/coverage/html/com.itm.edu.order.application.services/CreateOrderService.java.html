@@ -3,54 +3,54 @@
 import com.itm.edu.common.dto.OrderMessageDTO;
 import com.itm.edu.common.dto.ProductOrderDTO;
 import com.itm.edu.order.application.ports.inputs.CreateOrderUseCase;
-import com.itm.edu.order.application.ports.outputs.OrderPublisherPort;
-import com.itm.edu.order.domain.exception.ProductNotFoundException;
 import com.itm.edu.order.domain.model.Client;
 import com.itm.edu.order.domain.model.Order;
 import com.itm.edu.order.domain.model.Product;
 import com.itm.edu.order.domain.repository.OrderRepository;
 import com.itm.edu.order.domain.repository.ProductRepository;
 import com.itm.edu.order.domain.valueobjects.AddressShipping;
+import com.itm.edu.order.infrastructure.config.RabbitMQConfig;
 import lombok.RequiredArgsConstructor;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.UUID;
 
 @Service
-<span class="nc" id="L23">@RequiredArgsConstructor</span>
+<span class="nc" id="L24">@RequiredArgsConstructor</span>
 public class CreateOrderService implements CreateOrderUseCase {
 
     private final ProductRepository productRepository;
     private final OrderRepository orderRepository;
-    private final OrderPublisherPort orderPublisher;  // ← el puerto
+    private final RabbitTemplate rabbitTemplate;
 
     @Override
     @Transactional
     public Order createOrder(Client client,
                              Map&lt;UUID, BigDecimal&gt; productQuantities,
                              AddressShipping shippingAddress) {
-
-        // 1) Construir y guardar la orden
+        // 1) Build and save entity
 <span class="nc" id="L37">        Order order = Order.builder()</span>
-<span class="nc" id="L38">                .orderId(UUID.randomUUID())</span>
-<span class="nc" id="L39">                .orderDate(java.time.LocalDateTime.now())</span>
-<span class="nc" id="L40">                .deliveryAddress(shippingAddress)</span>
-<span class="nc" id="L41">                .client(client)</span>
-<span class="nc" id="L42">                .build();</span>
+<span class="nc" id="L38">            .orderId(UUID.randomUUID())</span>
+<span class="nc" id="L39">            .orderDate(LocalDateTime.now())</span>
+<span class="nc" id="L40">            .client(client)</span>
+<span class="nc" id="L41">            .deliveryAddress(shippingAddress)</span>
+<span class="nc" id="L42">            .build();</span>
 
-<span class="nc" id="L44">        productQuantities.forEach((productId, quantity) -&gt; {</span>
-<span class="nc" id="L45">            Product product = productRepository.findById(productId)</span>
-<span class="nc" id="L46">                .orElseThrow(() -&gt; new ProductNotFoundException(&quot;Product not found: &quot; + productId));</span>
-<span class="nc" id="L47">            order.addProduct(product, quantity);</span>
+<span class="nc" id="L44">        productQuantities.forEach((pid, qty) -&gt; {</span>
+<span class="nc" id="L45">            Product product = productRepository.findById(pid)</span>
+<span class="nc" id="L46">                .orElseThrow(() -&gt; new RuntimeException(&quot;Product not found: &quot; + pid));</span>
+<span class="nc" id="L47">            order.addProduct(product, qty);</span>
 <span class="nc" id="L48">        });</span>
 
 <span class="nc" id="L50">        Order saved = orderRepository.save(order);</span>
 
-        // 2) Mapear a DTO (common-dto)
-<span class="nc" id="L53">        OrderMessageDTO message = OrderMessageDTO.builder()</span>
+        // 2) Map to DTO
+<span class="nc" id="L53">        OrderMessageDTO dto = OrderMessageDTO.builder()</span>
 <span class="nc" id="L54">            .orderId(saved.getOrderId())</span>
 <span class="nc" id="L55">            .products(saved.getProducts().stream()</span>
 <span class="nc" id="L56">                .&lt;ProductOrderDTO&gt;map(line -&gt; ProductOrderDTO.builder()</span>
@@ -60,10 +60,14 @@ public class CreateOrderService implements CreateOrderUseCase {
 <span class="nc" id="L60">                .toList())</span>
 <span class="nc" id="L61">            .build();</span>
 
-        // 3) Publicar usando el puerto
-<span class="nc" id="L64">        orderPublisher.publish(message);</span>
+        // 3) Publish with JSON converter
+<span class="nc" id="L64">        rabbitTemplate.convertAndSend(</span>
+            RabbitMQConfig.ORDER_EXCHANGE,
+            RabbitMQConfig.ORDER_ROUTING_KEY,
+            dto
+        );
 
-<span class="nc" id="L66">        return saved;</span>
+<span class="nc" id="L70">        return saved;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>
