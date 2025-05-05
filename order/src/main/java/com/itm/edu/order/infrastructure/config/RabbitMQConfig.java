@@ -21,9 +21,17 @@ public class RabbitMQConfig {
     public static final String ORDER_EXCHANGE    = "order.exchange";
     public static final String ORDER_ROUTING_KEY = "order.key";
 
+    public static final String STOCK_RESPONSE_QUEUE = "stock.response.order.queue";
+    public static final String STOCK_RESPONSE_ROUTING_KEY = "stock.response.key";
+
     @Bean
     public Queue orderQueue() {
         return new Queue(ORDER_QUEUE, true);
+    }
+
+    @Bean
+    public Queue stockResponseQueue() {
+        return new Queue(STOCK_RESPONSE_QUEUE, true);
     }
 
     @Bean
@@ -37,6 +45,14 @@ public class RabbitMQConfig {
             .bind(orderQueue)
             .to(orderExchange)
             .with(ORDER_ROUTING_KEY);
+    }
+
+    @Bean
+    public Binding stockResponseBinding(Queue stockResponseQueue, DirectExchange orderExchange) {
+        return BindingBuilder
+            .bind(stockResponseQueue)
+            .to(orderExchange)
+            .with(STOCK_RESPONSE_ROUTING_KEY);
     }
 
     /** JSON converter for template and listeners **/
