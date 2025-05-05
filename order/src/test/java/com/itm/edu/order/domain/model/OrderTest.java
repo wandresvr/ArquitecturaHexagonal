@@ -176,13 +176,11 @@ class OrderTest {
     @Test
     void testCalculateTotalWithEmptyProducts() {
         // Arrange
-        Order order = new Order();
-        
+        Order order = Order.builder().build();
+
         // Act
-        BigDecimal total = order.calculateTotalValue();
-        
-        // Assert
-        assertEquals(BigDecimal.ZERO, total);
+        assertNotNull(order.getTotal(), "Total should be initialized even with no products");
+        assertEquals(BigDecimal.ZERO, order.getTotal().getAmount());
     }
 
     @Test

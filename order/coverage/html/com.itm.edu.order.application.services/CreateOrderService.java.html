@@ -6,6 +6,7 @@ import com.itm.edu.order.application.ports.inputs.CreateOrderUseCase;
 import com.itm.edu.order.domain.model.Client;
 import com.itm.edu.order.domain.model.Order;
 import com.itm.edu.order.domain.model.Product;
+import com.itm.edu.order.domain.repository.ClientRepository;
 import com.itm.edu.order.domain.repository.OrderRepository;
 import com.itm.edu.order.domain.repository.ProductRepository;
 import com.itm.edu.order.domain.valueobjects.AddressShipping;
@@ -21,11 +22,12 @@ import java.util.Map;
 import java.util.UUID;
 
 @Service
-<span class="nc" id="L24">@RequiredArgsConstructor</span>
+<span class="nc" id="L25">@RequiredArgsConstructor</span>
 public class CreateOrderService implements CreateOrderUseCase {
 
     private final ProductRepository productRepository;
     private final OrderRepository orderRepository;
+    private final ClientRepository clientRepository;
     private final RabbitTemplate rabbitTemplate;
 
     @Override
@@ -33,41 +35,47 @@ public class CreateOrderService implements CreateOrderUseCase {
     public Order createOrder(Client client,
                              Map&lt;UUID, BigDecimal&gt; productQuantities,
                              AddressShipping shippingAddress) {
-        // 1) Build and save entity
-<span class="nc" id="L37">        Order order = Order.builder()</span>
-<span class="nc" id="L38">            .orderId(UUID.randomUUID())</span>
-<span class="nc" id="L39">            .orderDate(LocalDateTime.now())</span>
-<span class="nc" id="L40">            .client(client)</span>
-<span class="nc" id="L41">            .deliveryAddress(shippingAddress)</span>
-<span class="nc" id="L42">            .build();</span>
+        // 1) Save client first
+<span class="nc" id="L39">        Client savedClient = clientRepository.save(client);</span>
+        
+        // 2) Build and save entity
+<span class="nc" id="L42">        Order order = Order.builder()</span>
+<span class="nc" id="L43">            .orderId(UUID.randomUUID())</span>
+<span class="nc" id="L44">            .orderDate(LocalDateTime.now())</span>
+<span class="nc" id="L45">            .client(savedClient)</span>
+<span class="nc" id="L46">            .deliveryAddress(shippingAddress)</span>
+<span class="nc" id="L47">            .build();</span>
 
-<span class="nc" id="L44">        productQuantities.forEach((pid, qty) -&gt; {</span>
-<span class="nc" id="L45">            Product product = productRepository.findById(pid)</span>
-<span class="nc" id="L46">                .orElseThrow(() -&gt; new RuntimeException(&quot;Product not found: &quot; + pid));</span>
-<span class="nc" id="L47">            order.addProduct(product, qty);</span>
-<span class="nc" id="L48">        });</span>
+<span class="nc" id="L49">        productQuantities.forEach((pid, qty) -&gt; {</span>
+<span class="nc" id="L50">            Product product = productRepository.findById(pid)</span>
+<span class="nc" id="L51">                .orElseThrow(() -&gt; new RuntimeException(&quot;Product not found: &quot; + pid));</span>
+<span class="nc" id="L52">            order.addProduct(product, qty);</span>
+<span class="nc" id="L53">        });</span>
 
-<span class="nc" id="L50">        Order saved = orderRepository.save(order);</span>
+<span class="nc" id="L55">        Order saved = orderRepository.save(order);</span>
 
-        // 2) Map to DTO
-<span class="nc" id="L53">        OrderMessageDTO dto = OrderMessageDTO.builder()</span>
-<span class="nc" id="L54">            .orderId(saved.getOrderId())</span>
-<span class="nc" id="L55">            .products(saved.getProducts().stream()</span>
-<span class="nc" id="L56">                .&lt;ProductOrderDTO&gt;map(line -&gt; ProductOrderDTO.builder()</span>
-<span class="nc" id="L57">                    .productId(line.getProduct().getId())</span>
-<span class="nc" id="L58">                    .quantity(line.getQuantity().intValue())</span>
-<span class="nc" id="L59">                    .build())</span>
-<span class="nc" id="L60">                .toList())</span>
-<span class="nc" id="L61">            .build();</span>
+        // 3) Map to DTO
+<span class="nc" id="L58">        OrderMessageDTO dto = OrderMessageDTO.builder()</span>
+<span class="nc" id="L59">            .orderId(saved.getOrderId())</span>
+<span class="nc" id="L60">            .products(saved.getProducts().stream()</span>
+<span class="nc" id="L61">                .&lt;ProductOrderDTO&gt;map(line -&gt; ProductOrderDTO.builder()</span>
+<span class="nc" id="L62">                    .productId(line.getProduct().getId())</span>
+<span class="nc" id="L63">                    .quantity(line.getQuantity().intValue())</span>
+<span class="nc" id="L64">                    .build())</span>
+<span class="nc" id="L65">                .toList())</span>
+<span class="nc" id="L66">            .build();</span>
 
-        // 3) Publish with JSON converter
-<span class="nc" id="L64">        rabbitTemplate.convertAndSend(</span>
+        // Verificar el tipo de convertidor y el mensaje
+<span class="nc" id="L69">        System.out.println(&quot;Tipo de MessageConverter: &quot; + rabbitTemplate.getMessageConverter().getClass().getName());</span>
+<span class="nc" id="L70">        System.out.println(&quot;Mensaje a enviar: &quot; + dto);</span>
+        
+<span class="nc" id="L72">        rabbitTemplate.convertAndSend(</span>
             RabbitMQConfig.ORDER_EXCHANGE,
             RabbitMQConfig.ORDER_ROUTING_KEY,
             dto
         );
 
-<span class="nc" id="L70">        return saved;</span>
+<span class="nc" id="L78">        return saved;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

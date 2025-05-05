@@ -3,7 +3,7 @@
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
@@ -11,21 +11,21 @@ import java.util.UUID;
 
 @Entity
 @Table(name = &quot;order_items&quot;)
-<span class="nc bnc" id="L14" title="All 38 branches missed.">@Data</span>
-<span class="pc" id="L15">@Builder</span>
-<span class="nc" id="L16">@NoArgsConstructor</span>
-<span class="fc" id="L17">@AllArgsConstructor</span>
+@Getter
+<span class="nc" id="L15">@NoArgsConstructor</span>
+<span class="fc" id="L16">@AllArgsConstructor</span>
+<span class="pc" id="L17">@Builder</span>
 public class OrderItem {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
 <span class="nc" id="L22">    private UUID id;</span>
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = &quot;order_id&quot;)
 <span class="nc" id="L26">    private Order order;</span>
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = &quot;product_id&quot;)
 <span class="fc" id="L30">    private Product product;</span>
 
@@ -33,16 +33,6 @@ public class OrderItem {
 
     public BigDecimal calculateValue() {
 <span class="fc" id="L35">        return product.getPrice().multiply(quantity);</span>
-    }
-
-    @Override
-    public String toString() {
-<span class="nc" id="L40">        return &quot;OrderItem{&quot; +</span>
-                &quot;id=&quot; + id +
-<span class="nc" id="L42">                &quot;, productId=&quot; + product.getId() +</span>
-                &quot;, quantity=&quot; + quantity +
-<span class="nc" id="L44">                &quot;, value=&quot; + calculateValue() +</span>
-                '}';
     }
 } 
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

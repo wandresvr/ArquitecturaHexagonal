@@ -3,20 +3,20 @@ package com.itm.edu.order.domain.valueobjects;
 import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Embeddable
-@Data
-@Builder
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class AddressShipping {
     private String street;
     private String city;
     private String state;
-    private String country;
     private String zipCode;
+    private String country;
 
     public static class AddressShippingBuilder {
         private String street;
@@ -66,7 +66,7 @@ public class AddressShipping {
         }
 
         public AddressShipping build() {
-            return new AddressShipping(street, city, state, country, zipCode);
+            return new AddressShipping(street, city, state, zipCode, country);
         }
     }
 }
