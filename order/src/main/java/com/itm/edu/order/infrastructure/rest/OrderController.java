@@ -1,13 +1,10 @@
 package com.itm.edu.order.infrastructure.rest;
 
-import com.itm.edu.order.application.ports.inputs.CreateOrderUseCase;
+import com.itm.edu.order.application.ports.inputs.*;
 import com.itm.edu.order.domain.model.Client;
 import com.itm.edu.order.domain.model.Order;
 import com.itm.edu.order.domain.valueobjects.AddressShipping;
-import com.itm.edu.order.infrastructure.rest.dto.AddressShippingDto;
-import com.itm.edu.order.infrastructure.rest.dto.CreateClientDto;
-import com.itm.edu.order.infrastructure.rest.dto.CreateOrderProductDto;
-import com.itm.edu.order.infrastructure.rest.dto.CreateOrderRequestDto;
+import com.itm.edu.order.infrastructure.rest.dto.*;
 import com.itm.edu.order.domain.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +20,10 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class OrderController {
     private final CreateOrderUseCase createOrderUseCase;
+    private final GetOrderUseCase getOrderUseCase;
+    private final DeleteOrderUseCase deleteOrderUseCase;
+    private final UpdateOrderUseCase updateOrderUseCase;
+    private final UpdateShippingAddressUseCase updateShippingAddressUseCase;
 
     @PostMapping
     public ResponseEntity<?> createOrder(@RequestBody CreateOrderRequestDto request) {
@@ -59,6 +60,64 @@ public class OrderController {
                     addressShipping
             );
             return ResponseEntity.ok(order);
+        } catch (BusinessException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getOrder(@PathVariable UUID id) {
+        return getOrderUseCase.getOrder(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping
+    public ResponseEntity<?> getAllOrders() {
+        return ResponseEntity.ok(getOrderUseCase.getAllOrders());
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateOrder(
+            @PathVariable UUID id,
+            @RequestBody UpdateOrderRequestDto request) {
+        try {
+            Order orderDetails = Order.builder()
+                    .orderStatus(request.getOrderStatus())
+                    .build();
+
+            Order updatedOrder = updateOrderUseCase.updateOrder(id, orderDetails);
+            return ResponseEntity.ok(updatedOrder);
+        } catch (BusinessException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteOrder(@PathVariable UUID id) {
+        try {
+            deleteOrderUseCase.deleteOrder(id);
+            return ResponseEntity.ok().build();
+        } catch (BusinessException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PatchMapping("/{id}/shipping-address")
+    public ResponseEntity<?> updateShippingAddress(
+            @PathVariable UUID id,
+            @RequestBody AddressShippingDto addressDto) {
+        try {
+            AddressShipping addressShipping = AddressShipping.builder()
+                    .street(addressDto.getStreet())
+                    .city(addressDto.getCity())
+                    .state(addressDto.getState())
+                    .zipCode(addressDto.getZipCode())
+                    .country(addressDto.getCountry())
+                    .build();
+
+            Order updatedOrder = updateShippingAddressUseCase.updateShippingAddress(id, addressShipping);
+            return ResponseEntity.ok(updatedOrder);
         } catch (BusinessException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

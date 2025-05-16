@@ -2,6 +2,8 @@ package com.itm.edu.order.infrastructure.rest;
 
 import com.itm.edu.order.application.ports.inputs.CreateProductUseCase;
 import com.itm.edu.order.application.ports.inputs.GetProductUseCase;
+import com.itm.edu.order.application.ports.inputs.UpdateProductUseCase;
+import com.itm.edu.order.application.ports.inputs.DeleteProductUseCase;
 import com.itm.edu.order.domain.model.Product;
 import com.itm.edu.order.infrastructure.rest.dto.ProductDto;
 import com.itm.edu.order.infrastructure.rest.mapper.ProductMapper;
@@ -19,6 +21,8 @@ import java.util.stream.Collectors;
 public class ProductController {
     private final CreateProductUseCase createProductUseCase;
     private final GetProductUseCase getProductUseCase;
+    private final UpdateProductUseCase updateProductUseCase;
+    private final DeleteProductUseCase deleteProductUseCase;
     private final ProductMapper productMapper;
 
     @PostMapping
@@ -46,5 +50,25 @@ public class ProductController {
                 .map(productMapper::toDto)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(productDtos);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ProductDto> updateProduct(
+            @PathVariable UUID id,
+            @RequestBody ProductDto request) {
+        Product updatedProduct = updateProductUseCase.updateProduct(
+                id,
+                request.getName(),
+                request.getDescription(),
+                request.getPrice(),
+                request.getStock()
+        );
+        return ResponseEntity.ok(productMapper.toDto(updatedProduct));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteProduct(@PathVariable UUID id) {
+        deleteProductUseCase.deleteProduct(id);
+        return ResponseEntity.noContent().build();
     }
 } 
