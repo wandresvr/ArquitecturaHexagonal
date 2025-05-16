@@ -8,6 +8,7 @@ import com.itm.edu.order.infrastructure.rest.dto.AddressShippingDto;
 import com.itm.edu.order.infrastructure.rest.dto.CreateClientDto;
 import com.itm.edu.order.infrastructure.rest.dto.CreateOrderProductDto;
 import com.itm.edu.order.infrastructure.rest.dto.CreateOrderRequestDto;
+import com.itm.edu.order.domain.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,7 +25,7 @@ public class OrderController {
     private final CreateOrderUseCase createOrderUseCase;
 
     @PostMapping
-    public ResponseEntity<Order> createOrder(@RequestBody CreateOrderRequestDto request) {
+    public ResponseEntity<?> createOrder(@RequestBody CreateOrderRequestDto request) {
         validateOrderRequest(request);
 
         // Crear el cliente
@@ -50,14 +51,17 @@ public class OrderController {
                 .country(request.getShippingAddress().getCountry())
                 .build();
 
-        // Crear la orden
-        Order order = createOrderUseCase.createOrder(
-                client,
-                productQuantities,
-                addressShipping
-        );
-
-        return ResponseEntity.ok(order);
+        try {
+            // Crear la orden
+            Order order = createOrderUseCase.createOrder(
+                    client,
+                    productQuantities,
+                    addressShipping
+            );
+            return ResponseEntity.ok(order);
+        } catch (BusinessException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     private void validateOrderRequest(CreateOrderRequestDto request) {

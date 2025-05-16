@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -12,27 +13,28 @@ import java.util.UUID;
 @Entity
 @Table(name = &quot;order_items&quot;)
 @Getter
-<span class="nc" id="L15">@NoArgsConstructor</span>
-<span class="fc" id="L16">@AllArgsConstructor</span>
-<span class="pc" id="L17">@Builder</span>
+<span class="nc" id="L16">@NoArgsConstructor</span>
+<span class="fc" id="L17">@AllArgsConstructor</span>
+<span class="pc" id="L18">@Builder</span>
 public class OrderItem {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-<span class="nc" id="L22">    private UUID id;</span>
+<span class="nc" id="L23">    private UUID id;</span>
 
     @ManyToOne
     @JoinColumn(name = &quot;order_id&quot;)
-<span class="nc" id="L26">    private Order order;</span>
+    @JsonBackReference
+<span class="nc" id="L28">    private Order order;</span>
 
     @ManyToOne
     @JoinColumn(name = &quot;product_id&quot;)
-<span class="fc" id="L30">    private Product product;</span>
+<span class="fc" id="L32">    private Product product;</span>
 
-<span class="nc" id="L32">    private BigDecimal quantity;</span>
+<span class="nc" id="L34">    private BigDecimal quantity;</span>
 
     public BigDecimal calculateValue() {
-<span class="fc" id="L35">        return product.getPrice().multiply(quantity);</span>
+<span class="fc" id="L37">        return product.getPrice().multiply(quantity);</span>
     }
 } 
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>
