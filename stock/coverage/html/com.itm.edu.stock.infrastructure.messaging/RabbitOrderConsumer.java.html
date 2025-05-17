@@ -59,11 +59,25 @@ public class RabbitOrderConsumer {
                 response
             );
 
-<span class="nc" id="L62">            throw new AmqpRejectAndDontRequeueException(&quot;Error de negocio: &quot; + e.getMessage(), e);</span>
-<span class="nc" id="L63">        } catch (Exception e) {</span>
-<span class="nc" id="L64">            log.error(&quot;Error inesperado procesando la orden {}: {}&quot;, msg.getOrderId(), e.getMessage(), e);</span>
-<span class="nc" id="L65">            throw new AmqpRejectAndDontRequeueException(&quot;Error inesperado: &quot; + e.getMessage(), e);</span>
-<span class="nc" id="L66">        }</span>
-<span class="nc" id="L67">    }</span>
+            // No relanzamos la excepción para que el mensaje no se reintente
+<span class="nc" id="L63">            log.warn(&quot;Orden {} cancelada. Motivo: {}&quot;, msg.getOrderId(), e.getMessage());</span>
+<span class="nc" id="L64">        } catch (Exception e) {</span>
+<span class="nc" id="L65">            log.error(&quot;Error inesperado procesando la orden {}: {}&quot;, msg.getOrderId(), e.getMessage(), e);</span>
+            
+            // Para errores del sistema también usamos CANCELLED_NO_STOCK
+<span class="nc" id="L68">            StockUpdateResponseEvent response = new StockUpdateResponseEvent(</span>
+<span class="nc" id="L69">                msg.getOrderId().toString(),</span>
+                StockValidationStatus.CANCELLED_NO_STOCK
+            );
+
+<span class="nc" id="L73">            rabbitTemplate.convertAndSend(</span>
+                RabbitMQConfig.STOCK_RESPONSE_EXCHANGE,
+                RabbitMQConfig.STOCK_RESPONSE_ROUTING_KEY,
+                response
+            );
+
+<span class="nc" id="L79">            throw new AmqpRejectAndDontRequeueException(&quot;Error inesperado: &quot; + e.getMessage(), e);</span>
+<span class="nc" id="L80">        }</span>
+<span class="nc" id="L81">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

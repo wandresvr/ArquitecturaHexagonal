@@ -59,9 +59,23 @@ public class RabbitOrderConsumer {
                 response
             );
 
-            throw new AmqpRejectAndDontRequeueException("Error de negocio: " + e.getMessage(), e);
+            // No relanzamos la excepción para que el mensaje no se reintente
+            log.warn("Orden {} cancelada. Motivo: {}", msg.getOrderId(), e.getMessage());
         } catch (Exception e) {
             log.error("Error inesperado procesando la orden {}: {}", msg.getOrderId(), e.getMessage(), e);
+            
+            // Para errores del sistema también usamos CANCELLED_NO_STOCK
+            StockUpdateResponseEvent response = new StockUpdateResponseEvent(
+                msg.getOrderId().toString(),
+                StockValidationStatus.CANCELLED_NO_STOCK
+            );
+
+            rabbitTemplate.convertAndSend(
+                RabbitMQConfig.STOCK_RESPONSE_EXCHANGE,
+                RabbitMQConfig.STOCK_RESPONSE_ROUTING_KEY,
+                response
+            );
+
             throw new AmqpRejectAndDontRequeueException("Error inesperado: " + e.getMessage(), e);
         }
     }

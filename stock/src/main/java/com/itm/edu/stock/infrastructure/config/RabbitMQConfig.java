@@ -94,7 +94,9 @@ public class RabbitMQConfig {
     @Bean
     public MessageConverter jsonMessageConverter() {
         Jackson2JsonMessageConverter converter = new Jackson2JsonMessageConverter();
-        converter.setClassMapper(new DefaultClassMapper());
+        DefaultClassMapper classMapper = new DefaultClassMapper();
+        classMapper.setTrustedPackages("java.util", "java.lang", "com.itm.edu.common.dto", "com.itm.edu.common.dto.events");
+        converter.setClassMapper(classMapper);
         return converter;
     }
 
