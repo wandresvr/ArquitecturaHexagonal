@@ -1,7 +1,8 @@
 package com.itm.edu.order.application.dto;
 
-import com.itm.edu.order.domain.valueobjects.AddressShipping;
-import com.itm.edu.order.domain.valueobjects.OrderTotalValue;
+import com.itm.edu.common.dto.ClientDTO;
+import com.itm.edu.common.dto.AddressShippingDTO;
+import com.itm.edu.common.dto.ProductOrderDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,6 +11,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+import java.math.BigDecimal;
 
 @Data
 @Builder
@@ -19,8 +21,8 @@ public class OrderDTO {
     private UUID orderId;
     private String orderStatus;
     private LocalDateTime orderDate;
-    private AddressShipping deliveryAddress;
-    private OrderTotalValue total;
+    private AddressShippingDTO deliveryAddress;
+    private BigDecimal total;
     private ClientDTO client;
-    private List<OrderItemDTO> products;
+    private List<ProductOrderDTO> products;
 } 

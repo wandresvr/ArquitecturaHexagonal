@@ -42,8 +42,8 @@ dependencies {
 	implementation 'org.postgresql:postgresql:42.7.1'
 	
 	// Lombok
-	compileOnly 'org.projectlombok:lombok'
-	annotationProcessor 'org.projectlombok:lombok'
+	compileOnly 'org.projectlombok:lombok:1.18.30'
+	annotationProcessor 'org.projectlombok:lombok:1.18.30'
 	
 	// Jackson para JSON
 	implementation 'com.fasterxml.jackson.core:jackson-databind'
@@ -57,11 +57,15 @@ dependencies {
 	testImplementation 'org.mockito:mockito-junit-jupiter:5.3.1'
 
 	// Dto para sincronizar microservicios
-	implementation 'com.github.wandresvr:ArquitecuraHexagonal:v1.0.0'
+	implementation 'com.github.wandresvr:ArquitecuraHexagonal:v1.0.1'
 
 	// SpringDoc OpenAPI (Swagger)
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0'
 	implementation 'org.springdoc:springdoc-openapi-starter-common:2.3.0'
+
+	// Jackson
+	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-hibernate6:2.16.1'
+	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.16.1'
 }
 
 tasks.named('test') {

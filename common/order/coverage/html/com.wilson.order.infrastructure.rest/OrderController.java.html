@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OrderController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">order</a> &gt; <a href="index.source.html" class="el_package">com.wilson.order.infrastructure.rest</a> &gt; <span class="el_source">OrderController.java</span></div><h1>OrderController.java</h1><pre class="source lang-java linenums">package com.wilson.order.infrastructure.rest;
+
+import com.wilson.order.application.ports.inputs.CreateOrderUseCase;
+import com.wilson.order.domain.model.Client;
+import com.wilson.order.domain.model.Order;
+import com.wilson.order.domain.valueobjects.AddressShipping;
+import com.wilson.order.infrastructure.rest.dto.AddressShippingDto;
+import com.wilson.order.infrastructure.rest.dto.CreateClientDto;
+import com.wilson.order.infrastructure.rest.dto.CreateOrderProductDto;
+import com.wilson.order.infrastructure.rest.dto.CreateOrderRequestDto;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.math.BigDecimal;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+@RestController
+@RequestMapping(&quot;/api/orders&quot;)
+<span class="fc" id="L22">@RequiredArgsConstructor</span>
+public class OrderController {
+    private final CreateOrderUseCase createOrderUseCase;
+
+    @PostMapping
+    public ResponseEntity&lt;Order&gt; createOrder(@RequestBody CreateOrderRequestDto request) {
+<span class="fc" id="L28">        validateOrderRequest(request);</span>
+
+        // Crear el cliente
+<span class="fc" id="L31">        Client client = Client.builder()</span>
+<span class="fc" id="L32">                .name(request.getClient().getName())</span>
+<span class="fc" id="L33">                .email(request.getClient().getEmail())</span>
+<span class="fc" id="L34">                .phone(request.getClient().getPhone())</span>
+<span class="fc" id="L35">                .build();</span>
+
+        // Convertir productos a mapa de cantidades
+<span class="fc" id="L38">        Map&lt;UUID, BigDecimal&gt; productQuantities = request.getProducts().stream()</span>
+<span class="fc" id="L39">                .collect(Collectors.toMap(</span>
+                        CreateOrderProductDto::getProductId,
+                        CreateOrderProductDto::getQuantity
+                ));
+
+        // Crear la dirección de envío
+<span class="fc" id="L45">        AddressShipping addressShipping = AddressShipping.builder()</span>
+<span class="fc" id="L46">                .street(request.getShippingAddress().getStreet())</span>
+<span class="fc" id="L47">                .city(request.getShippingAddress().getCity())</span>
+<span class="fc" id="L48">                .state(request.getShippingAddress().getState())</span>
+<span class="fc" id="L49">                .zipCode(request.getShippingAddress().getZipCode())</span>
+<span class="fc" id="L50">                .country(request.getShippingAddress().getCountry())</span>
+<span class="fc" id="L51">                .build();</span>
+
+        // Crear la orden
+<span class="fc" id="L54">        Order order = createOrderUseCase.createOrder(</span>
+                client,
+                productQuantities,
+                addressShipping
+        );
+
+<span class="fc" id="L60">        return ResponseEntity.ok(order);</span>
+    }
+
+    private void validateOrderRequest(CreateOrderRequestDto request) {
+<span class="pc bpc" id="L64" title="1 of 2 branches missed.">        if (request.getClient() == null) {</span>
+<span class="nc" id="L65">            throw new IllegalArgumentException(&quot;Client information is required&quot;);</span>
+        }
+
+<span class="pc bpc" id="L68" title="2 of 4 branches missed.">        if (request.getProducts() == null || request.getProducts().isEmpty()) {</span>
+<span class="nc" id="L69">            throw new IllegalArgumentException(&quot;At least one product is required&quot;);</span>
+        }
+
+<span class="fc bfc" id="L72" title="All 2 branches covered.">        for (CreateOrderProductDto product : request.getProducts()) {</span>
+<span class="fc bfc" id="L73" title="All 2 branches covered.">            if (product.getQuantity().compareTo(BigDecimal.ZERO) &lt;= 0) {</span>
+<span class="fc" id="L74">                throw new IllegalArgumentException(&quot;Product quantity must be greater than 0&quot;);</span>
+            }
+<span class="fc" id="L76">        }</span>
+
+<span class="pc bpc" id="L78" title="1 of 2 branches missed.">        if (request.getShippingAddress() == null) {</span>
+<span class="nc" id="L79">            throw new IllegalArgumentException(&quot;Shipping address is required&quot;);</span>
+        }
+<span class="fc" id="L81">    }</span>
+} 
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

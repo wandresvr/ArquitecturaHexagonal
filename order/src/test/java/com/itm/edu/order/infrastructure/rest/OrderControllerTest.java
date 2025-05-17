@@ -82,7 +82,6 @@ class OrderControllerTest {
                 .build();
 
         Order expectedOrder = Order.builder()
-                .orderId(UUID.randomUUID())
                 .orderStatus("CREATED")
                 .client(expectedClient)
                 .deliveryAddress(expectedAddress)
@@ -98,9 +97,8 @@ class OrderControllerTest {
         assertNotNull(response);
         assertEquals(200, response.getStatusCode().value());
         assertNotNull(response.getBody());
-        assertTrue(response.getBody() instanceof Order);
-        Order order = (Order) response.getBody();
-        assertEquals(expectedOrder.getOrderId(), order.getOrderId());
+        assertTrue(response.getBody() instanceof com.itm.edu.order.infrastructure.rest.dto.OrderResponseDto);
+        com.itm.edu.order.infrastructure.rest.dto.OrderResponseDto order = (com.itm.edu.order.infrastructure.rest.dto.OrderResponseDto) response.getBody();
         assertEquals(expectedOrder.getOrderStatus(), order.getOrderStatus());
         assertEquals(expectedClient.getName(), order.getClient().getName());
         assertEquals(expectedClient.getEmail(), order.getClient().getEmail());
@@ -160,7 +158,6 @@ class OrderControllerTest {
                 .build();
 
         Order expectedOrder = Order.builder()
-                .orderId(UUID.randomUUID())
                 .orderStatus("CREATED")
                 .client(expectedClient)
                 .deliveryAddress(expectedAddress)
@@ -176,9 +173,8 @@ class OrderControllerTest {
         assertNotNull(response);
         assertEquals(200, response.getStatusCode().value());
         assertNotNull(response.getBody());
-        assertTrue(response.getBody() instanceof Order);
-        Order order = (Order) response.getBody();
-        assertEquals(expectedOrder.getOrderId(), order.getOrderId());
+        assertTrue(response.getBody() instanceof com.itm.edu.order.infrastructure.rest.dto.OrderResponseDto);
+        com.itm.edu.order.infrastructure.rest.dto.OrderResponseDto order = (com.itm.edu.order.infrastructure.rest.dto.OrderResponseDto) response.getBody();
         assertEquals(expectedOrder.getOrderStatus(), order.getOrderStatus());
         assertEquals(expectedClient.getName(), order.getClient().getName());
         assertEquals(expectedClient.getEmail(), order.getClient().getEmail());
@@ -218,9 +214,11 @@ class OrderControllerTest {
                 .shippingAddress(addressDto)
                 .build();
 
-        // Act & Assert
-        assertThrows(IllegalArgumentException.class, () -> {
-            orderController.createOrder(request);
-        });
+        // Act
+        ResponseEntity<?> response = orderController.createOrder(request);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(422, response.getStatusCode().value());
     }
 } 

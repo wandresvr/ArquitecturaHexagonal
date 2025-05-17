@@ -34,7 +34,7 @@ public class Order {
     @JoinColumn(name = &quot;order_id&quot;)
     @Builder.Default
     @JsonManagedReference
-<span class="nc" id="L37">    private List&lt;OrderItem&gt; products = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L37">    private List&lt;OrderItem&gt; products = new ArrayList&lt;&gt;();</span>
 
 <span class="fc" id="L39">    private String orderStatus;</span>
 <span class="fc" id="L40">    private LocalDateTime orderDate;</span>

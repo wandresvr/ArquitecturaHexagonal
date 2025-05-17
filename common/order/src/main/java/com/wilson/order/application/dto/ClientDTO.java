@@ -1,4 +1,4 @@
-package com.itm.edu.order.application.dto;
+package com.wilson.order.application.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
