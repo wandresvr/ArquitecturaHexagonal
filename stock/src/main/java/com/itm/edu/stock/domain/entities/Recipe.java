@@ -34,11 +34,6 @@ public class Recipe {
     @Column(name = "cost", precision = 10, scale = 2)
     private BigDecimal cost;
 
-    @ManyToMany
-    @JoinTable(
-        name = "recipe_ingredients",
-        joinColumns = @JoinColumn(name = "recipe_id"),
-        inverseJoinColumns = @JoinColumn(name = "ingredient_id")
-    )
-    private List<Ingredient> ingredients;
+    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<RecipeIngredient> recipeIngredients;
 }

@@ -25,13 +25,13 @@ public class RabbitOrderConsumer {
     )
     public void onOrderMessage(OrderMessageDTO msg) {
         try {
-            // Procesar la orden y obtener el resultado
-            boolean stockAvailable = processOrderUseCase.processOrder(msg);
+            // Procesar la orden
+            processOrderUseCase.processOrder(msg);
             
             // Crear el mensaje de respuesta
             StockResponseMessage response = new StockResponseMessage(
-                msg.getOrderId(),
-                stockAvailable ? "VALIDATED" : "NO_STOCK"
+                msg.getOrderId().toString(),
+                "RESERVED"
             );
 
             // Enviar la respuesta al exchange de respuestas
@@ -41,9 +41,22 @@ public class RabbitOrderConsumer {
                 response
             );
 
-            log.info("Orden {} procesada. Stock disponible: {}", msg.getOrderId(), stockAvailable);
+            log.info("Orden {} procesada. Stock reservado.", msg.getOrderId());
         } catch (BusinessException e) {
             log.error("Error de negocio procesando la orden {}: {}", msg.getOrderId(), e.getMessage());
+            
+            // Enviar respuesta de error
+            StockResponseMessage response = new StockResponseMessage(
+                msg.getOrderId().toString(),
+                "NO_STOCK"
+            );
+
+            rabbitTemplate.convertAndSend(
+                RabbitMQConfig.STOCK_RESPONSE_EXCHANGE,
+                RabbitMQConfig.STOCK_RESPONSE_ROUTING_KEY,
+                response
+            );
+
             throw new AmqpRejectAndDontRequeueException("Error de negocio: " + e.getMessage(), e);
         } catch (Exception e) {
             log.error("Error inesperado procesando la orden {}: {}", msg.getOrderId(), e.getMessage(), e);

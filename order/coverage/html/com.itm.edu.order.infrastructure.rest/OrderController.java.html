@@ -6,6 +6,14 @@ import com.itm.edu.order.domain.model.Order;
 import com.itm.edu.order.domain.valueobjects.AddressShipping;
 import com.itm.edu.order.infrastructure.rest.dto.*;
 import com.itm.edu.order.domain.exception.BusinessException;
+import com.itm.edu.order.domain.exception.ApiError;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +25,8 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(&quot;/api/orders&quot;)
-<span class="fc" id="L20">@RequiredArgsConstructor</span>
+<span class="fc" id="L28">@RequiredArgsConstructor</span>
+@Tag(name = &quot;Órdenes&quot;, description = &quot;API para la gestión de órdenes&quot;)
 public class OrderController {
     private final CreateOrderUseCase createOrderUseCase;
     private final GetOrderUseCase getOrderUseCase;
@@ -25,122 +34,191 @@ public class OrderController {
     private final UpdateOrderUseCase updateOrderUseCase;
     private final UpdateShippingAddressUseCase updateShippingAddressUseCase;
 
+    @Operation(summary = &quot;Crear una nueva orden&quot;)
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Orden creada exitosamente&quot;,
+            content = @Content(schema = @Schema(implementation = Order.class))),
+        @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Solicitud inválida&quot;,
+            content = @Content(schema = @Schema(implementation = ApiError.class))),
+        @ApiResponse(responseCode = &quot;422&quot;, description = &quot;Error de validación&quot;,
+            content = @Content(schema = @Schema(implementation = ApiError.class))),
+        @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Error interno del servidor&quot;,
+            content = @Content(schema = @Schema(implementation = ApiError.class)))
+    })
     @PostMapping
     public ResponseEntity&lt;?&gt; createOrder(@RequestBody CreateOrderRequestDto request) {
-<span class="fc" id="L30">        validateOrderRequest(request);</span>
+<span class="fc" id="L50">        validateOrderRequest(request);</span>
 
         // Crear el cliente
-<span class="fc" id="L33">        Client client = Client.builder()</span>
-<span class="fc" id="L34">                .name(request.getClient().getName())</span>
-<span class="fc" id="L35">                .email(request.getClient().getEmail())</span>
-<span class="fc" id="L36">                .phone(request.getClient().getPhone())</span>
-<span class="fc" id="L37">                .build();</span>
+<span class="fc" id="L53">        Client client = Client.builder()</span>
+<span class="fc" id="L54">                .name(request.getClient().getName())</span>
+<span class="fc" id="L55">                .email(request.getClient().getEmail())</span>
+<span class="fc" id="L56">                .phone(request.getClient().getPhone())</span>
+<span class="fc" id="L57">                .build();</span>
 
         // Convertir productos a mapa de cantidades
-<span class="fc" id="L40">        Map&lt;UUID, BigDecimal&gt; productQuantities = request.getProducts().stream()</span>
-<span class="fc" id="L41">                .collect(Collectors.toMap(</span>
+<span class="fc" id="L60">        Map&lt;UUID, BigDecimal&gt; productQuantities = request.getProducts().stream()</span>
+<span class="fc" id="L61">                .collect(Collectors.toMap(</span>
                         CreateOrderProductDto::getProductId,
                         CreateOrderProductDto::getQuantity
                 ));
 
         // Crear la dirección de envío
-<span class="fc" id="L47">        AddressShipping addressShipping = AddressShipping.builder()</span>
-<span class="fc" id="L48">                .street(request.getShippingAddress().getStreet())</span>
-<span class="fc" id="L49">                .city(request.getShippingAddress().getCity())</span>
-<span class="fc" id="L50">                .state(request.getShippingAddress().getState())</span>
-<span class="fc" id="L51">                .zipCode(request.getShippingAddress().getZipCode())</span>
-<span class="fc" id="L52">                .country(request.getShippingAddress().getCountry())</span>
-<span class="fc" id="L53">                .build();</span>
+<span class="fc" id="L67">        AddressShipping addressShipping = AddressShipping.builder()</span>
+<span class="fc" id="L68">                .street(request.getShippingAddress().getStreet())</span>
+<span class="fc" id="L69">                .city(request.getShippingAddress().getCity())</span>
+<span class="fc" id="L70">                .state(request.getShippingAddress().getState())</span>
+<span class="fc" id="L71">                .zipCode(request.getShippingAddress().getZipCode())</span>
+<span class="fc" id="L72">                .country(request.getShippingAddress().getCountry())</span>
+<span class="fc" id="L73">                .build();</span>
 
         try {
             // Crear la orden
-<span class="fc" id="L57">            Order order = createOrderUseCase.createOrder(</span>
+<span class="fc" id="L77">            Order order = createOrderUseCase.createOrder(</span>
                     client,
                     productQuantities,
                     addressShipping
             );
-<span class="fc" id="L62">            return ResponseEntity.ok(order);</span>
-<span class="nc" id="L63">        } catch (BusinessException e) {</span>
-<span class="nc" id="L64">            return ResponseEntity.badRequest().body(e.getMessage());</span>
+<span class="fc" id="L82">            return ResponseEntity.ok(order);</span>
+<span class="nc" id="L83">        } catch (BusinessException e) {</span>
+<span class="nc" id="L84">            return ResponseEntity.badRequest().body(e.getMessage());</span>
         }
     }
 
+    @Operation(summary = &quot;Obtener una orden por su ID&quot;)
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Orden encontrada&quot;,
+            content = @Content(schema = @Schema(implementation = Order.class))),
+        @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Orden no encontrada&quot;,
+            content = @Content(schema = @Schema(implementation = ApiError.class))),
+        @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Error interno del servidor&quot;,
+            content = @Content(schema = @Schema(implementation = ApiError.class)))
+    })
     @GetMapping(&quot;/{id}&quot;)
-    public ResponseEntity&lt;?&gt; getOrder(@PathVariable UUID id) {
-<span class="nc" id="L70">        return getOrderUseCase.getOrder(id)</span>
-<span class="nc" id="L71">                .map(ResponseEntity::ok)</span>
-<span class="nc" id="L72">                .orElse(ResponseEntity.notFound().build());</span>
+    public ResponseEntity&lt;?&gt; getOrder(
+            @Parameter(description = &quot;ID de la orden&quot;, required = true)
+            @PathVariable UUID id) {
+<span class="nc" id="L101">        return getOrderUseCase.getOrder(id)</span>
+<span class="nc" id="L102">                .map(ResponseEntity::ok)</span>
+<span class="nc" id="L103">                .orElse(ResponseEntity.notFound().build());</span>
     }
 
+    @Operation(summary = &quot;Obtener todas las órdenes&quot;)
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Lista de órdenes obtenida exitosamente&quot;,
+            content = @Content(schema = @Schema(implementation = Order.class))),
+        @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Error interno del servidor&quot;,
+            content = @Content(schema = @Schema(implementation = ApiError.class)))
+    })
     @GetMapping
     public ResponseEntity&lt;?&gt; getAllOrders() {
-<span class="nc" id="L77">        return ResponseEntity.ok(getOrderUseCase.getAllOrders());</span>
+<span class="nc" id="L115">        return ResponseEntity.ok(getOrderUseCase.getAllOrders());</span>
     }
 
+    @Operation(summary = &quot;Actualizar una orden existente&quot;)
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Orden actualizada exitosamente&quot;,
+            content = @Content(schema = @Schema(implementation = Order.class))),
+        @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Solicitud inválida&quot;,
+            content = @Content(schema = @Schema(implementation = ApiError.class))),
+        @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Orden no encontrada&quot;,
+            content = @Content(schema = @Schema(implementation = ApiError.class))),
+        @ApiResponse(responseCode = &quot;422&quot;, description = &quot;Error de validación&quot;,
+            content = @Content(schema = @Schema(implementation = ApiError.class))),
+        @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Error interno del servidor&quot;,
+            content = @Content(schema = @Schema(implementation = ApiError.class)))
+    })
     @PutMapping(&quot;/{id}&quot;)
     public ResponseEntity&lt;?&gt; updateOrder(
+            @Parameter(description = &quot;ID de la orden&quot;, required = true)
             @PathVariable UUID id,
             @RequestBody UpdateOrderRequestDto request) {
         try {
-<span class="nc" id="L85">            Order orderDetails = Order.builder()</span>
-<span class="nc" id="L86">                    .orderStatus(request.getOrderStatus())</span>
-<span class="nc" id="L87">                    .build();</span>
+<span class="nc" id="L137">            Order orderDetails = Order.builder()</span>
+<span class="nc" id="L138">                    .orderStatus(request.getOrderStatus())</span>
+<span class="nc" id="L139">                    .build();</span>
 
-<span class="nc" id="L89">            Order updatedOrder = updateOrderUseCase.updateOrder(id, orderDetails);</span>
-<span class="nc" id="L90">            return ResponseEntity.ok(updatedOrder);</span>
-<span class="nc" id="L91">        } catch (BusinessException e) {</span>
-<span class="nc" id="L92">            return ResponseEntity.badRequest().body(e.getMessage());</span>
+<span class="nc" id="L141">            Order updatedOrder = updateOrderUseCase.updateOrder(id, orderDetails);</span>
+<span class="nc" id="L142">            return ResponseEntity.ok(updatedOrder);</span>
+<span class="nc" id="L143">        } catch (BusinessException e) {</span>
+<span class="nc" id="L144">            return ResponseEntity.badRequest().body(e.getMessage());</span>
         }
     }
 
+    @Operation(summary = &quot;Eliminar una orden&quot;)
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Orden eliminada exitosamente&quot;),
+        @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Solicitud inválida&quot;,
+            content = @Content(schema = @Schema(implementation = ApiError.class))),
+        @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Orden no encontrada&quot;,
+            content = @Content(schema = @Schema(implementation = ApiError.class))),
+        @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Error interno del servidor&quot;,
+            content = @Content(schema = @Schema(implementation = ApiError.class)))
+    })
     @DeleteMapping(&quot;/{id}&quot;)
-    public ResponseEntity&lt;?&gt; deleteOrder(@PathVariable UUID id) {
+    public ResponseEntity&lt;?&gt; deleteOrder(
+            @Parameter(description = &quot;ID de la orden&quot;, required = true)
+            @PathVariable UUID id) {
         try {
-<span class="nc" id="L99">            deleteOrderUseCase.deleteOrder(id);</span>
-<span class="nc" id="L100">            return ResponseEntity.ok().build();</span>
-<span class="nc" id="L101">        } catch (BusinessException e) {</span>
-<span class="nc" id="L102">            return ResponseEntity.badRequest().body(e.getMessage());</span>
+<span class="nc" id="L163">            deleteOrderUseCase.deleteOrder(id);</span>
+<span class="nc" id="L164">            return ResponseEntity.ok().build();</span>
+<span class="nc" id="L165">        } catch (BusinessException e) {</span>
+<span class="nc" id="L166">            return ResponseEntity.badRequest().body(e.getMessage());</span>
         }
     }
 
+    @Operation(summary = &quot;Actualizar la dirección de envío de una orden&quot;)
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Dirección de envío actualizada exitosamente&quot;,
+            content = @Content(schema = @Schema(implementation = Order.class))),
+        @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Solicitud inválida&quot;,
+            content = @Content(schema = @Schema(implementation = ApiError.class))),
+        @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Orden no encontrada&quot;,
+            content = @Content(schema = @Schema(implementation = ApiError.class))),
+        @ApiResponse(responseCode = &quot;422&quot;, description = &quot;Error de validación&quot;,
+            content = @Content(schema = @Schema(implementation = ApiError.class))),
+        @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Error interno del servidor&quot;,
+            content = @Content(schema = @Schema(implementation = ApiError.class)))
+    })
     @PatchMapping(&quot;/{id}/shipping-address&quot;)
     public ResponseEntity&lt;?&gt; updateShippingAddress(
+            @Parameter(description = &quot;ID de la orden&quot;, required = true)
             @PathVariable UUID id,
             @RequestBody AddressShippingDto addressDto) {
         try {
-<span class="nc" id="L111">            AddressShipping addressShipping = AddressShipping.builder()</span>
-<span class="nc" id="L112">                    .street(addressDto.getStreet())</span>
-<span class="nc" id="L113">                    .city(addressDto.getCity())</span>
-<span class="nc" id="L114">                    .state(addressDto.getState())</span>
-<span class="nc" id="L115">                    .zipCode(addressDto.getZipCode())</span>
-<span class="nc" id="L116">                    .country(addressDto.getCountry())</span>
-<span class="nc" id="L117">                    .build();</span>
+<span class="nc" id="L189">            AddressShipping addressShipping = AddressShipping.builder()</span>
+<span class="nc" id="L190">                    .street(addressDto.getStreet())</span>
+<span class="nc" id="L191">                    .city(addressDto.getCity())</span>
+<span class="nc" id="L192">                    .state(addressDto.getState())</span>
+<span class="nc" id="L193">                    .zipCode(addressDto.getZipCode())</span>
+<span class="nc" id="L194">                    .country(addressDto.getCountry())</span>
+<span class="nc" id="L195">                    .build();</span>
 
-<span class="nc" id="L119">            Order updatedOrder = updateShippingAddressUseCase.updateShippingAddress(id, addressShipping);</span>
-<span class="nc" id="L120">            return ResponseEntity.ok(updatedOrder);</span>
-<span class="nc" id="L121">        } catch (BusinessException e) {</span>
-<span class="nc" id="L122">            return ResponseEntity.badRequest().body(e.getMessage());</span>
+<span class="nc" id="L197">            Order updatedOrder = updateShippingAddressUseCase.updateShippingAddress(id, addressShipping);</span>
+<span class="nc" id="L198">            return ResponseEntity.ok(updatedOrder);</span>
+<span class="nc" id="L199">        } catch (BusinessException e) {</span>
+<span class="nc" id="L200">            return ResponseEntity.badRequest().body(e.getMessage());</span>
         }
     }
 
     private void validateOrderRequest(CreateOrderRequestDto request) {
-<span class="pc bpc" id="L127" title="1 of 2 branches missed.">        if (request.getClient() == null) {</span>
-<span class="nc" id="L128">            throw new IllegalArgumentException(&quot;Client information is required&quot;);</span>
+<span class="pc bpc" id="L205" title="1 of 2 branches missed.">        if (request.getClient() == null) {</span>
+<span class="nc" id="L206">            throw new IllegalArgumentException(&quot;Client information is required&quot;);</span>
         }
 
-<span class="pc bpc" id="L131" title="2 of 4 branches missed.">        if (request.getProducts() == null || request.getProducts().isEmpty()) {</span>
-<span class="nc" id="L132">            throw new IllegalArgumentException(&quot;At least one product is required&quot;);</span>
+<span class="pc bpc" id="L209" title="2 of 4 branches missed.">        if (request.getProducts() == null || request.getProducts().isEmpty()) {</span>
+<span class="nc" id="L210">            throw new IllegalArgumentException(&quot;At least one product is required&quot;);</span>
         }
 
-<span class="fc bfc" id="L135" title="All 2 branches covered.">        for (CreateOrderProductDto product : request.getProducts()) {</span>
-<span class="fc bfc" id="L136" title="All 2 branches covered.">            if (product.getQuantity().compareTo(BigDecimal.ZERO) &lt;= 0) {</span>
-<span class="fc" id="L137">                throw new IllegalArgumentException(&quot;Product quantity must be greater than 0&quot;);</span>
+<span class="fc bfc" id="L213" title="All 2 branches covered.">        for (CreateOrderProductDto product : request.getProducts()) {</span>
+<span class="fc bfc" id="L214" title="All 2 branches covered.">            if (product.getQuantity().compareTo(BigDecimal.ZERO) &lt;= 0) {</span>
+<span class="fc" id="L215">                throw new IllegalArgumentException(&quot;Product quantity must be greater than 0&quot;);</span>
             }
-<span class="fc" id="L139">        }</span>
+<span class="fc" id="L217">        }</span>
 
-<span class="pc bpc" id="L141" title="1 of 2 branches missed.">        if (request.getShippingAddress() == null) {</span>
-<span class="nc" id="L142">            throw new IllegalArgumentException(&quot;Shipping address is required&quot;);</span>
+<span class="pc bpc" id="L219" title="1 of 2 branches missed.">        if (request.getShippingAddress() == null) {</span>
+<span class="nc" id="L220">            throw new IllegalArgumentException(&quot;Shipping address is required&quot;);</span>
         }
-<span class="fc" id="L144">    }</span>
+<span class="fc" id="L222">    }</span>
 } 
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

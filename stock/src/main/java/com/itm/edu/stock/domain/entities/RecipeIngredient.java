@@ -8,6 +8,7 @@ import jakarta.persistence.*;
 import java.util.UUID;
 import com.itm.edu.stock.domain.valueobjects.Quantity;
 import com.itm.edu.stock.domain.valueobjects.Unit;
+import org.hibernate.annotations.GenericGenerator;
 
 @Entity
 @Table(name = "recipe_ingredients")
@@ -17,6 +18,8 @@ import com.itm.edu.stock.domain.valueobjects.Unit;
 @AllArgsConstructor
 public class RecipeIngredient {
     @Id
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     private UUID id;
     
     @ManyToOne

@@ -2,13 +2,13 @@
 
 import com.itm.edu.common.dto.OrderMessageDTO;
 import com.itm.edu.order.application.ports.outputs.OrderPublisherPort;
+import com.itm.edu.order.infrastructure.config.RabbitMQConfig;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
 
-import static com.itm.edu.order.infrastructure.config.RabbitMQConfig.ORDER_EXCHANGE;
-import static com.itm.edu.order.infrastructure.config.RabbitMQConfig.ORDER_ROUTING_KEY;
-
+<span class="nc" id="L11">@Slf4j</span>
 @Component
 <span class="nc" id="L13">@RequiredArgsConstructor</span>
 public class RabbitOrderPublisher implements OrderPublisherPort {
@@ -18,14 +18,19 @@ public class RabbitOrderPublisher implements OrderPublisherPort {
     @Override
     public void publish(OrderMessageDTO orderMessage) {
         try {
-<span class="nc" id="L21">            rabbitTemplate.convertAndSend(ORDER_EXCHANGE, ORDER_ROUTING_KEY, orderMessage);</span>
-<span class="nc" id="L22">            System.out.println(&quot;Message sent: &quot; + orderMessage);</span>
-<span class="nc" id="L23">        } catch (Exception e) {</span>
-<span class="nc" id="L24">            System.err.println(&quot;Error sending message: &quot; + e.getMessage());</span>
-<span class="nc" id="L25">            e.printStackTrace();</span>
-<span class="nc" id="L26">            throw e;</span>
-<span class="nc" id="L27">        }</span>
-<span class="nc" id="L28">    }</span>
+            // Enviar al exchange de órdenes
+<span class="nc" id="L22">            rabbitTemplate.convertAndSend(</span>
+                RabbitMQConfig.ORDER_EXCHANGE,
+                RabbitMQConfig.ORDER_ROUTING_KEY,
+                orderMessage
+            );
+<span class="nc" id="L27">            log.info(&quot;✅ Mensaje de orden enviado: {}&quot;, orderMessage);</span>
+<span class="nc" id="L28">        } catch (Exception e) {</span>
+<span class="nc" id="L29">            log.error(&quot;❌ Error enviando mensaje: {}&quot;, e.getMessage());</span>
+<span class="nc" id="L30">            e.printStackTrace();</span>
+<span class="nc" id="L31">            throw e;</span>
+<span class="nc" id="L32">        }</span>
+<span class="nc" id="L33">    }</span>
 }
 
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

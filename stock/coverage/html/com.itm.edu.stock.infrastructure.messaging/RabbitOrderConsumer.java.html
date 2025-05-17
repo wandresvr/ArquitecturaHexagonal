@@ -3,13 +3,13 @@
 import com.itm.edu.common.dto.OrderMessageDTO;
 import com.itm.edu.stock.application.ports.input.ProcessOrderUseCase;
 import com.itm.edu.stock.domain.exception.BusinessException;
+import com.itm.edu.stock.infrastructure.config.RabbitMQConfig;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.stereotype.Component;
-
-import static com.itm.edu.stock.infrastructure.config.RabbitMQConfig.ORDER_QUEUE;
 
 <span class="fc" id="L14">@Slf4j</span>
 @Component
@@ -17,23 +17,70 @@ import static com.itm.edu.stock.infrastructure.config.RabbitMQConfig.ORDER_QUEUE
 public class RabbitOrderConsumer {
 
     private final ProcessOrderUseCase processOrderUseCase;
+    private final RabbitTemplate rabbitTemplate;
 
     @RabbitListener(
-      queues = ORDER_QUEUE,
-      containerFactory = &quot;rabbitListenerContainerFactory&quot;
+        queues = RabbitMQConfig.ORDER_QUEUE,
+        containerFactory = &quot;rabbitListenerContainerFactory&quot;
     )
     public void onOrderMessage(OrderMessageDTO msg) {
         try {
-<span class="nc" id="L27">            processOrderUseCase.processOrder(msg);</span>
-<span class="nc" id="L28">            log.info(&quot;Orden procesada correctamente: {}&quot;, msg.getOrderId());</span>
-<span class="nc" id="L29">        } catch (BusinessException e) {</span>
-<span class="nc" id="L30">            log.error(&quot;Error de negocio procesando la orden {}: {}&quot;, msg.getOrderId(), e.getMessage());</span>
-            // Lanzar excepción que indica que no debe reintentar
-<span class="nc" id="L32">            throw new AmqpRejectAndDontRequeueException(&quot;Error de negocio: &quot; + e.getMessage(), e);</span>
-<span class="nc" id="L33">        } catch (Exception e) {</span>
-<span class="nc" id="L34">            log.error(&quot;Error inesperado procesando la orden {}: {}&quot;, msg.getOrderId(), e.getMessage(), e);</span>
-<span class="nc" id="L35">            throw new AmqpRejectAndDontRequeueException(&quot;Error inesperado: &quot; + e.getMessage(), e);</span>
-<span class="nc" id="L36">        }</span>
-<span class="nc" id="L37">    }</span>
+            // Procesar la orden
+<span class="nc" id="L29">            processOrderUseCase.processOrder(msg);</span>
+            
+            // Crear el mensaje de respuesta
+<span class="nc" id="L32">            StockResponseMessage response = new StockResponseMessage(</span>
+<span class="nc" id="L33">                msg.getOrderId().toString(),</span>
+                &quot;RESERVED&quot;
+            );
+
+            // Enviar la respuesta al exchange de respuestas
+<span class="nc" id="L38">            rabbitTemplate.convertAndSend(</span>
+                RabbitMQConfig.STOCK_RESPONSE_EXCHANGE,
+                RabbitMQConfig.STOCK_RESPONSE_ROUTING_KEY,
+                response
+            );
+
+<span class="nc" id="L44">            log.info(&quot;Orden {} procesada. Stock reservado.&quot;, msg.getOrderId());</span>
+<span class="nc" id="L45">        } catch (BusinessException e) {</span>
+<span class="nc" id="L46">            log.error(&quot;Error de negocio procesando la orden {}: {}&quot;, msg.getOrderId(), e.getMessage());</span>
+            
+            // Enviar respuesta de error
+<span class="nc" id="L49">            StockResponseMessage response = new StockResponseMessage(</span>
+<span class="nc" id="L50">                msg.getOrderId().toString(),</span>
+                &quot;NO_STOCK&quot;
+            );
+
+<span class="nc" id="L54">            rabbitTemplate.convertAndSend(</span>
+                RabbitMQConfig.STOCK_RESPONSE_EXCHANGE,
+                RabbitMQConfig.STOCK_RESPONSE_ROUTING_KEY,
+                response
+            );
+
+<span class="nc" id="L60">            throw new AmqpRejectAndDontRequeueException(&quot;Error de negocio: &quot; + e.getMessage(), e);</span>
+<span class="nc" id="L61">        } catch (Exception e) {</span>
+<span class="nc" id="L62">            log.error(&quot;Error inesperado procesando la orden {}: {}&quot;, msg.getOrderId(), e.getMessage(), e);</span>
+<span class="nc" id="L63">            throw new AmqpRejectAndDontRequeueException(&quot;Error inesperado: &quot; + e.getMessage(), e);</span>
+<span class="nc" id="L64">        }</span>
+<span class="nc" id="L65">    }</span>
+
+    // Clase interna para el mensaje de respuesta
+    private static class StockResponseMessage {
+        private final String orderId;
+        private final String status;
+
+<span class="nc" id="L72">        public StockResponseMessage(String orderId, String status) {</span>
+<span class="nc" id="L73">            this.orderId = orderId;</span>
+<span class="nc" id="L74">            this.status = status;</span>
+<span class="nc" id="L75">        }</span>
+
+        public String getOrderId() {
+<span class="nc" id="L78">            return orderId;</span>
+        }
+
+        public String getStatus() {
+<span class="nc" id="L82">            return status;</span>
+        }
+    }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

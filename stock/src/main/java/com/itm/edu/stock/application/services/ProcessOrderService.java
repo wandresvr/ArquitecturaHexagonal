@@ -5,6 +5,7 @@ import com.itm.edu.common.dto.ProductOrderDTO;
 import com.itm.edu.stock.application.ports.input.ProcessOrderUseCase;
 import com.itm.edu.stock.domain.entities.Ingredient;
 import com.itm.edu.stock.domain.entities.Recipe;
+import com.itm.edu.stock.domain.entities.RecipeIngredient;
 import com.itm.edu.stock.domain.exception.BusinessException;
 import com.itm.edu.stock.domain.repository.IngredientRepository;
 import com.itm.edu.stock.application.ports.output.RecipeRepository;
@@ -34,13 +35,13 @@ public class ProcessOrderService implements ProcessOrderUseCase {
                 .orElseThrow(() ->
                     new BusinessException("Receta no encontrada para producto " + line.getProductId()));
 
-            recipe.getIngredients().forEach(req -> {
+            recipe.getRecipeIngredients().forEach(req -> {
                 Ingredient ing = ingredientRepository
-                    .findById(req.getId())
+                    .findById(req.getIngredient().getId())
                     .orElseThrow(() ->
-                        new BusinessException("Ingrediente no encontrado: " + req.getId()));
+                        new BusinessException("Ingrediente no encontrado: " + req.getIngredient().getId()));
 
-                BigDecimal needed = req.getQuantity()
+                BigDecimal needed = req.getQuantity().getValue()
                     .multiply(BigDecimal.valueOf(line.getQuantity()));
 
                 if (ing.getQuantity().compareTo(needed) < 0) {
@@ -76,8 +77,9 @@ public class ProcessOrderService implements ProcessOrderUseCase {
             Recipe recipe = recipeRepository.findById(line.getProductId())
                 .orElseThrow(() -> new RuntimeException("Receta no encontrada"));
 
-            for (Ingredient ingredient : recipe.getIngredients()) {
-                BigDecimal needed = ingredient.getQuantity().multiply(line.getQuantity());
+            for (RecipeIngredient ri : recipe.getRecipeIngredients()) {
+                Ingredient ingredient = ri.getIngredient();
+                BigDecimal needed = ri.getQuantity().getValue().multiply(line.getQuantity());
                 if (ingredient.getQuantity().compareTo(needed) < 0) {
                     throw new RuntimeException("No hay suficiente stock del ingrediente: " + ingredient.getName());
                 }

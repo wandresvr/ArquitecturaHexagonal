@@ -3,6 +3,7 @@ package com.itm.edu.order.infrastructure.messaging;
 import com.itm.edu.order.application.dto.events.StockUpdateResponseEvent;
 import com.itm.edu.order.application.dto.events.StockValidationStatus;
 import com.itm.edu.order.domain.model.Order;
+import com.itm.edu.order.domain.model.OrderItem;
 import com.itm.edu.order.domain.repository.OrderRepository;
 import com.itm.edu.order.infrastructure.config.RabbitMQConfig;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +14,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -37,7 +40,7 @@ public class StockEventListenerService {
             if ("PENDING_VALIDATION".equals(order.getOrderStatus())) {
                 String newStatus;
                 
-                if (event.getStatus() == StockValidationStatus.VALIDATED) {
+                if (event.getStatus() == StockValidationStatus.RESERVED) {
                     newStatus = "APPROVED";
                     // Enviar mensaje para actualizar el inventario
                     sendStockUpdateMessage(order);
@@ -60,10 +63,18 @@ public class StockEventListenerService {
 
     private void sendStockUpdateMessage(Order order) {
         try {
+            // Convertir OrderItems a ProductUpdates
+            List<ProductUpdate> productUpdates = order.getProducts().stream()
+                .map(item -> new ProductUpdate(
+                    item.getProduct().getId().toString(),
+                    item.getQuantity().intValue()
+                ))
+                .collect(Collectors.toList());
+
             // Crear mensaje de actualización de inventario
             StockUpdateMessage updateMessage = new StockUpdateMessage(
-                order.getOrderId(),
-                order.getProducts() // Asumiendo que Order tiene una lista de productos
+                order.getOrderId().toString(),
+                productUpdates
             );
 
             // Enviar al exchange de actualización de inventario

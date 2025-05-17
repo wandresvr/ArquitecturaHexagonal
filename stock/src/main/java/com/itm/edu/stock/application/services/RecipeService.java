@@ -52,7 +52,7 @@ public class RecipeService implements RecipeUseCase {
         existingRecipe.setInstructions(updatedRecipe.getInstructions());
         existingRecipe.setPreparationTime(updatedRecipe.getPreparationTime());
         existingRecipe.setDifficulty(updatedRecipe.getDifficulty());
-        existingRecipe.setIngredients(updatedRecipe.getIngredients());
+        existingRecipe.setRecipeIngredients(updatedRecipe.getRecipeIngredients());
         
         calculateRecipeCost(existingRecipe);
         Recipe savedRecipe = recipeRepository.save(existingRecipe);
@@ -80,8 +80,8 @@ public class RecipeService implements RecipeUseCase {
     }
 
     private void calculateRecipeCost(Recipe recipe) {
-        BigDecimal totalCost = recipe.getIngredients().stream()
-                .map(ingredient -> ingredient.getPrice().multiply(ingredient.getQuantity()))
+        BigDecimal totalCost = recipe.getRecipeIngredients().stream()
+                .map(ri -> ri.getIngredient().getPrice().multiply(ri.getQuantity().getValue()))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         recipe.setCost(totalCost);
     }
