@@ -1,47 +1,81 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>IngredientService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">stock</a> &gt; <a href="index.source.html" class="el_package">com.itm.edu.stock.application.services</a> &gt; <span class="el_source">IngredientService.java</span></div><h1>IngredientService.java</h1><pre class="source lang-java linenums">package com.itm.edu.stock.application.services;
 
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import java.util.List;
-import java.util.UUID;
-
 import com.itm.edu.stock.application.ports.input.IngredientUseCase;
 import com.itm.edu.stock.domain.entities.Ingredient;
 import com.itm.edu.stock.domain.repository.IngredientRepository;
 import com.itm.edu.stock.infrastructure.api.dto.CreateIngredientRequestDto;
-import com.itm.edu.stock.domain.valueobjects.Quantity;
-import com.itm.edu.stock.domain.valueobjects.Unit;
-
+import com.itm.edu.stock.infrastructure.api.dto.IngredientResponseDto;
+import com.itm.edu.stock.infrastructure.api.mapper.IngredientMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
-<span class="fc" id="L18">@RequiredArgsConstructor</span>
+<span class="fc" id="L19">@RequiredArgsConstructor</span>
 public class IngredientService implements IngredientUseCase {
-    
+
     private final IngredientRepository ingredientRepository;
+    private final IngredientMapper ingredientMapper;
 
     @Override
     @Transactional
-    public Ingredient createIngredient(CreateIngredientRequestDto request) {
-<span class="fc" id="L26">        Ingredient ingredient = new Ingredient();</span>
-<span class="fc" id="L27">        ingredient.setId(UUID.randomUUID());</span>
-<span class="fc" id="L28">        ingredient.setName(request.getName());</span>
-<span class="fc" id="L29">        ingredient.setDescription(request.getDescription());</span>
-<span class="fc" id="L30">        ingredient.setQuantity(new Quantity(request.getQuantity()));</span>
-<span class="fc" id="L31">        ingredient.setUnit(new Unit(request.getUnit()));</span>
-        
-<span class="fc" id="L33">        return ingredientRepository.save(ingredient);</span>
+    public IngredientResponseDto createIngredient(CreateIngredientRequestDto request) {
+<span class="fc" id="L28">        Ingredient ingredient = ingredientMapper.toEntity(request);</span>
+<span class="fc" id="L29">        Ingredient savedIngredient = ingredientRepository.save(ingredient);</span>
+<span class="fc" id="L30">        return ingredientMapper.toDto(savedIngredient);</span>
     }
 
     @Override
-    public List&lt;Ingredient&gt; getAllIngredients() {
-<span class="fc" id="L38">        return ingredientRepository.findAll();</span>
+    public List&lt;IngredientResponseDto&gt; getAllIngredients() {
+<span class="fc" id="L35">        return ingredientRepository.findAll().stream()</span>
+<span class="fc" id="L36">            .map(ingredientMapper::toDto)</span>
+<span class="fc" id="L37">            .collect(Collectors.toList());</span>
     }
 
     @Override
-    public Ingredient getIngredientById(UUID id) {
-<span class="fc" id="L43">        return ingredientRepository.findById(id)</span>
-<span class="fc" id="L44">                .orElseThrow(() -&gt; new RuntimeException(&quot;Ingredient not found: &quot; + id));</span>
+    public IngredientResponseDto getIngredientById(UUID id) {
+<span class="fc" id="L42">        Ingredient ingredient = ingredientRepository.findById(id)</span>
+<span class="pc" id="L43">            .orElseThrow(() -&gt; new RuntimeException(&quot;Ingrediente no encontrado&quot;));</span>
+<span class="fc" id="L44">        return ingredientMapper.toDto(ingredient);</span>
     }
+
+    @Override
+    @Transactional
+    public IngredientResponseDto updateIngredient(UUID id, CreateIngredientRequestDto request) {
+<span class="nc" id="L50">        Ingredient existingIngredient = ingredientRepository.findById(id)</span>
+<span class="nc" id="L51">            .orElseThrow(() -&gt; new RuntimeException(&quot;Ingrediente no encontrado&quot;));</span>
+
+<span class="nc" id="L53">        Ingredient updatedIngredient = ingredientMapper.toEntity(request);</span>
+<span class="nc" id="L54">        updatedIngredient.setId(id);</span>
+<span class="nc" id="L55">        Ingredient savedIngredient = ingredientRepository.save(updatedIngredient);</span>
+<span class="nc" id="L56">        return ingredientMapper.toDto(savedIngredient);</span>
+    }
+
+    @Override
+    @Transactional
+    public void deleteIngredient(UUID id) {
+<span class="nc" id="L62">        ingredientRepository.deleteById(id);</span>
+<span class="nc" id="L63">    }</span>
+
+    @Override
+    public List&lt;IngredientResponseDto&gt; getIngredientsBySupplier(String supplier) {
+<span class="nc" id="L67">        return ingredientRepository.findBySupplier(supplier).stream()</span>
+<span class="nc" id="L68">            .map(ingredientMapper::toDto)</span>
+<span class="nc" id="L69">            .collect(Collectors.toList());</span>
+    }
+
+    @Override
+    @Transactional
+    public void updateIngredientQuantity(UUID id, BigDecimal quantity) {
+<span class="nc" id="L75">        Ingredient ingredient = ingredientRepository.findById(id)</span>
+<span class="nc" id="L76">            .orElseThrow(() -&gt; new RuntimeException(&quot;Ingrediente no encontrado&quot;));</span>
+<span class="nc" id="L77">        ingredient.setQuantity(quantity);</span>
+<span class="nc" id="L78">        ingredientRepository.save(ingredient);</span>
+<span class="nc" id="L79">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

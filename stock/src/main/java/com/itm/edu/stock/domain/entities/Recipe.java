@@ -1,52 +1,44 @@
 package com.itm.edu.stock.domain.entities;
 
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-
-import java.util.UUID;
+import lombok.Data;
+import org.hibernate.annotations.GenericGenerator;
+import jakarta.persistence.*;
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.JoinColumn;
-
-import com.itm.edu.stock.domain.valueobjects.Quantity;
-import com.itm.edu.stock.domain.valueobjects.Unit;
-
+@Data
 @Entity
 @Table(name = "recipes")
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
 public class Recipe {
-
     @Id
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     private UUID id;
-    
-    private UUID productId;
-    
+
+    @Column(nullable = false)
     private String name;
-    
+
+    @Column(length = 1000)
     private String description;
-    
-    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<RecipeIngredient> ingredients = new ArrayList<>();
-    
-    public void addIngredient(Ingredient ingredient, BigDecimal quantity, String unit) {
-        RecipeIngredient recipeIngredient = new RecipeIngredient();
-        recipeIngredient.setId(UUID.randomUUID());
-        recipeIngredient.setIngredient(ingredient);
-        recipeIngredient.setQuantity(new Quantity(quantity));
-        recipeIngredient.setUnit(new Unit(unit));
-        recipeIngredient.setRecipe(this);
-        ingredients.add(recipeIngredient);
-    }
+
+    @Column(length = 2000)
+    private String instructions;
+
+    @Column(name = "preparation_time")
+    private Integer preparationTime;
+
+    @Column(nullable = false)
+    private String difficulty;
+
+    @Column(name = "cost", precision = 10, scale = 2)
+    private BigDecimal cost;
+
+    @ManyToMany
+    @JoinTable(
+        name = "recipe_ingredients",
+        joinColumns = @JoinColumn(name = "recipe_id"),
+        inverseJoinColumns = @JoinColumn(name = "ingredient_id")
+    )
+    private List<Ingredient> ingredients;
 }

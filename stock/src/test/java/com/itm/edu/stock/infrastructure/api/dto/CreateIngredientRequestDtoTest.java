@@ -20,6 +20,8 @@ class CreateIngredientRequestDtoTest {
         dto.setDescription("All purpose flour");
         dto.setQuantity(new BigDecimal("1000"));
         dto.setUnit("g");
+        dto.setPrice(new BigDecimal("2.50"));
+        dto.setSupplier("Proveedor A");
 
         // When
         var violations = validator.validate(dto);
@@ -35,6 +37,8 @@ class CreateIngredientRequestDtoTest {
         dto.setDescription("All purpose flour");
         dto.setQuantity(new BigDecimal("1000"));
         dto.setUnit("g");
+        dto.setPrice(new BigDecimal("2.50"));
+        dto.setSupplier("Proveedor A");
 
         // When
         var violations = validator.validate(dto);
@@ -52,6 +56,8 @@ class CreateIngredientRequestDtoTest {
         dto.setName("Flour");
         dto.setDescription("All purpose flour");
         dto.setUnit("g");
+        dto.setPrice(new BigDecimal("2.50"));
+        dto.setSupplier("Proveedor A");
 
         // When
         var violations = validator.validate(dto);
@@ -70,6 +76,8 @@ class CreateIngredientRequestDtoTest {
         dto.setDescription("All purpose flour");
         dto.setQuantity(new BigDecimal("-1000"));
         dto.setUnit("g");
+        dto.setPrice(new BigDecimal("2.50"));
+        dto.setSupplier("Proveedor A");
 
         // When
         var violations = validator.validate(dto);
@@ -77,7 +85,7 @@ class CreateIngredientRequestDtoTest {
         // Then
         assertFalse(violations.isEmpty());
         assertEquals(1, violations.size());
-        assertEquals("La cantidad debe ser positiva", violations.iterator().next().getMessage());
+        assertEquals("La cantidad debe ser mayor o igual a 0", violations.iterator().next().getMessage());
     }
 
     @Test
@@ -87,6 +95,8 @@ class CreateIngredientRequestDtoTest {
         dto.setName("Flour");
         dto.setDescription("All purpose flour");
         dto.setQuantity(new BigDecimal("1000"));
+        dto.setPrice(new BigDecimal("2.50"));
+        dto.setSupplier("Proveedor A");
 
         // When
         var violations = validator.validate(dto);

@@ -7,13 +7,16 @@ import com.itm.edu.stock.domain.entities.Ingredient;
 import com.itm.edu.stock.domain.entities.Recipe;
 import com.itm.edu.stock.domain.exception.BusinessException;
 import com.itm.edu.stock.domain.repository.IngredientRepository;
-import com.itm.edu.stock.domain.repository.RecipeRepository;
-import com.itm.edu.stock.domain.valueobjects.Quantity;
+import com.itm.edu.stock.application.ports.output.RecipeRepository;
+import com.itm.edu.stock.infrastructure.api.dto.OrderLineDto;
+import com.itm.edu.stock.infrastructure.api.dto.ProcessOrderRequestDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -27,26 +30,60 @@ public class ProcessOrderService implements ProcessOrderUseCase {
     public void processOrder(OrderMessageDTO orderMessage) {
         for (ProductOrderDTO line : orderMessage.getProducts()) {
             Recipe recipe = recipeRepository
-                .findByProductId(line.getProductId())
+                .findById(line.getProductId())
                 .orElseThrow(() ->
                     new BusinessException("Receta no encontrada para producto " + line.getProductId()));
 
             recipe.getIngredients().forEach(req -> {
                 Ingredient ing = ingredientRepository
-                    .findById(req.getIngredient().getId())
+                    .findById(req.getId())
                     .orElseThrow(() ->
-                        new BusinessException("Ingrediente no encontrado: " + req.getIngredient().getId()));
+                        new BusinessException("Ingrediente no encontrado: " + req.getId()));
 
-                BigDecimal needed = req.getQuantity().getValue()
+                BigDecimal needed = req.getQuantity()
                     .multiply(BigDecimal.valueOf(line.getQuantity()));
 
-                if (ing.getQuantity().getValue().compareTo(needed) < 0) {
+                if (ing.getQuantity().compareTo(needed) < 0) {
                     throw new BusinessException("Stock insuficiente de " + ing.getName());
                 }
 
-                ing.setQuantity(new Quantity(ing.getQuantity().getValue().subtract(needed)));
+                ing.setQuantity(ing.getQuantity().subtract(needed));
                 ingredientRepository.save(ing);
             });
+        }
+    }
+
+    @Transactional
+    public void processOrder(List<Ingredient> ingredients) {
+        for (Ingredient req : ingredients) {
+            Ingredient ing = ingredientRepository.findById(req.getId())
+                    .orElseThrow(() -> 
+                        new BusinessException("Ingrediente no encontrado: " + req.getId()));
+
+            BigDecimal needed = req.getQuantity();
+            if (ing.getQuantity().compareTo(needed) < 0) {
+                throw new BusinessException("Stock insuficiente para el ingrediente: " + ing.getName());
+            }
+
+            ing.setQuantity(ing.getQuantity().subtract(needed));
+            ingredientRepository.save(ing);
+        }
+    }
+
+    @Transactional
+    public void processOrder(ProcessOrderRequestDto request) {
+        for (OrderLineDto line : request.getLines()) {
+            Recipe recipe = recipeRepository.findById(line.getProductId())
+                .orElseThrow(() -> new RuntimeException("Receta no encontrada"));
+
+            for (Ingredient ingredient : recipe.getIngredients()) {
+                BigDecimal needed = ingredient.getQuantity().multiply(line.getQuantity());
+                if (ingredient.getQuantity().compareTo(needed) < 0) {
+                    throw new RuntimeException("No hay suficiente stock del ingrediente: " + ingredient.getName());
+                }
+                ingredient.setQuantity(ingredient.getQuantity().subtract(needed));
+                ingredientRepository.save(ingredient);
+            }
         }
     }
 }

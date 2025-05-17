@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>IngredientMapper.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">stock</a> &gt; <a href="index.source.html" class="el_package">com.itm.edu.stock.infrastructure.api.mapper</a> &gt; <span class="el_source">IngredientMapper.java</span></div><h1>IngredientMapper.java</h1><pre class="source lang-java linenums">package com.itm.edu.stock.infrastructure.api.mapper;
+
+import com.itm.edu.stock.domain.entities.Ingredient;
+import com.itm.edu.stock.infrastructure.api.dto.CreateIngredientRequestDto;
+import com.itm.edu.stock.infrastructure.api.dto.IngredientResponseDto;
+import org.springframework.stereotype.Component;
+
+@Component
+<span class="fc" id="L9">public class IngredientMapper {</span>
+
+    public IngredientResponseDto toDto(Ingredient ingredient) {
+<span class="nc" id="L12">        IngredientResponseDto dto = new IngredientResponseDto();</span>
+<span class="nc" id="L13">        dto.setId(ingredient.getId());</span>
+<span class="nc" id="L14">        dto.setName(ingredient.getName());</span>
+<span class="nc" id="L15">        dto.setDescription(ingredient.getDescription());</span>
+<span class="nc" id="L16">        dto.setQuantity(ingredient.getQuantity());</span>
+<span class="nc" id="L17">        dto.setUnit(ingredient.getUnit());</span>
+<span class="nc" id="L18">        dto.setPrice(ingredient.getPrice());</span>
+<span class="nc" id="L19">        dto.setSupplier(ingredient.getSupplier());</span>
+<span class="nc" id="L20">        return dto;</span>
+    }
+
+    public Ingredient toEntity(CreateIngredientRequestDto dto) {
+<span class="nc" id="L24">        Ingredient ingredient = new Ingredient();</span>
+<span class="nc" id="L25">        ingredient.setName(dto.getName());</span>
+<span class="nc" id="L26">        ingredient.setDescription(dto.getDescription());</span>
+<span class="nc" id="L27">        ingredient.setQuantity(dto.getQuantity());</span>
+<span class="nc" id="L28">        ingredient.setUnit(dto.getUnit());</span>
+<span class="nc" id="L29">        ingredient.setPrice(dto.getPrice());</span>
+<span class="nc" id="L30">        ingredient.setSupplier(dto.getSupplier());</span>
+<span class="nc" id="L31">        return ingredient;</span>
+    }
+} 
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

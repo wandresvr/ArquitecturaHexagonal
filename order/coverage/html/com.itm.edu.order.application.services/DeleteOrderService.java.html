@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DeleteOrderService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">order</a> &gt; <a href="index.source.html" class="el_package">com.itm.edu.order.application.services</a> &gt; <span class="el_source">DeleteOrderService.java</span></div><h1>DeleteOrderService.java</h1><pre class="source lang-java linenums">package com.itm.edu.order.application.services;
+
+import com.itm.edu.order.application.ports.inputs.DeleteOrderUseCase;
+import com.itm.edu.order.application.ports.outputs.OrderRepositoryPort;
+import com.itm.edu.order.domain.exception.OrderNotFoundException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.UUID;
+
+@Service
+public class DeleteOrderService implements DeleteOrderUseCase {
+
+    private final OrderRepositoryPort orderRepositoryPort;
+
+<span class="nc" id="L16">    public DeleteOrderService(OrderRepositoryPort orderRepositoryPort) {</span>
+<span class="nc" id="L17">        this.orderRepositoryPort = orderRepositoryPort;</span>
+<span class="nc" id="L18">    }</span>
+
+    @Override
+    @Transactional
+    public void deleteOrder(UUID id) {
+<span class="nc bnc" id="L23" title="All 2 branches missed.">        if (id == null) {</span>
+<span class="nc" id="L24">            throw new IllegalArgumentException(&quot;Order ID cannot be null&quot;);</span>
+        }
+
+<span class="nc bnc" id="L27" title="All 2 branches missed.">        if (!orderRepositoryPort.findById(id).isPresent()) {</span>
+<span class="nc" id="L28">            throw new OrderNotFoundException(&quot;Order not found with id: &quot; + id);</span>
+        }
+
+<span class="nc" id="L31">        orderRepositoryPort.deleteById(id);</span>
+<span class="nc" id="L32">    }</span>
+} 
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

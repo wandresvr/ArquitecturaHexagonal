@@ -1,5 +1,14 @@
 package com.itm.edu.stock.application;
 
+import com.itm.edu.stock.application.ports.input.RecipeUseCase;
+import com.itm.edu.stock.application.ports.output.RecipeRepository;
+import com.itm.edu.stock.domain.entities.Recipe;
+import com.itm.edu.stock.domain.entities.Ingredient;
+import com.itm.edu.stock.infrastructure.api.dto.CreateRecipeRequestDto;
+import com.itm.edu.stock.infrastructure.api.dto.RecipeResponseDto;
+import com.itm.edu.stock.infrastructure.api.mapper.RecipeMapper;
+import com.itm.edu.stock.application.services.RecipeService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -8,94 +17,86 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
-import java.util.Optional;
+import java.util.List;
 import java.util.UUID;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 import static org.junit.jupiter.api.Assertions.*;
-
-import com.itm.edu.stock.application.services.CreateRecipeService;
-import com.itm.edu.stock.domain.entities.Ingredient;
-import com.itm.edu.stock.domain.entities.Recipe;
-import com.itm.edu.stock.domain.entities.RecipeIngredient;
-import com.itm.edu.stock.domain.repository.IngredientRepository;
-import com.itm.edu.stock.domain.repository.RecipeRepository;
-import com.itm.edu.stock.infrastructure.api.dto.CreateRecipeRequestDto;
-import com.itm.edu.stock.infrastructure.api.dto.CreateRecipeIngredientDto;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class CreateRecipeServiceTest {
 
     @Mock
-    private IngredientRepository ingredientRepository;
-
-    @Mock
     private RecipeRepository recipeRepository;
 
+    @Mock
+    private RecipeMapper recipeMapper;
+
     @InjectMocks
-    private CreateRecipeService createRecipeService;
+    private RecipeService recipeService;
 
-    @Test
-    void whenCreateRecipe_thenSuccess() {
-        // Given
-        UUID ingredientId = UUID.randomUUID();
-        CreateRecipeRequestDto requestDto = new CreateRecipeRequestDto();
-        requestDto.setRecipeName("Pizza");
-        
-        CreateRecipeIngredientDto ingredientDto = new CreateRecipeIngredientDto();
-        ingredientDto.setIngredientId(ingredientId);
-        ingredientDto.setQuantity(new BigDecimal("500"));
-        ingredientDto.setUnit("g");
-        requestDto.setIngredients(Arrays.asList(ingredientDto));
+    private CreateRecipeRequestDto requestDto;
+    private Recipe recipe;
+    private Recipe savedRecipe;
+    private RecipeResponseDto responseDto;
 
-        Ingredient ingredient = new Ingredient();
-        ingredient.setId(ingredientId);
-        ingredient.setName("Flour");
+    @BeforeEach
+    void setUp() {
+        // Setup test data
+        requestDto = new CreateRecipeRequestDto();
+        requestDto.setName("Test Recipe");
+        requestDto.setDescription("Test Description");
+        requestDto.setInstructions("Test Instructions");
+        requestDto.setPreparationTime(30);
+        requestDto.setDifficulty("Easy");
 
-        Recipe expectedRecipe = new Recipe();
-        expectedRecipe.setName("Pizza");
+        recipe = new Recipe();
+        recipe.setId(UUID.randomUUID());
+        recipe.setName(requestDto.getName());
+        recipe.setDescription(requestDto.getDescription());
+        recipe.setInstructions(requestDto.getInstructions());
+        recipe.setPreparationTime(requestDto.getPreparationTime());
+        recipe.setDifficulty(requestDto.getDifficulty());
 
-        when(ingredientRepository.findById(ingredientId)).thenReturn(Optional.of(ingredient));
-        when(recipeRepository.save(any(Recipe.class))).thenAnswer(invocation -> {
-            Recipe savedRecipe = invocation.getArgument(0);
-            savedRecipe.setId(UUID.randomUUID());
-            return savedRecipe;
-        });
+        // Inicializar lista de ingredientes para evitar NullPointerException
+        recipe.setIngredients(new java.util.ArrayList<>());
+        savedRecipe = new Recipe();
+        savedRecipe.setId(recipe.getId());
+        savedRecipe.setName(recipe.getName());
+        savedRecipe.setDescription(recipe.getDescription());
+        savedRecipe.setInstructions(recipe.getInstructions());
+        savedRecipe.setPreparationTime(recipe.getPreparationTime());
+        savedRecipe.setDifficulty(recipe.getDifficulty());
+        savedRecipe.setIngredients(new java.util.ArrayList<>());
 
-        // When
-        Recipe result = createRecipeService.createRecipe(requestDto);
-
-        // Then
-        assertNotNull(result);
-        assertNotNull(result.getId());
-        assertEquals(expectedRecipe.getName(), result.getName());
-        assertEquals(1, result.getIngredients().size());
-        
-        RecipeIngredient recipeIngredient = result.getIngredients().get(0);
-        assertEquals(ingredientId, recipeIngredient.getIngredient().getId());
-        assertEquals(new BigDecimal("500"), recipeIngredient.getQuantity().getValue());
-        assertEquals("g", recipeIngredient.getUnit().getValue());
+        responseDto = new RecipeResponseDto();
+        responseDto.setId(savedRecipe.getId());
+        responseDto.setName(savedRecipe.getName());
+        responseDto.setDescription(savedRecipe.getDescription());
+        responseDto.setInstructions(savedRecipe.getInstructions());
+        responseDto.setPreparationTime(savedRecipe.getPreparationTime());
+        responseDto.setDifficulty(savedRecipe.getDifficulty());
     }
 
     @Test
-    void whenCreateRecipeWithNonExistentIngredient_thenThrowException() {
-        // Given
-        UUID ingredientId = UUID.randomUUID();
-        CreateRecipeRequestDto requestDto = new CreateRecipeRequestDto();
-        requestDto.setRecipeName("Pizza");
-        
-        CreateRecipeIngredientDto ingredientDto = new CreateRecipeIngredientDto();
-        ingredientDto.setIngredientId(ingredientId);
-        ingredientDto.setQuantity(new BigDecimal("500"));
-        ingredientDto.setUnit("g");
-        requestDto.setIngredients(Arrays.asList(ingredientDto));
+    void testCreateRecipe() {
+        // Arrange
+        when(recipeMapper.toEntity(any(CreateRecipeRequestDto.class))).thenReturn(recipe);
+        when(recipeRepository.save(any())).thenReturn(savedRecipe);
+        when(recipeMapper.toDto(any())).thenReturn(responseDto);
 
-        when(ingredientRepository.findById(ingredientId)).thenReturn(Optional.empty());
+        // Act
+        RecipeResponseDto result = recipeService.createRecipe(requestDto);
 
-        // When & Then
-        assertThrows(RuntimeException.class, () -> {
-            createRecipeService.createRecipe(requestDto);
-        });
+        // Assert
+        assertNotNull(result);
+        assertEquals(responseDto.getId(), result.getId());
+        assertEquals(responseDto.getName(), result.getName());
+        assertEquals(responseDto.getDescription(), result.getDescription());
+        assertEquals(responseDto.getInstructions(), result.getInstructions());
+        assertEquals(responseDto.getPreparationTime(), result.getPreparationTime());
+        assertEquals(responseDto.getDifficulty(), result.getDifficulty());
+        verify(recipeRepository).save(any());
     }
 }

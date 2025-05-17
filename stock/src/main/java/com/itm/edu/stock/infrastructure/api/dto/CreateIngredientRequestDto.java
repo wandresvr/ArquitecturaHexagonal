@@ -1,16 +1,12 @@
 package com.itm.edu.stock.infrastructure.api.dto;
 
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 import java.math.BigDecimal;
-import com.itm.edu.stock.domain.valueobjects.Quantity;
-import com.itm.edu.stock.domain.valueobjects.Unit;
 
-@Getter
-@Setter
+@Data
 public class CreateIngredientRequestDto {
     @NotBlank(message = "El nombre es requerido")
     private String name;
@@ -18,9 +14,16 @@ public class CreateIngredientRequestDto {
     private String description;
     
     @NotNull(message = "La cantidad es requerida")
-    @Positive(message = "La cantidad debe ser positiva")
+    @Min(value = 0, message = "La cantidad debe ser mayor o igual a 0")
     private BigDecimal quantity;
     
     @NotBlank(message = "La unidad es requerida")
     private String unit;
+    
+    @NotNull(message = "El precio es requerido")
+    @Min(value = 0, message = "El precio debe ser mayor o igual a 0")
+    private BigDecimal price;
+    
+    @NotBlank(message = "El proveedor es requerido")
+    private String supplier;
 } 

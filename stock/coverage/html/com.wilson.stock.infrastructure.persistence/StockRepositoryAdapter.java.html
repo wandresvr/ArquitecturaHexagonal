@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StockRepositoryAdapter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">stock</a> &gt; <a href="index.source.html" class="el_package">com.wilson.stock.infrastructure.persistence</a> &gt; <span class="el_source">StockRepositoryAdapter.java</span></div><h1>StockRepositoryAdapter.java</h1><pre class="source lang-java linenums">package com.wilson.stock.infrastructure.persistence;
+
+import com.wilson.stock.application.ports.output.StockRepository;
+import com.wilson.stock.domain.model.Stock;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+@Repository
+<span class="nc" id="L13">@RequiredArgsConstructor</span>
+public class StockRepositoryAdapter implements StockRepository {
+
+    private final SpringDataStockRepository stockRepository;
+
+    @Override
+    public Stock save(Stock stock) {
+<span class="nc" id="L20">        StockJpaRepository stockEntity = mapToEntity(stock);</span>
+<span class="nc" id="L21">        return mapToDomain(stockRepository.save(stockEntity));</span>
+    }
+
+    @Override
+    public Optional&lt;Stock&gt; findById(Long id) {
+<span class="nc" id="L26">        return stockRepository.findById(id).map(this::mapToDomain);</span>
+    }
+
+    @Override
+    public List&lt;Stock&gt; findAll() {
+<span class="nc" id="L31">        return stockRepository.findAll().stream()</span>
+<span class="nc" id="L32">                .map(this::mapToDomain)</span>
+<span class="nc" id="L33">                .collect(Collectors.toList());</span>
+    }
+
+    @Override
+    public void deleteById(Long id) {
+<span class="nc" id="L38">        stockRepository.deleteById(id);</span>
+<span class="nc" id="L39">    }</span>
+
+    @Override
+    public Optional&lt;Stock&gt; findByProductId(String productId) {
+<span class="nc" id="L43">        return stockRepository.findByProductId(productId).map(this::mapToDomain);</span>
+    }
+
+    private StockJpaRepository mapToEntity(Stock stock) {
+<span class="nc" id="L47">        return new StockJpaRepository(</span>
+<span class="nc" id="L48">            stock.getId(),</span>
+<span class="nc" id="L49">            stock.getProductId(),</span>
+<span class="nc" id="L50">            stock.getQuantity(),</span>
+<span class="nc" id="L51">            stock.getPrice(),</span>
+<span class="nc" id="L52">            stock.getLocation()</span>
+        );
+    }
+
+    private Stock mapToDomain(StockJpaRepository entity) {
+<span class="nc" id="L57">        return new Stock(</span>
+<span class="nc" id="L58">            entity.getId(),</span>
+<span class="nc" id="L59">            entity.getProductId(),</span>
+<span class="nc" id="L60">            entity.getQuantity(),</span>
+<span class="nc" id="L61">            entity.getPrice(),</span>
+<span class="nc" id="L62">            entity.getLocation()</span>
+        );
+    }
+} 
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StockEventListenerService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">order</a> &gt; <a href="index.source.html" class="el_package">com.itm.edu.order.infrastructure.messaging</a> &gt; <span class="el_source">StockEventListenerService.java</span></div><h1>StockEventListenerService.java</h1><pre class="source lang-java linenums">package com.itm.edu.order.infrastructure.messaging;
+
+import com.itm.edu.order.application.dto.events.StockUpdateResponseEvent;
+import com.itm.edu.order.application.dto.events.StockValidationStatus;
+import com.itm.edu.order.domain.model.Order;
+import com.itm.edu.order.domain.repository.OrderRepository;
+import com.itm.edu.order.infrastructure.config.RabbitMQConfig;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+<span class="nc" id="L14">@Slf4j</span>
+@Service
+<span class="nc" id="L16">@RequiredArgsConstructor</span>
+public class StockEventListenerService {
+
+    private final OrderRepository orderRepository;
+
+    @RabbitListener(queues = RabbitMQConfig.STOCK_RESPONSE_QUEUE)
+    @Transactional
+    public void handleStockUpdateResponse(StockUpdateResponseEvent event) {
+<span class="nc" id="L24">        log.info(&quot;Received stock update response event: {}&quot;, event);</span>
+
+<span class="nc bnc" id="L26" title="All 6 branches missed.">        if (event == null || event.getOrderId() == null || event.getStatus() == null) {</span>
+<span class="nc" id="L27">            log.error(&quot;Received invalid stock update event.&quot;);</span>
+            // Considerar enviar a una dead-letter queue
+<span class="nc" id="L29">            return;</span>
+        }
+
+<span class="nc" id="L32">        orderRepository.findById(event.getOrderId()).ifPresentOrElse(order -&gt; {</span>
+            // Solo actualizamos si la orden está esperando validación
+<span class="nc bnc" id="L34" title="All 2 branches missed.">            if (&quot;PENDING_VALIDATION&quot;.equals(order.getOrderStatus())) {</span>
+<span class="nc bnc" id="L35" title="All 2 branches missed.">                String newStatus = event.getStatus() == StockValidationStatus.RESERVED</span>
+<span class="nc" id="L36">                        ? &quot;APPROVED&quot; // O tal vez &quot;AWAITING_PAYMENT&quot;, &quot;PROCESSING&quot; etc.</span>
+<span class="nc" id="L37">                        : &quot;CANCELLED_NO_STOCK&quot;;</span>
+
+<span class="nc" id="L39">                log.info(&quot;Updating order {} status from {} to {}&quot;, order.getOrderId(), order.getOrderStatus(), newStatus);</span>
+<span class="nc" id="L40">                order.setOrderStatus(newStatus);</span>
+<span class="nc" id="L41">                orderRepository.save(order);</span>
+<span class="nc" id="L42">                log.info(&quot;Order {} status updated successfully.&quot;, order.getOrderId());</span>
+<span class="nc" id="L43">            } else {</span>
+<span class="nc" id="L44">                log.warn(&quot;Received stock update for order {} which is not in PENDING_VALIDATION state (current state: {}). Ignoring event.&quot;,</span>
+<span class="nc" id="L45">                        order.getOrderId(), order.getOrderStatus());</span>
+            }
+<span class="nc" id="L47">        }, () -&gt; {</span>
+<span class="nc" id="L48">            log.error(&quot;Received stock update for non-existent order ID: {}&quot;, event.getOrderId());</span>
+            // No se puede hacer mucho aquí, la orden no existe
+<span class="nc" id="L50">        });</span>
+<span class="nc" id="L51">    }</span>
+} 
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

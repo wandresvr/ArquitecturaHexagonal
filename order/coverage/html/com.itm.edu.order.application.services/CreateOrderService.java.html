@@ -18,11 +18,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 @Service
-<span class="nc" id="L25">@RequiredArgsConstructor</span>
+<span class="nc" id="L26">@RequiredArgsConstructor</span>
 public class CreateOrderService implements CreateOrderUseCase {
 
     private final ProductRepository productRepository;
@@ -36,46 +37,48 @@ public class CreateOrderService implements CreateOrderUseCase {
                              Map&lt;UUID, BigDecimal&gt; productQuantities,
                              AddressShipping shippingAddress) {
         // 1) Save client first
-<span class="nc" id="L39">        Client savedClient = clientRepository.save(client);</span>
+<span class="nc" id="L40">        Client savedClient = clientRepository.save(client);</span>
         
-        // 2) Build and save entity
-<span class="nc" id="L42">        Order order = Order.builder()</span>
-<span class="nc" id="L43">            .orderId(UUID.randomUUID())</span>
-<span class="nc" id="L44">            .orderDate(LocalDateTime.now())</span>
-<span class="nc" id="L45">            .client(savedClient)</span>
-<span class="nc" id="L46">            .deliveryAddress(shippingAddress)</span>
-<span class="nc" id="L47">            .build();</span>
+        // 2) Build entity with initial state
+<span class="nc" id="L43">        Order order = Order.builder()</span>
+<span class="nc" id="L44">            .orderId(UUID.randomUUID())</span>
+<span class="nc" id="L45">            .orderDate(LocalDateTime.now())</span>
+<span class="nc" id="L46">            .client(savedClient)</span>
+<span class="nc" id="L47">            .deliveryAddress(shippingAddress)</span>
+<span class="nc" id="L48">            .orderStatus(&quot;PENDING_VALIDATION&quot;) // Estado inicial</span>
+<span class="nc" id="L49">            .build();</span>
 
-<span class="nc" id="L49">        productQuantities.forEach((pid, qty) -&gt; {</span>
-<span class="nc" id="L50">            Product product = productRepository.findById(pid)</span>
-<span class="nc" id="L51">                .orElseThrow(() -&gt; new RuntimeException(&quot;Product not found: &quot; + pid));</span>
-<span class="nc" id="L52">            order.addProduct(product, qty);</span>
-<span class="nc" id="L53">        });</span>
+<span class="nc" id="L51">        productQuantities.forEach((pid, qty) -&gt; {</span>
+<span class="nc" id="L52">            Product product = productRepository.findById(pid)</span>
+<span class="nc" id="L53">                .orElseThrow(() -&gt; new RuntimeException(&quot;Product not found: &quot; + pid));</span>
+<span class="nc" id="L54">            order.addProduct(product, qty);</span>
+<span class="nc" id="L55">        });</span>
 
-<span class="nc" id="L55">        Order saved = orderRepository.save(order);</span>
+        // 3) Save the order locally
+<span class="nc" id="L58">        Order savedOrder = orderRepository.save(order);</span>
 
-        // 3) Map to DTO
-<span class="nc" id="L58">        OrderMessageDTO dto = OrderMessageDTO.builder()</span>
-<span class="nc" id="L59">            .orderId(saved.getOrderId())</span>
-<span class="nc" id="L60">            .products(saved.getProducts().stream()</span>
-<span class="nc" id="L61">                .&lt;ProductOrderDTO&gt;map(line -&gt; ProductOrderDTO.builder()</span>
-<span class="nc" id="L62">                    .productId(line.getProduct().getId())</span>
-<span class="nc" id="L63">                    .quantity(line.getQuantity().intValue())</span>
-<span class="nc" id="L64">                    .build())</span>
-<span class="nc" id="L65">                .toList())</span>
-<span class="nc" id="L66">            .build();</span>
+        // 4) Prepare and publish the OrderMessageDTO event
+<span class="nc" id="L61">        OrderMessageDTO eventDto = OrderMessageDTO.builder()</span>
+<span class="nc" id="L62">                .orderId(savedOrder.getOrderId())</span>
+<span class="nc" id="L63">                .products(savedOrder.getProducts().stream()</span>
+<span class="nc" id="L64">                        .map(item -&gt; ProductOrderDTO.builder() // Usar ProductOrderDTO del common dto</span>
+<span class="nc" id="L65">                                .productId(item.getProduct().getId())</span>
+<span class="nc" id="L66">                                .quantity(item.getQuantity().intValue()) // Asegurarse que common DTO usa int</span>
+<span class="nc" id="L67">                                .build())</span>
+<span class="nc" id="L68">                        .toList())</span>
+<span class="nc" id="L69">                .build();</span>
 
-        // Verificar el tipo de convertidor y el mensaje
-<span class="nc" id="L69">        System.out.println(&quot;Tipo de MessageConverter: &quot; + rabbitTemplate.getMessageConverter().getClass().getName());</span>
-<span class="nc" id="L70">        System.out.println(&quot;Mensaje a enviar: &quot; + dto);</span>
-        
-<span class="nc" id="L72">        rabbitTemplate.convertAndSend(</span>
-            RabbitMQConfig.ORDER_EXCHANGE,
-            RabbitMQConfig.ORDER_ROUTING_KEY,
-            dto
-        );
+        try {
+<span class="nc" id="L72">            System.out.println(&quot;Publishing OrderMessageDTO to exchange: &quot; + RabbitMQConfig.ORDER_EXCHANGE + &quot;, key: &quot; + RabbitMQConfig.ORDER_ROUTING_KEY + &quot;, event: &quot; + eventDto);</span>
+<span class="nc" id="L73">            rabbitTemplate.convertAndSend(RabbitMQConfig.ORDER_EXCHANGE, RabbitMQConfig.ORDER_ROUTING_KEY, eventDto);</span>
+<span class="nc" id="L74">            System.out.println(&quot;Event published successfully.&quot;);</span>
+<span class="nc" id="L75">        } catch (Exception e) {</span>
+<span class="nc" id="L76">            System.err.println(&quot;ERROR publishing OrderMessageDTO: &quot; + e.getMessage());</span>
+            // Considerar manejo de error/compensación
+            // throw new RuntimeException(&quot;Failed to publish order creation event&quot;, e);
+<span class="nc" id="L79">        }</span>
 
-<span class="nc" id="L78">        return saved;</span>
+<span class="nc" id="L81">        return savedOrder;   </span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

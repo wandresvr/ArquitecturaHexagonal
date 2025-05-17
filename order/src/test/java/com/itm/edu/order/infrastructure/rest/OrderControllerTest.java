@@ -92,22 +92,24 @@ class OrderControllerTest {
                 .thenReturn(expectedOrder);
 
         // Act
-        ResponseEntity<Order> response = orderController.createOrder(request);
+        ResponseEntity<?> response = orderController.createOrder(request);
 
         // Assert
         assertNotNull(response);
         assertEquals(200, response.getStatusCode().value());
         assertNotNull(response.getBody());
-        assertEquals(expectedOrder.getOrderId(), response.getBody().getOrderId());
-        assertEquals(expectedOrder.getOrderStatus(), response.getBody().getOrderStatus());
-        assertEquals(expectedClient.getName(), response.getBody().getClient().getName());
-        assertEquals(expectedClient.getEmail(), response.getBody().getClient().getEmail());
-        assertEquals(expectedClient.getPhone(), response.getBody().getClient().getPhone());
-        assertEquals(expectedAddress.getStreet(), response.getBody().getDeliveryAddress().getStreet());
-        assertEquals(expectedAddress.getCity(), response.getBody().getDeliveryAddress().getCity());
-        assertEquals(expectedAddress.getState(), response.getBody().getDeliveryAddress().getState());
-        assertEquals(expectedAddress.getZipCode(), response.getBody().getDeliveryAddress().getZipCode());
-        assertEquals(expectedAddress.getCountry(), response.getBody().getDeliveryAddress().getCountry());
+        assertTrue(response.getBody() instanceof Order);
+        Order order = (Order) response.getBody();
+        assertEquals(expectedOrder.getOrderId(), order.getOrderId());
+        assertEquals(expectedOrder.getOrderStatus(), order.getOrderStatus());
+        assertEquals(expectedClient.getName(), order.getClient().getName());
+        assertEquals(expectedClient.getEmail(), order.getClient().getEmail());
+        assertEquals(expectedClient.getPhone(), order.getClient().getPhone());
+        assertEquals(expectedAddress.getStreet(), order.getDeliveryAddress().getStreet());
+        assertEquals(expectedAddress.getCity(), order.getDeliveryAddress().getCity());
+        assertEquals(expectedAddress.getState(), order.getDeliveryAddress().getState());
+        assertEquals(expectedAddress.getZipCode(), order.getDeliveryAddress().getZipCode());
+        assertEquals(expectedAddress.getCountry(), order.getDeliveryAddress().getCountry());
     }
 
     @Test
@@ -168,22 +170,24 @@ class OrderControllerTest {
                 .thenReturn(expectedOrder);
 
         // Act
-        ResponseEntity<Order> response = orderController.createOrder(request);
+        ResponseEntity<?> response = orderController.createOrder(request);
 
         // Assert
         assertNotNull(response);
         assertEquals(200, response.getStatusCode().value());
         assertNotNull(response.getBody());
-        assertEquals(expectedOrder.getOrderId(), response.getBody().getOrderId());
-        assertEquals(expectedOrder.getOrderStatus(), response.getBody().getOrderStatus());
-        assertEquals(expectedClient.getName(), response.getBody().getClient().getName());
-        assertEquals(expectedClient.getEmail(), response.getBody().getClient().getEmail());
-        assertEquals(expectedClient.getPhone(), response.getBody().getClient().getPhone());
-        assertEquals(expectedAddress.getStreet(), response.getBody().getDeliveryAddress().getStreet());
-        assertEquals(expectedAddress.getCity(), response.getBody().getDeliveryAddress().getCity());
-        assertEquals(expectedAddress.getState(), response.getBody().getDeliveryAddress().getState());
-        assertEquals(expectedAddress.getZipCode(), response.getBody().getDeliveryAddress().getZipCode());
-        assertEquals(expectedAddress.getCountry(), response.getBody().getDeliveryAddress().getCountry());
+        assertTrue(response.getBody() instanceof Order);
+        Order order = (Order) response.getBody();
+        assertEquals(expectedOrder.getOrderId(), order.getOrderId());
+        assertEquals(expectedOrder.getOrderStatus(), order.getOrderStatus());
+        assertEquals(expectedClient.getName(), order.getClient().getName());
+        assertEquals(expectedClient.getEmail(), order.getClient().getEmail());
+        assertEquals(expectedClient.getPhone(), order.getClient().getPhone());
+        assertEquals(expectedAddress.getStreet(), order.getDeliveryAddress().getStreet());
+        assertEquals(expectedAddress.getCity(), order.getDeliveryAddress().getCity());
+        assertEquals(expectedAddress.getState(), order.getDeliveryAddress().getState());
+        assertEquals(expectedAddress.getZipCode(), order.getDeliveryAddress().getZipCode());
+        assertEquals(expectedAddress.getCountry(), order.getDeliveryAddress().getCountry());
     }
 
     @Test

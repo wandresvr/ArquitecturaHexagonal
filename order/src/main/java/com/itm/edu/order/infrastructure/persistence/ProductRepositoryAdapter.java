@@ -38,4 +38,12 @@ public class ProductRepositoryAdapter implements ProductRepositoryPort {
         return entityManager.createQuery("SELECT p FROM Product p", Product.class)
                 .getResultList();
     }
+
+    @Override
+    public void deleteById(UUID id) {
+        Product product = entityManager.find(Product.class, id);
+        if (product != null) {
+            entityManager.remove(product);
+        }
+    }
 } 
