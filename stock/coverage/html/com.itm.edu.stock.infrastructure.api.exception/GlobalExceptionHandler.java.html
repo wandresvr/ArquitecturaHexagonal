@@ -14,18 +14,18 @@ import java.util.Map;
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity&lt;Map&lt;String, String&gt;&gt; handleRuntimeException(RuntimeException ex) {
-<span class="fc" id="L17">        Map&lt;String, String&gt; response = new HashMap&lt;&gt;();</span>
-<span class="fc" id="L18">        response.put(&quot;error&quot;, ex.getMessage());</span>
-<span class="fc" id="L19">        return new ResponseEntity&lt;&gt;(response, HttpStatus.BAD_REQUEST);</span>
+<span class="nc" id="L17">        Map&lt;String, String&gt; response = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L18">        response.put(&quot;error&quot;, ex.getMessage());</span>
+<span class="nc" id="L19">        return new ResponseEntity&lt;&gt;(response, HttpStatus.BAD_REQUEST);</span>
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity&lt;Map&lt;String, String&gt;&gt; handleValidationExceptions(MethodArgumentNotValidException ex) {
-<span class="fc" id="L24">        Map&lt;String, String&gt; errors = new HashMap&lt;&gt;();</span>
-<span class="fc" id="L25">        ex.getBindingResult().getFieldErrors().forEach(error -&gt; </span>
-<span class="fc" id="L26">            errors.put(error.getField(), error.getDefaultMessage())</span>
+<span class="nc" id="L24">        Map&lt;String, String&gt; errors = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L25">        ex.getBindingResult().getFieldErrors().forEach(error -&gt; </span>
+<span class="nc" id="L26">            errors.put(error.getField(), error.getDefaultMessage())</span>
         );
-<span class="fc" id="L28">        return new ResponseEntity&lt;&gt;(errors, HttpStatus.BAD_REQUEST);</span>
+<span class="nc" id="L28">        return new ResponseEntity&lt;&gt;(errors, HttpStatus.BAD_REQUEST);</span>
     }
 } 
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

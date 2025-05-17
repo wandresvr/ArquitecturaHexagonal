@@ -1,41 +1,29 @@
 package com.itm.edu.stock.infrastructure.api.dto;
 
-import lombok.Getter;
-import lombok.Setter;
-import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.NotNull;
+import lombok.Data;
 import java.util.List;
 
-@Getter
-@Setter
+@Data
 public class CreateRecipeRequestDto {
-    @NotBlank(message = "El nombre de la receta es requerido")
-    @Size(min = 3, max = 100, message = "El nombre debe tener entre 3 y 100 caracteres")
-    private String recipeName;
-
+    @NotBlank(message = "El nombre es requerido")
+    private String name;
+    
     private String description;
-
-    @NotEmpty(message = "La receta debe tener al menos un ingrediente")
-    @Size(min = 1, max = 20, message = "La receta debe tener entre 1 y 20 ingredientes")
-    @Valid
+    
+    @NotBlank(message = "Las instrucciones son requeridas")
+    private String instructions;
+    
+    @NotNull(message = "El tiempo de preparación es requerido")
+    @Min(value = 1, message = "El tiempo de preparación debe ser mayor a 0")
+    private Integer preparationTime;
+    
+    @NotBlank(message = "La dificultad es requerida")
+    private String difficulty;
+    
+    @NotEmpty(message = "La lista de ingredientes no puede estar vacía")
     private List<CreateRecipeIngredientDto> ingredients;
-
-    // Getters y Setters
-    public String getRecipeName() {
-        return recipeName;
-    }
-
-    public void setRecipeName(String recipeName) {
-        this.recipeName = recipeName;
-    }
-
-    public List<CreateRecipeIngredientDto> getIngredients() {
-        return ingredients;
-    }
-
-    public void setIngredients(List<CreateRecipeIngredientDto> ingredients) {
-        this.ingredients = ingredients;
-    }
 } 

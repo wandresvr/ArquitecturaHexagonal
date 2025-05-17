@@ -7,16 +7,19 @@ import com.itm.edu.stock.domain.entities.Ingredient;
 import com.itm.edu.stock.domain.entities.Recipe;
 import com.itm.edu.stock.domain.exception.BusinessException;
 import com.itm.edu.stock.domain.repository.IngredientRepository;
-import com.itm.edu.stock.domain.repository.RecipeRepository;
-import com.itm.edu.stock.domain.valueobjects.Quantity;
+import com.itm.edu.stock.application.ports.output.RecipeRepository;
+import com.itm.edu.stock.infrastructure.api.dto.OrderLineDto;
+import com.itm.edu.stock.infrastructure.api.dto.ProcessOrderRequestDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.UUID;
 
 @Service
-<span class="fc" id="L19">@RequiredArgsConstructor</span>
+<span class="fc" id="L22">@RequiredArgsConstructor</span>
 public class ProcessOrderService implements ProcessOrderUseCase {
 
     private final RecipeRepository recipeRepository;
@@ -25,29 +28,63 @@ public class ProcessOrderService implements ProcessOrderUseCase {
     @Override
     @Transactional
     public void processOrder(OrderMessageDTO orderMessage) {
-<span class="nc bnc" id="L28" title="All 2 branches missed.">        for (ProductOrderDTO line : orderMessage.getProducts()) {</span>
-<span class="nc" id="L29">            Recipe recipe = recipeRepository</span>
-<span class="nc" id="L30">                .findByProductId(line.getProductId())</span>
-<span class="nc" id="L31">                .orElseThrow(() -&gt;</span>
-<span class="nc" id="L32">                    new BusinessException(&quot;Receta no encontrada para producto &quot; + line.getProductId()));</span>
+<span class="nc bnc" id="L31" title="All 2 branches missed.">        for (ProductOrderDTO line : orderMessage.getProducts()) {</span>
+<span class="nc" id="L32">            Recipe recipe = recipeRepository</span>
+<span class="nc" id="L33">                .findById(line.getProductId())</span>
+<span class="nc" id="L34">                .orElseThrow(() -&gt;</span>
+<span class="nc" id="L35">                    new BusinessException(&quot;Receta no encontrada para producto &quot; + line.getProductId()));</span>
 
-<span class="nc" id="L34">            recipe.getIngredients().forEach(req -&gt; {</span>
-<span class="nc" id="L35">                Ingredient ing = ingredientRepository</span>
-<span class="nc" id="L36">                    .findById(req.getIngredient().getId())</span>
-<span class="nc" id="L37">                    .orElseThrow(() -&gt;</span>
-<span class="nc" id="L38">                        new BusinessException(&quot;Ingrediente no encontrado: &quot; + req.getIngredient().getId()));</span>
+<span class="nc" id="L37">            recipe.getIngredients().forEach(req -&gt; {</span>
+<span class="nc" id="L38">                Ingredient ing = ingredientRepository</span>
+<span class="nc" id="L39">                    .findById(req.getId())</span>
+<span class="nc" id="L40">                    .orElseThrow(() -&gt;</span>
+<span class="nc" id="L41">                        new BusinessException(&quot;Ingrediente no encontrado: &quot; + req.getId()));</span>
 
-<span class="nc" id="L40">                BigDecimal needed = req.getQuantity().getValue()</span>
-<span class="nc" id="L41">                    .multiply(BigDecimal.valueOf(line.getQuantity()));</span>
+<span class="nc" id="L43">                BigDecimal needed = req.getQuantity()</span>
+<span class="nc" id="L44">                    .multiply(BigDecimal.valueOf(line.getQuantity()));</span>
 
-<span class="nc bnc" id="L43" title="All 2 branches missed.">                if (ing.getQuantity().getValue().compareTo(needed) &lt; 0) {</span>
-<span class="nc" id="L44">                    throw new BusinessException(&quot;Stock insuficiente de &quot; + ing.getName());</span>
+<span class="nc bnc" id="L46" title="All 2 branches missed.">                if (ing.getQuantity().compareTo(needed) &lt; 0) {</span>
+<span class="nc" id="L47">                    throw new BusinessException(&quot;Stock insuficiente de &quot; + ing.getName());</span>
                 }
 
-<span class="nc" id="L47">                ing.setQuantity(new Quantity(ing.getQuantity().getValue().subtract(needed)));</span>
-<span class="nc" id="L48">                ingredientRepository.save(ing);</span>
-<span class="nc" id="L49">            });</span>
-<span class="nc" id="L50">        }</span>
-<span class="nc" id="L51">    }</span>
+<span class="nc" id="L50">                ing.setQuantity(ing.getQuantity().subtract(needed));</span>
+<span class="nc" id="L51">                ingredientRepository.save(ing);</span>
+<span class="nc" id="L52">            });</span>
+<span class="nc" id="L53">        }</span>
+<span class="nc" id="L54">    }</span>
+
+    @Transactional
+    public void processOrder(List&lt;Ingredient&gt; ingredients) {
+<span class="nc bnc" id="L58" title="All 2 branches missed.">        for (Ingredient req : ingredients) {</span>
+<span class="nc" id="L59">            Ingredient ing = ingredientRepository.findById(req.getId())</span>
+<span class="nc" id="L60">                    .orElseThrow(() -&gt; </span>
+<span class="nc" id="L61">                        new BusinessException(&quot;Ingrediente no encontrado: &quot; + req.getId()));</span>
+
+<span class="nc" id="L63">            BigDecimal needed = req.getQuantity();</span>
+<span class="nc bnc" id="L64" title="All 2 branches missed.">            if (ing.getQuantity().compareTo(needed) &lt; 0) {</span>
+<span class="nc" id="L65">                throw new BusinessException(&quot;Stock insuficiente para el ingrediente: &quot; + ing.getName());</span>
+            }
+
+<span class="nc" id="L68">            ing.setQuantity(ing.getQuantity().subtract(needed));</span>
+<span class="nc" id="L69">            ingredientRepository.save(ing);</span>
+<span class="nc" id="L70">        }</span>
+<span class="nc" id="L71">    }</span>
+
+    @Transactional
+    public void processOrder(ProcessOrderRequestDto request) {
+<span class="nc bnc" id="L75" title="All 2 branches missed.">        for (OrderLineDto line : request.getLines()) {</span>
+<span class="nc" id="L76">            Recipe recipe = recipeRepository.findById(line.getProductId())</span>
+<span class="nc" id="L77">                .orElseThrow(() -&gt; new RuntimeException(&quot;Receta no encontrada&quot;));</span>
+
+<span class="nc bnc" id="L79" title="All 2 branches missed.">            for (Ingredient ingredient : recipe.getIngredients()) {</span>
+<span class="nc" id="L80">                BigDecimal needed = ingredient.getQuantity().multiply(line.getQuantity());</span>
+<span class="nc bnc" id="L81" title="All 2 branches missed.">                if (ingredient.getQuantity().compareTo(needed) &lt; 0) {</span>
+<span class="nc" id="L82">                    throw new RuntimeException(&quot;No hay suficiente stock del ingrediente: &quot; + ingredient.getName());</span>
+                }
+<span class="nc" id="L84">                ingredient.setQuantity(ingredient.getQuantity().subtract(needed));</span>
+<span class="nc" id="L85">                ingredientRepository.save(ingredient);</span>
+<span class="nc" id="L86">            }</span>
+<span class="nc" id="L87">        }</span>
+<span class="nc" id="L88">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

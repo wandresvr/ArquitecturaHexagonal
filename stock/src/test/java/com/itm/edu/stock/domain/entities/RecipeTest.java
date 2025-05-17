@@ -13,59 +13,36 @@ import com.itm.edu.stock.domain.valueobjects.Unit;
 class RecipeTest {
 
     @Test
-    void whenCreateRecipe_thenSuccess() {
+    void testRecipeCreation() {
+        // Arrange
         UUID id = UUID.randomUUID();
-        UUID productId = UUID.randomUUID();
-        String name = "Pizza";
-        String description = "Homemade pizza";
+        String name = "Test Recipe";
+        String description = "Test Description";
+        String instructions = "Test Instructions";
+        Integer preparationTime = 30;
+        String difficulty = "Easy";
+        List<Ingredient> ingredients = new ArrayList<>();
+        BigDecimal cost = new BigDecimal("10.00");
 
+        // Act
         Recipe recipe = new Recipe();
         recipe.setId(id);
-        recipe.setProductId(productId);
         recipe.setName(name);
         recipe.setDescription(description);
+        recipe.setInstructions(instructions);
+        recipe.setPreparationTime(preparationTime);
+        recipe.setDifficulty(difficulty);
+        recipe.setIngredients(ingredients);
+        recipe.setCost(cost);
 
+        // Assert
         assertEquals(id, recipe.getId());
-        assertEquals(productId, recipe.getProductId());
         assertEquals(name, recipe.getName());
         assertEquals(description, recipe.getDescription());
-        assertTrue(recipe.getIngredients().isEmpty());
-    }
-
-    @Test
-    void whenAddIngredient_thenSuccess() {
-        Recipe recipe = new Recipe();
-        recipe.setId(UUID.randomUUID());
-        recipe.setProductId(UUID.randomUUID());
-        recipe.setName("Pizza");
-
-        Ingredient ingredient = new Ingredient();
-        ingredient.setId(UUID.randomUUID());
-        ingredient.setName("Flour");
-
-        recipe.addIngredient(ingredient, new BigDecimal("500"), "g");
-
-        assertEquals(1, recipe.getIngredients().size());
-        RecipeIngredient recipeIngredient = recipe.getIngredients().get(0);
-        assertEquals(ingredient.getId(), recipeIngredient.getIngredient().getId());
-        assertEquals(new BigDecimal("500"), recipeIngredient.getQuantity().getValue());
-        assertEquals("g", recipeIngredient.getUnit().getValue());
-    }
-
-    @Test
-    void whenCreateRecipeWithConstructor_thenSuccess() {
-        UUID id = UUID.randomUUID();
-        UUID productId = UUID.randomUUID();
-        String name = "Pizza";
-        String description = "Homemade pizza";
-        List<RecipeIngredient> ingredients = new ArrayList<>();
-
-        Recipe recipe = new Recipe(id, productId, name, description, ingredients);
-
-        assertEquals(id, recipe.getId());
-        assertEquals(productId, recipe.getProductId());
-        assertEquals(name, recipe.getName());
-        assertEquals(description, recipe.getDescription());
-        assertTrue(recipe.getIngredients().isEmpty());
+        assertEquals(instructions, recipe.getInstructions());
+        assertEquals(preparationTime, recipe.getPreparationTime());
+        assertEquals(difficulty, recipe.getDifficulty());
+        assertEquals(ingredients, recipe.getIngredients());
+        assertEquals(cost, recipe.getCost());
     }
 } 

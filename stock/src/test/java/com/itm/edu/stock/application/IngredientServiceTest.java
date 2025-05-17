@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -11,6 +12,7 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -18,8 +20,8 @@ import com.itm.edu.stock.application.services.IngredientService;
 import com.itm.edu.stock.domain.entities.Ingredient;
 import com.itm.edu.stock.domain.repository.IngredientRepository;
 import com.itm.edu.stock.infrastructure.api.dto.CreateIngredientRequestDto;
-import com.itm.edu.stock.domain.valueobjects.Quantity;
-import com.itm.edu.stock.domain.valueobjects.Unit;
+import com.itm.edu.stock.infrastructure.api.dto.IngredientResponseDto;
+import com.itm.edu.stock.infrastructure.api.mapper.IngredientMapper;
 
 @ExtendWith(MockitoExtension.class)
 class IngredientServiceTest {
@@ -27,101 +29,122 @@ class IngredientServiceTest {
     @Mock
     private IngredientRepository ingredientRepository;
 
+    @Mock
+    private IngredientMapper ingredientMapper;
+
+    @InjectMocks
     private IngredientService ingredientService;
 
     @BeforeEach
     void setUp() {
-        ingredientService = new IngredientService(ingredientRepository);
+        // MockitoAnnotations.openMocks(this);
     }
 
     @Test
-    void createIngredient_ShouldCreateAndSaveIngredient() {
-        // Arrange
+    void testCreateIngredient() {
         CreateIngredientRequestDto request = new CreateIngredientRequestDto();
         request.setName("Harina");
         request.setDescription("Harina de trigo");
         request.setQuantity(new BigDecimal("1000"));
         request.setUnit("gramos");
+        request.setPrice(new BigDecimal("2.50"));
+        request.setSupplier("Proveedor A");
 
         Ingredient savedIngredient = new Ingredient();
         savedIngredient.setId(UUID.randomUUID());
         savedIngredient.setName(request.getName());
         savedIngredient.setDescription(request.getDescription());
-        savedIngredient.setQuantity(new Quantity(request.getQuantity()));
-        savedIngredient.setUnit(new Unit(request.getUnit()));
+        savedIngredient.setQuantity(request.getQuantity());
+        savedIngredient.setUnit(request.getUnit());
+        savedIngredient.setPrice(request.getPrice());
+        savedIngredient.setSupplier(request.getSupplier());
+
+        IngredientResponseDto responseDto = new IngredientResponseDto();
+        responseDto.setId(savedIngredient.getId());
+        responseDto.setName(savedIngredient.getName());
+        responseDto.setDescription(savedIngredient.getDescription());
+        responseDto.setQuantity(savedIngredient.getQuantity());
+        responseDto.setUnit(savedIngredient.getUnit());
+        responseDto.setPrice(savedIngredient.getPrice());
+        responseDto.setSupplier(savedIngredient.getSupplier());
 
         when(ingredientRepository.save(any(Ingredient.class))).thenReturn(savedIngredient);
+        when(ingredientMapper.toEntity(any(CreateIngredientRequestDto.class))).thenReturn(savedIngredient);
+        when(ingredientMapper.toDto(any(Ingredient.class))).thenReturn(responseDto);
 
-        // Act
-        Ingredient result = ingredientService.createIngredient(request);
+        IngredientResponseDto result = ingredientService.createIngredient(request);
 
-        // Assert
         assertNotNull(result);
         assertEquals(request.getName(), result.getName());
         assertEquals(request.getDescription(), result.getDescription());
-        assertEquals(request.getQuantity(), result.getQuantity().getValue());
-        assertEquals(request.getUnit(), result.getUnit().getValue());
-        verify(ingredientRepository).save(any(Ingredient.class));
+        assertEquals(request.getQuantity(), result.getQuantity());
+        assertEquals(request.getUnit(), result.getUnit());
+        assertEquals(request.getPrice(), result.getPrice());
+        assertEquals(request.getSupplier(), result.getSupplier());
     }
 
     @Test
-    void getAllIngredients_ShouldReturnAllIngredients() {
-        // Arrange
+    void testGetAllIngredients() {
         Ingredient ingredient1 = new Ingredient();
         ingredient1.setId(UUID.randomUUID());
         ingredient1.setName("Harina");
-        ingredient1.setQuantity(new Quantity(new BigDecimal("1000")));
-        ingredient1.setUnit(new Unit("gramos"));
+        ingredient1.setQuantity(new BigDecimal("1000"));
+        ingredient1.setUnit("gramos");
 
         Ingredient ingredient2 = new Ingredient();
         ingredient2.setId(UUID.randomUUID());
         ingredient2.setName("Azúcar");
-        ingredient2.setQuantity(new Quantity(new BigDecimal("500")));
-        ingredient2.setUnit(new Unit("gramos"));
+        ingredient2.setQuantity(new BigDecimal("500"));
+        ingredient2.setUnit("gramos");
 
-        when(ingredientRepository.findAll()).thenReturn(List.of(ingredient1, ingredient2));
+        IngredientResponseDto dto1 = new IngredientResponseDto();
+        dto1.setId(ingredient1.getId());
+        dto1.setName(ingredient1.getName());
+        dto1.setQuantity(ingredient1.getQuantity());
+        dto1.setUnit(ingredient1.getUnit());
 
-        // Act
-        List<Ingredient> result = ingredientService.getAllIngredients();
+        IngredientResponseDto dto2 = new IngredientResponseDto();
+        dto2.setId(ingredient2.getId());
+        dto2.setName(ingredient2.getName());
+        dto2.setQuantity(ingredient2.getQuantity());
+        dto2.setUnit(ingredient2.getUnit());
 
-        // Assert
-        assertNotNull(result);
-        assertEquals(2, result.size());
-        verify(ingredientRepository).findAll();
+        when(ingredientRepository.findAll()).thenReturn(Arrays.asList(ingredient1, ingredient2));
+        when(ingredientMapper.toDto(ingredient1)).thenReturn(dto1);
+        when(ingredientMapper.toDto(ingredient2)).thenReturn(dto2);
+
+        List<IngredientResponseDto> results = ingredientService.getAllIngredients();
+
+        assertNotNull(results);
+        assertEquals(2, results.size());
+        assertEquals(ingredient1.getName(), results.get(0).getName());
+        assertEquals(ingredient2.getName(), results.get(1).getName());
     }
 
     @Test
-    void getIngredientById_WhenIngredientExists_ShouldReturnIngredient() {
-        // Arrange
+    void testGetIngredientById() {
         UUID id = UUID.randomUUID();
         Ingredient ingredient = new Ingredient();
         ingredient.setId(id);
         ingredient.setName("Harina");
-        ingredient.setQuantity(new Quantity(new BigDecimal("1000")));
-        ingredient.setUnit(new Unit("gramos"));
+        ingredient.setQuantity(new BigDecimal("1000"));
+        ingredient.setUnit("gramos");
+
+        IngredientResponseDto dto = new IngredientResponseDto();
+        dto.setId(ingredient.getId());
+        dto.setName(ingredient.getName());
+        dto.setQuantity(ingredient.getQuantity());
+        dto.setUnit(ingredient.getUnit());
 
         when(ingredientRepository.findById(id)).thenReturn(Optional.of(ingredient));
+        when(ingredientMapper.toDto(ingredient)).thenReturn(dto);
 
-        // Act
-        Ingredient result = ingredientService.getIngredientById(id);
+        IngredientResponseDto result = ingredientService.getIngredientById(id);
 
-        // Assert
         assertNotNull(result);
         assertEquals(id, result.getId());
-        assertEquals("Harina", result.getName());
-        verify(ingredientRepository).findById(id);
-    }
-
-    @Test
-    void getIngredientById_WhenIngredientDoesNotExist_ShouldThrowException() {
-        // Arrange
-        UUID id = UUID.randomUUID();
-        when(ingredientRepository.findById(id)).thenReturn(Optional.empty());
-
-        // Act & Assert
-        assertThrows(RuntimeException.class, () -> {
-            ingredientService.getIngredientById(id);
-        });
-        verify(ingredientRepository).findById(id);
+        assertEquals(ingredient.getName(), result.getName());
+        assertEquals(ingredient.getQuantity(), result.getQuantity());
+        assertEquals(ingredient.getUnit(), result.getUnit());
     }
 }

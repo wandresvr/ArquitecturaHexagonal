@@ -1,44 +1,39 @@
 package com.itm.edu.stock.domain.entities;
 
-import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import java.math.BigDecimal;
 import java.util.UUID;
+import jakarta.persistence.*;
+import org.hibernate.annotations.GenericGenerator;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import jakarta.persistence.Embedded;
-import jakarta.persistence.AttributeOverrides;
-import jakarta.persistence.AttributeOverride;
-import jakarta.persistence.Column;
-
-import com.itm.edu.stock.domain.valueobjects.Quantity;
-import com.itm.edu.stock.domain.valueobjects.Unit;
-
-@Entity
-@Table(name = "ingredients")
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Entity
+@Table(name = "ingredients")
 public class Ingredient {
     @Id
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     private UUID id;
+
+    @Column(nullable = false)
     private String name;
+
+    @Column(length = 1000)
     private String description;
-    
-    @Embedded
-    @AttributeOverrides({
-        @AttributeOverride(name = "value", column = @Column(name = "quantity_value"))
-    })
-    private Quantity quantity;
-    
-    @Embedded
-    @AttributeOverrides({
-        @AttributeOverride(name = "value", column = @Column(name = "unit_value"))
-    })
-    private Unit unit;
+
+    @Column(nullable = false)
+    private BigDecimal quantity;
+
+    @Column(nullable = false)
+    private String unit;
+
+    @Column(nullable = false)
+    private BigDecimal price;
+
+    @Column(nullable = false)
+    private String supplier;
 } 

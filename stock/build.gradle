@@ -20,7 +20,7 @@ configurations {
 }
 
 repositories {
-	maven { url 'https://jitpack.io' }
+	maven { url = uri("https://jitpack.io") }
 	mavenCentral()
 	mavenLocal() 
 }
@@ -46,6 +46,7 @@ dependencies {
 
 	// Dto para sincronizar microservicios
 	implementation 'com.github.wandresvr:ArquitecuraHexagonal:v1.0.0'
+
 }
 
 tasks.named('test') {

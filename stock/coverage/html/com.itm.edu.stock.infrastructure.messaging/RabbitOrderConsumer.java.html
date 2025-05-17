@@ -2,14 +2,18 @@
 
 import com.itm.edu.common.dto.OrderMessageDTO;
 import com.itm.edu.stock.application.ports.input.ProcessOrderUseCase;
+import com.itm.edu.stock.domain.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.stereotype.Component;
 
 import static com.itm.edu.stock.infrastructure.config.RabbitMQConfig.ORDER_QUEUE;
 
+<span class="fc" id="L14">@Slf4j</span>
 @Component
-<span class="fc" id="L12">@RequiredArgsConstructor</span>
+<span class="fc" id="L16">@RequiredArgsConstructor</span>
 public class RabbitOrderConsumer {
 
     private final ProcessOrderUseCase processOrderUseCase;
@@ -19,7 +23,17 @@ public class RabbitOrderConsumer {
       containerFactory = &quot;rabbitListenerContainerFactory&quot;
     )
     public void onOrderMessage(OrderMessageDTO msg) {
-<span class="nc" id="L22">        processOrderUseCase.processOrder(msg);</span>
-<span class="nc" id="L23">    }</span>
+        try {
+<span class="nc" id="L27">            processOrderUseCase.processOrder(msg);</span>
+<span class="nc" id="L28">            log.info(&quot;Orden procesada correctamente: {}&quot;, msg.getOrderId());</span>
+<span class="nc" id="L29">        } catch (BusinessException e) {</span>
+<span class="nc" id="L30">            log.error(&quot;Error de negocio procesando la orden {}: {}&quot;, msg.getOrderId(), e.getMessage());</span>
+            // Lanzar excepción que indica que no debe reintentar
+<span class="nc" id="L32">            throw new AmqpRejectAndDontRequeueException(&quot;Error de negocio: &quot; + e.getMessage(), e);</span>
+<span class="nc" id="L33">        } catch (Exception e) {</span>
+<span class="nc" id="L34">            log.error(&quot;Error inesperado procesando la orden {}: {}&quot;, msg.getOrderId(), e.getMessage(), e);</span>
+<span class="nc" id="L35">            throw new AmqpRejectAndDontRequeueException(&quot;Error inesperado: &quot; + e.getMessage(), e);</span>
+<span class="nc" id="L36">        }</span>
+<span class="nc" id="L37">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
