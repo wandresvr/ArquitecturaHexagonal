@@ -23,6 +23,16 @@ La librería proporciona DTOs comunes para la comunicación entre microservicios
 - `AddressShippingDTO`: Dirección de envío
 - `ProductOrderDTO`: Producto en una orden
 
+## Estructura del Proyecto
+
+```
+src/main/java/com/itm/edu/common/dto/
+├── OrderMessageDTO.java
+├── ClientDTO.java
+├── AddressShippingDTO.java
+└── ProductOrderDTO.java
+```
+
 ## Licencia
 
 Apache License 2.0 
