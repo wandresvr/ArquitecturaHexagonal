@@ -23,6 +23,7 @@ public class OpenApiConfig {
                         .contact(new Contact()
                                 .name("ITM")
                                 .email("wilson.vargas@itm.edu.co")
+                                .url("https://github.com/wilsonvargas"))
                         .license(new License()
                                 .name("Apache 2.0")
                                 .url("http://www.apache.org/licenses/LICENSE-2.0.html")))

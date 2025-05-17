@@ -28,29 +28,33 @@ repositories {
 }
 
 dependencies {
-	// Spring Boot
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	// Spring Boot Starters
+	implementation 'org.springframework.boot:spring-boot-starter'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	
+	// RabbitMQ
+	implementation 'org.springframework.boot:spring-boot-starter-amqp'
+	implementation 'org.springframework.amqp:spring-rabbit:3.1.1'
 	
 	// Database
 	implementation 'org.postgresql:postgresql:42.7.1'
 	
 	// Lombok
-	compileOnly 'org.projectlombok:lombok:1.18.30'
-	annotationProcessor 'org.projectlombok:lombok:1.18.30'
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+	
+	// Jackson para JSON
+	implementation 'com.fasterxml.jackson.core:jackson-databind'
 	
 	// Testing
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.amqp:spring-rabbit-test'
 	testImplementation 'org.projectlombok:lombok:1.18.30'
 	testAnnotationProcessor 'org.projectlombok:lombok:1.18.30'
 	testImplementation 'org.mockito:mockito-core:5.3.1'
 	testImplementation 'org.mockito:mockito-junit-jupiter:5.3.1'
-
-	// RabbitMQ
-	implementation 'org.springframework.boot:spring-boot-starter-amqp'
-	implementation 'org.springframework.amqp:spring-rabbit:3.1.1'
-	implementation 'com.fasterxml.jackson.core:jackson-databind'
 
 	// Dto para sincronizar microservicios
 	implementation 'com.github.wandresvr:ArquitecuraHexagonal:v1.0.0'

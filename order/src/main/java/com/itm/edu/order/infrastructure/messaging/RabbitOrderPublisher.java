@@ -2,13 +2,13 @@ package com.itm.edu.order.infrastructure.messaging;
 
 import com.itm.edu.common.dto.OrderMessageDTO;
 import com.itm.edu.order.application.ports.outputs.OrderPublisherPort;
+import com.itm.edu.order.infrastructure.config.RabbitMQConfig;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
 
-import static com.itm.edu.order.infrastructure.config.RabbitMQConfig.ORDER_EXCHANGE;
-import static com.itm.edu.order.infrastructure.config.RabbitMQConfig.ORDER_ROUTING_KEY;
-
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class RabbitOrderPublisher implements OrderPublisherPort {
@@ -18,10 +18,15 @@ public class RabbitOrderPublisher implements OrderPublisherPort {
     @Override
     public void publish(OrderMessageDTO orderMessage) {
         try {
-            rabbitTemplate.convertAndSend(ORDER_EXCHANGE, ORDER_ROUTING_KEY, orderMessage);
-            System.out.println("Message sent: " + orderMessage);
+            // Enviar al exchange de órdenes
+            rabbitTemplate.convertAndSend(
+                RabbitMQConfig.ORDER_EXCHANGE,
+                RabbitMQConfig.ORDER_ROUTING_KEY,
+                orderMessage
+            );
+            log.info("✅ Mensaje de orden enviado: {}", orderMessage);
         } catch (Exception e) {
-            System.err.println("Error sending message: " + e.getMessage());
+            log.error("❌ Error enviando mensaje: {}", e.getMessage());
             e.printStackTrace();
             throw e;
         }
