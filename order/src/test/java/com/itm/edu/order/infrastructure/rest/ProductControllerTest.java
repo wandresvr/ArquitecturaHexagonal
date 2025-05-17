@@ -20,6 +20,9 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 class ProductControllerTest {
@@ -206,5 +209,66 @@ class ProductControllerTest {
         assertEquals(product2.getDescription(), resultDto2.getDescription());
         assertEquals(product2.getPrice(), resultDto2.getPrice());
         assertEquals(product2.getStock(), resultDto2.getStock());
+    }
+
+    @Test
+    void testCreateProductWithCustomIdSuccess() {
+        // Arrange
+        UUID customId = UUID.randomUUID();
+        ProductDto request = ProductDto.builder()
+                .id(customId)
+                .name("Test Product")
+                .description("Test Description")
+                .price(new BigDecimal("99.99"))
+                .stock(100)
+                .build();
+
+        Product expectedProduct = Product.builder()
+                .id(customId)
+                .name(request.getName())
+                .description(request.getDescription())
+                .price(request.getPrice())
+                .stock(request.getStock())
+                .build();
+
+        ProductDto expectedDto = ProductDto.builder()
+                .id(expectedProduct.getId())
+                .name(expectedProduct.getName())
+                .description(expectedProduct.getDescription())
+                .price(expectedProduct.getPrice())
+                .stock(expectedProduct.getStock())
+                .build();
+
+        when(createProductUseCase.createProduct(
+                eq(customId),
+                eq(request.getName()),
+                eq(request.getDescription()),
+                eq(request.getPrice()),
+                eq(request.getStock())))
+                .thenReturn(expectedProduct);
+        when(productMapper.toDto(expectedProduct))
+                .thenReturn(expectedDto);
+
+        // Act
+        ResponseEntity<ProductDto> response = productController.createProduct(request);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(200, response.getStatusCode().value());
+        assertNotNull(response.getBody());
+        assertEquals(customId, response.getBody().getId());
+        assertEquals(expectedProduct.getName(), response.getBody().getName());
+        assertEquals(expectedProduct.getDescription(), response.getBody().getDescription());
+        assertEquals(expectedProduct.getPrice(), response.getBody().getPrice());
+        assertEquals(expectedProduct.getStock(), response.getBody().getStock());
+
+        verify(createProductUseCase).createProduct(
+                eq(customId),
+                eq(request.getName()),
+                eq(request.getDescription()),
+                eq(request.getPrice()),
+                eq(request.getStock()));
+        verify(productMapper).toDto(expectedProduct);
+        verifyNoMoreInteractions(createProductUseCase, productMapper);
     }
 } 

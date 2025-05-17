@@ -56,7 +56,9 @@ dependencies {
 	testImplementation 'org.springframework.amqp:spring-rabbit-test'
 
 	// Dto para sincronizar microservicios
-	implementation 'com.github.wandresvr:ArquitecuraHexagonal:v1.0.0'
+	implementation('com.github.wandresvr:ArquitecturaHexagonal:main-SNAPSHOT') {
+		changing = true
+	}
 
 	// Swagger/OpenAPI
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0'

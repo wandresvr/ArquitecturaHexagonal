@@ -1,6 +1,8 @@
 package com.itm.edu.stock.infrastructure.messaging;
 
 import com.itm.edu.common.dto.OrderMessageDTO;
+import com.itm.edu.common.dto.events.StockValidationStatus;
+import com.itm.edu.common.dto.events.StockUpdateResponseEvent;
 import com.itm.edu.stock.application.ports.input.ProcessOrderUseCase;
 import com.itm.edu.stock.domain.exception.BusinessException;
 import com.itm.edu.stock.infrastructure.config.RabbitMQConfig;
@@ -29,9 +31,9 @@ public class RabbitOrderConsumer {
             processOrderUseCase.processOrder(msg);
             
             // Crear el mensaje de respuesta
-            StockResponseMessage response = new StockResponseMessage(
+            StockUpdateResponseEvent response = new StockUpdateResponseEvent(
                 msg.getOrderId().toString(),
-                "RESERVED"
+                StockValidationStatus.RESERVED
             );
 
             // Enviar la respuesta al exchange de respuestas
@@ -46,9 +48,9 @@ public class RabbitOrderConsumer {
             log.error("Error de negocio procesando la orden {}: {}", msg.getOrderId(), e.getMessage());
             
             // Enviar respuesta de error
-            StockResponseMessage response = new StockResponseMessage(
+            StockUpdateResponseEvent response = new StockUpdateResponseEvent(
                 msg.getOrderId().toString(),
-                "NO_STOCK"
+                StockValidationStatus.CANCELLED_NO_STOCK
             );
 
             rabbitTemplate.convertAndSend(
@@ -61,25 +63,6 @@ public class RabbitOrderConsumer {
         } catch (Exception e) {
             log.error("Error inesperado procesando la orden {}: {}", msg.getOrderId(), e.getMessage(), e);
             throw new AmqpRejectAndDontRequeueException("Error inesperado: " + e.getMessage(), e);
-        }
-    }
-
-    // Clase interna para el mensaje de respuesta
-    private static class StockResponseMessage {
-        private final String orderId;
-        private final String status;
-
-        public StockResponseMessage(String orderId, String status) {
-            this.orderId = orderId;
-            this.status = status;
-        }
-
-        public String getOrderId() {
-            return orderId;
-        }
-
-        public String getStatus() {
-            return status;
         }
     }
 }

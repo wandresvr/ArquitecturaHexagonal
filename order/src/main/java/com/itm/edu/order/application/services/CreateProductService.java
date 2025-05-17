@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 @Service
 public class CreateProductService implements CreateProductUseCase {
@@ -22,6 +23,21 @@ public class CreateProductService implements CreateProductUseCase {
         validateProductParameters(name, description, price, stock);
 
         Product product = Product.builder()
+                .id(UUID.randomUUID())
+                .name(name)
+                .description(description)
+                .price(price)
+                .stock(stock)
+                .build();
+        
+        return productRepositoryPort.save(product);
+    }
+
+    public Product createProduct(UUID id, String name, String description, BigDecimal price, Integer stock) {
+        validateProductParameters(name, description, price, stock);
+
+        Product product = Product.builder()
+                .id(id)
                 .name(name)
                 .description(description)
                 .price(price)

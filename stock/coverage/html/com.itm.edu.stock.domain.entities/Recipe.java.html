@@ -34,12 +34,7 @@ public class Recipe {
     @Column(name = &quot;cost&quot;, precision = 10, scale = 2)
 <span class="fc" id="L35">    private BigDecimal cost;</span>
 
-    @ManyToMany
-    @JoinTable(
-        name = &quot;recipe_ingredients&quot;,
-        joinColumns = @JoinColumn(name = &quot;recipe_id&quot;),
-        inverseJoinColumns = @JoinColumn(name = &quot;ingredient_id&quot;)
-    )
-<span class="fc" id="L43">    private List&lt;Ingredient&gt; ingredients;</span>
+    @OneToMany(mappedBy = &quot;recipe&quot;, cascade = CascadeType.ALL, orphanRemoval = true)
+<span class="fc" id="L38">    private List&lt;RecipeIngredient&gt; recipeIngredients;</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

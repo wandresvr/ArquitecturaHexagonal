@@ -16,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -58,9 +59,8 @@ class CreateRecipeServiceTest {
         recipe.setInstructions(requestDto.getInstructions());
         recipe.setPreparationTime(requestDto.getPreparationTime());
         recipe.setDifficulty(requestDto.getDifficulty());
+        recipe.setRecipeIngredients(new ArrayList<>());
 
-        // Inicializar lista de ingredientes para evitar NullPointerException
-        recipe.setIngredients(new java.util.ArrayList<>());
         savedRecipe = new Recipe();
         savedRecipe.setId(recipe.getId());
         savedRecipe.setName(recipe.getName());
@@ -68,7 +68,7 @@ class CreateRecipeServiceTest {
         savedRecipe.setInstructions(recipe.getInstructions());
         savedRecipe.setPreparationTime(recipe.getPreparationTime());
         savedRecipe.setDifficulty(recipe.getDifficulty());
-        savedRecipe.setIngredients(new java.util.ArrayList<>());
+        savedRecipe.setRecipeIngredients(new ArrayList<>());
 
         responseDto = new RecipeResponseDto();
         responseDto.setId(savedRecipe.getId());

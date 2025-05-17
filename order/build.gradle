@@ -56,8 +56,9 @@ dependencies {
 	testImplementation 'org.mockito:mockito-core:5.3.1'
 	testImplementation 'org.mockito:mockito-junit-jupiter:5.3.1'
 
-	// Dto para sincronizar microservicios
-	implementation 'com.github.wandresvr:ArquitecuraHexagonal:v1.0.1'
+	implementation('com.github.wandresvr:ArquitecturaHexagonal:main-SNAPSHOT') {
+		changing = true
+	}
 
 	// SpringDoc OpenAPI (Swagger)
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0'

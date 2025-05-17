@@ -11,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -26,7 +27,42 @@ class CreateProductServiceTest {
     private CreateProductService createProductService;
 
     @Test
-    void shouldCreateProductSuccessfully() {
+    void shouldCreateProductWithCustomIdSuccessfully() {
+        // Arrange
+        UUID customId = UUID.randomUUID();
+        String name = "Test Product";
+        String description = "Test Description";
+        BigDecimal price = new BigDecimal("99.99");
+        Integer stock = 100;
+
+        Product expectedProduct = Product.builder()
+                .id(customId)
+                .name(name)
+                .description(description)
+                .price(price)
+                .stock(stock)
+                .build();
+
+        when(productRepositoryPort.save(any(Product.class))).thenReturn(expectedProduct);
+
+        // Act
+        Product result = createProductService.createProduct(customId, name, description, price, stock);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(customId, result.getId());
+        assertEquals(name, result.getName());
+        assertEquals(description, result.getDescription());
+        assertEquals(price, result.getPrice());
+        assertEquals(stock, result.getStock());
+
+        // Verify mock interactions
+        verify(productRepositoryPort, times(1)).save(any(Product.class));
+        verifyNoMoreInteractions(productRepositoryPort);
+    }
+
+    @Test
+    void shouldCreateProductWithGeneratedIdSuccessfully() {
         // Arrange
         String name = "Test Product";
         String description = "Test Description";
@@ -34,6 +70,7 @@ class CreateProductServiceTest {
         Integer stock = 100;
 
         Product expectedProduct = Product.builder()
+                .id(UUID.randomUUID())
                 .name(name)
                 .description(description)
                 .price(price)
@@ -47,6 +84,7 @@ class CreateProductServiceTest {
 
         // Assert
         assertNotNull(result);
+        assertNotNull(result.getId());
         assertEquals(name, result.getName());
         assertEquals(description, result.getDescription());
         assertEquals(price, result.getPrice());

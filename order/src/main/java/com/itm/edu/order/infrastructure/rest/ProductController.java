@@ -46,12 +46,23 @@ public class ProductController {
     })
     @PostMapping
     public ResponseEntity<ProductDto> createProduct(@RequestBody ProductDto productDto) {
-        Product createdProduct = createProductUseCase.createProduct(
-            productDto.getName(),
-            productDto.getDescription(),
-            productDto.getPrice(),
-            productDto.getStock()
-        );
+        Product createdProduct;
+        if (productDto.getId() != null) {
+            createdProduct = createProductUseCase.createProduct(
+                productDto.getId(),
+                productDto.getName(),
+                productDto.getDescription(),
+                productDto.getPrice(),
+                productDto.getStock()
+            );
+        } else {
+            createdProduct = createProductUseCase.createProduct(
+                productDto.getName(),
+                productDto.getDescription(),
+                productDto.getPrice(),
+                productDto.getStock()
+            );
+        }
         return ResponseEntity.ok(productMapper.toDto(createdProduct));
     }
 

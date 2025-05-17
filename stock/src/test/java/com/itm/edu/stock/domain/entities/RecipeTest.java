@@ -21,7 +21,7 @@ class RecipeTest {
         String instructions = "Test Instructions";
         Integer preparationTime = 30;
         String difficulty = "Easy";
-        List<Ingredient> ingredients = new ArrayList<>();
+        List<RecipeIngredient> recipeIngredients = new ArrayList<>();
         BigDecimal cost = new BigDecimal("10.00");
 
         // Act
@@ -32,7 +32,7 @@ class RecipeTest {
         recipe.setInstructions(instructions);
         recipe.setPreparationTime(preparationTime);
         recipe.setDifficulty(difficulty);
-        recipe.setIngredients(ingredients);
+        recipe.setRecipeIngredients(recipeIngredients);
         recipe.setCost(cost);
 
         // Assert
@@ -42,7 +42,7 @@ class RecipeTest {
         assertEquals(instructions, recipe.getInstructions());
         assertEquals(preparationTime, recipe.getPreparationTime());
         assertEquals(difficulty, recipe.getDifficulty());
-        assertEquals(ingredients, recipe.getIngredients());
+        assertEquals(recipeIngredients, recipe.getRecipeIngredients());
         assertEquals(cost, recipe.getCost());
     }
 } 

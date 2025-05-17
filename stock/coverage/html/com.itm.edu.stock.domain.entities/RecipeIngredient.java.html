@@ -8,29 +8,32 @@ import jakarta.persistence.*;
 import java.util.UUID;
 import com.itm.edu.stock.domain.valueobjects.Quantity;
 import com.itm.edu.stock.domain.valueobjects.Unit;
+import org.hibernate.annotations.GenericGenerator;
 
 @Entity
 @Table(name = &quot;recipe_ingredients&quot;)
 @Getter
-<span class="pc" id="L15">@Setter</span>
-<span class="fc" id="L16">@NoArgsConstructor</span>
-<span class="fc" id="L17">@AllArgsConstructor</span>
+<span class="pc" id="L16">@Setter</span>
+<span class="fc" id="L17">@NoArgsConstructor</span>
+<span class="fc" id="L18">@AllArgsConstructor</span>
 public class RecipeIngredient {
     @Id
-<span class="fc" id="L20">    private UUID id;</span>
+    @GeneratedValue(generator = &quot;UUID&quot;)
+    @GenericGenerator(name = &quot;UUID&quot;, strategy = &quot;org.hibernate.id.UUIDGenerator&quot;)
+<span class="fc" id="L23">    private UUID id;</span>
     
     @ManyToOne
     @JoinColumn(name = &quot;recipe_id&quot;)
-<span class="fc" id="L24">    private Recipe recipe;</span>
+<span class="fc" id="L27">    private Recipe recipe;</span>
     
     @ManyToOne
     @JoinColumn(name = &quot;ingredient_id&quot;)
-<span class="fc" id="L28">    private Ingredient ingredient;</span>
+<span class="fc" id="L31">    private Ingredient ingredient;</span>
     
     @Embedded
-<span class="fc" id="L31">    private Quantity quantity;</span>
+<span class="fc" id="L34">    private Quantity quantity;</span>
     
     @Embedded
-<span class="fc" id="L34">    private Unit unit;</span>
+<span class="fc" id="L37">    private Unit unit;</span>
 } 
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
