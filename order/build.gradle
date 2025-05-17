@@ -54,6 +54,10 @@ dependencies {
 
 	// Dto para sincronizar microservicios
 	implementation 'com.github.wandresvr:ArquitecuraHexagonal:v1.0.0'
+
+	// SpringDoc OpenAPI (Swagger)
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0'
+	implementation 'org.springdoc:springdoc-openapi-starter-common:2.3.0'
 }
 
 tasks.named('test') {
