@@ -94,27 +94,29 @@ import org.springframework.context.annotation.Configuration;
     @Bean
     public MessageConverter jsonMessageConverter() {
 <span class="fc" id="L96">        Jackson2JsonMessageConverter converter = new Jackson2JsonMessageConverter();</span>
-<span class="fc" id="L97">        converter.setClassMapper(new DefaultClassMapper());</span>
-<span class="fc" id="L98">        return converter;</span>
+<span class="fc" id="L97">        DefaultClassMapper classMapper = new DefaultClassMapper();</span>
+<span class="fc" id="L98">        classMapper.setTrustedPackages(&quot;java.util&quot;, &quot;java.lang&quot;, &quot;com.itm.edu.common.dto&quot;, &quot;com.itm.edu.common.dto.events&quot;);</span>
+<span class="fc" id="L99">        converter.setClassMapper(classMapper);</span>
+<span class="fc" id="L100">        return converter;</span>
     }
 
     @Bean
     public RabbitTemplate rabbitTemplate(ConnectionFactory cf, MessageConverter jsonMessageConverter) {
-<span class="fc" id="L103">        RabbitTemplate template = new RabbitTemplate(cf);</span>
-<span class="fc" id="L104">        template.setMessageConverter(jsonMessageConverter);</span>
-<span class="fc" id="L105">        template.setExchange(STOCK_RESPONSE_EXCHANGE);</span>
-<span class="fc" id="L106">        template.setRoutingKey(STOCK_RESPONSE_ROUTING_KEY);</span>
-<span class="fc" id="L107">        return template;</span>
+<span class="fc" id="L105">        RabbitTemplate template = new RabbitTemplate(cf);</span>
+<span class="fc" id="L106">        template.setMessageConverter(jsonMessageConverter);</span>
+<span class="fc" id="L107">        template.setExchange(STOCK_RESPONSE_EXCHANGE);</span>
+<span class="fc" id="L108">        template.setRoutingKey(STOCK_RESPONSE_ROUTING_KEY);</span>
+<span class="fc" id="L109">        return template;</span>
     }
 
     @Bean
     public SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory(
             ConnectionFactory cf,
             MessageConverter jsonMessageConverter) {
-<span class="fc" id="L114">        SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();</span>
-<span class="fc" id="L115">        factory.setConnectionFactory(cf);</span>
-<span class="fc" id="L116">        factory.setMessageConverter(jsonMessageConverter);</span>
-<span class="fc" id="L117">        return factory;</span>
+<span class="fc" id="L116">        SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();</span>
+<span class="fc" id="L117">        factory.setConnectionFactory(cf);</span>
+<span class="fc" id="L118">        factory.setMessageConverter(jsonMessageConverter);</span>
+<span class="fc" id="L119">        return factory;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
