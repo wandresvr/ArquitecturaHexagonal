@@ -5,5 +5,3 @@ pluginManagement {
     }
 }
 rootProject.name = 'stock'
-include ':common'
-project(':common').projectDir = file('../common')

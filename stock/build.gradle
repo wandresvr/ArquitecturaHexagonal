@@ -65,10 +65,14 @@ dependencies {
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0'
 }
 
+
 tasks.named('test') {
 	useJUnitPlatform()
 	finalizedBy jacocoTestReport
-	systemProperty 'spring.profiles.active', 'test'
+}
+
+jacoco {
+	toolVersion = "0.8.9"
 }
 
 def sonarProperties = new Properties()
@@ -76,25 +80,19 @@ file("sonar.properties").withInputStream { sonarProperties.load(it) }
 
 sonar {
 	properties {
-		property "sonar.projectKey", "stock-service-itm"
-		property "sonar.projectName", "Microservicio de Stock ITM"
+		property "sonar.projectKey", "stock-service_"
+		property "sonar.projectName", "Microservicio de Inventario ITM"
 		property "sonar.host.url", "http://localhost:9000"
 		property "sonar.login", sonarProperties.getProperty("sonar.token")
-		property "sonar.sources", "src/main/java"
-		property "sonar.tests", "src/test/java"
+		property "sonar.sources", "src/main"
+		property "sonar.tests", "src/test"
 		property "sonar.java.binaries", "build/classes/java/main"
 		property "sonar.java.test.binaries", "build/classes/java/test"
-		property "sonar.coverage.jacoco.xmlReportPaths", "${project.buildDir}/reports/jacoco/test/jacocoTestReport.xml"
+		property "sonar.coverage.jacoco.xmlReportPaths", "${project.projectDir}/coverage/jacocoTestReport.xml"
 		property "sonar.gradle.skipCompile", "true"
 		property "sonar.sourceEncoding", "UTF-8"
 		property "sonar.scm.disabled", "true"
-		property "sonar.exclusions", "**/common/**/*"
-		property "sonar.java.source", "17"
 	}
-}
-
-jacoco {
-	toolVersion = "0.8.9"
 }
 
 jacocoTestReport {
@@ -115,7 +113,7 @@ jacocoTestReport {
 				'**/config/**',
 				'**/dto/**',
 				'**/exception/**',
-				'**/StockApplication.class'
+				'**/OrderApplication.class'
 			])
 		}))
 	}
