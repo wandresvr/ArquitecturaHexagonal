@@ -4,50 +4,33 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-
+import jakarta.persistence.*;
 import java.util.UUID;
-
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Embedded;
-import jakarta.persistence.AttributeOverrides;
-import jakarta.persistence.AttributeOverride;
-import jakarta.persistence.Column;
-
 import com.wilson.stock.domain.valueobjects.Quantity;
 import com.wilson.stock.domain.valueobjects.Unit;
 
 @Entity
 @Table(name = &quot;recipe_ingredients&quot;)
 @Getter
-<span class="pc" id="L26">@Setter</span>
-<span class="fc" id="L27">@NoArgsConstructor</span>
-<span class="fc" id="L28">@AllArgsConstructor</span>
+<span class="fc" id="L15">@Setter</span>
+<span class="fc" id="L16">@NoArgsConstructor</span>
+<span class="fc" id="L17">@AllArgsConstructor</span>
 public class RecipeIngredient {
     @Id
-<span class="fc" id="L31">    private UUID id;</span>
+<span class="fc" id="L20">    private UUID id;</span>
     
     @ManyToOne
     @JoinColumn(name = &quot;recipe_id&quot;)
-<span class="fc" id="L35">    private Recipe recipe;</span>
+<span class="fc" id="L24">    private Recipe recipe;</span>
     
     @ManyToOne
     @JoinColumn(name = &quot;ingredient_id&quot;)
-<span class="fc" id="L39">    private Ingredient ingredient;</span>
+<span class="fc" id="L28">    private Ingredient ingredient;</span>
     
     @Embedded
-    @AttributeOverrides({
-        @AttributeOverride(name = &quot;value&quot;, column = @Column(name = &quot;quantity_value&quot;))
-    })
-<span class="fc" id="L45">    private Quantity quantity;</span>
+<span class="fc" id="L31">    private Quantity quantity;</span>
     
     @Embedded
-    @AttributeOverrides({
-        @AttributeOverride(name = &quot;value&quot;, column = @Column(name = &quot;unit_value&quot;))
-    })
-<span class="fc" id="L51">    private Unit unit;</span>
+<span class="fc" id="L34">    private Unit unit;</span>
 } 
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

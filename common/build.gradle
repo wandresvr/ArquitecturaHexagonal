@@ -1,0 +1,59 @@
+plugins {
+    // Aplica el plugin Java
+    id 'java'
+    // Plugin para publicar en mavenLocal()
+    id 'maven-publish'
+}
+
+group = 'com.github.wandresvr'
+version = '1.0.0'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+    withSourcesJar()
+    withJavadocJar()
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Lombok para compilación y anotaciones
+    compileOnly 'org.projectlombok:lombok:1.18.30'
+    annotationProcessor 'org.projectlombok:lombok:1.18.30'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
+    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.15.2'
+    implementation 'com.fasterxml.jackson.core:jackson-core:2.15.2'
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+            
+            pom {
+                name = 'ArquitecuraHexagonal'
+                description = 'Librería común para microservicios con arquitectura hexagonal'
+                url = 'https://github.com/wandresvr/ArquitecuraHexagonal'
+                
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                
+                developers {
+                    developer {
+                        id = 'wandresvr'
+                        name = 'Wilson Vargas'
+                        email = 'wandresvr@gmail.com'
+                    }
+                }
+            }
+        }
+    }
+}

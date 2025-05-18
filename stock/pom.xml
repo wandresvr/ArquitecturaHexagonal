@@ -1,0 +1,7 @@
+<dependencies>
+    <dependency>
+        <groupId>com.itm.edu</groupId>
+        <artifactId>order</artifactId>
+        <version>${project.version}</version>
+    </dependency>
+</dependencies> 

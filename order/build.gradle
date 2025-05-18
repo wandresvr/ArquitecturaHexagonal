@@ -3,9 +3,10 @@ plugins {
 	id 'org.springframework.boot' version '3.2.3'
 	id 'io.spring.dependency-management' version '1.1.4'
 	id 'jacoco'
+	id 'maven-publish'
 }
 
-group = 'com.wilson'
+group = 'com.itm.edu'
 version = '0.0.1-SNAPSHOT'
 
 java {
@@ -21,14 +22,21 @@ configurations {
 }
 
 repositories {
+	maven { url 'https://jitpack.io' }
 	mavenCentral()
+	mavenLocal() 
 }
 
 dependencies {
-	// Spring Boot
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	// Spring Boot Starters
+	implementation 'org.springframework.boot:spring-boot-starter'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	
+	// RabbitMQ
+	implementation 'org.springframework.boot:spring-boot-starter-amqp'
+	implementation 'org.springframework.amqp:spring-rabbit:3.1.1'
 	
 	// Database
 	implementation 'org.postgresql:postgresql:42.7.1'
@@ -37,12 +45,28 @@ dependencies {
 	compileOnly 'org.projectlombok:lombok:1.18.30'
 	annotationProcessor 'org.projectlombok:lombok:1.18.30'
 	
+	// Jackson para JSON
+	implementation 'com.fasterxml.jackson.core:jackson-databind'
+	
 	// Testing
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.amqp:spring-rabbit-test'
 	testImplementation 'org.projectlombok:lombok:1.18.30'
 	testAnnotationProcessor 'org.projectlombok:lombok:1.18.30'
 	testImplementation 'org.mockito:mockito-core:5.3.1'
 	testImplementation 'org.mockito:mockito-junit-jupiter:5.3.1'
+
+	implementation('com.github.wandresvr:ArquitecturaHexagonal:main-SNAPSHOT') {
+		changing = true
+	}
+
+	// SpringDoc OpenAPI (Swagger)
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0'
+	implementation 'org.springdoc:springdoc-openapi-starter-common:2.3.0'
+
+	// Jackson
+	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-hibernate6:2.16.1'
+	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.16.1'
 }
 
 tasks.named('test') {
@@ -84,6 +108,14 @@ jacocoTestCoverageVerification {
 			limit {
 				minimum = 0.80
 			}
+		}
+	}
+}
+
+publishing {
+	publications {
+		mavenJava(MavenPublication) {
+			from components.java
 		}
 	}
 }

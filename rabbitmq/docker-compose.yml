@@ -1,0 +1,27 @@
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - microservices-network
+
+  publisher:
+    build:
+      context: publisher
+      dockerfile: Dockerfile
+    container_name: publisher-api
+    ports:
+      - "3001:3000"
+    environment:
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
+    depends_on:
+      - rabbitmq
+    networks:
+      - microservices-network
+
+networks:
+  microservices-network:
+    external: true

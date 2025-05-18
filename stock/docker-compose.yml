@@ -5,7 +5,7 @@ services:
   app:
     build: .
     ports:
-      - "8080:8080"
+      - "8081:8081"
     depends_on:
       - db
     environment:
@@ -13,14 +13,19 @@ services:
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=1234
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_RABBITMQ_USERNAME=guest
+      - SPRING_RABBITMQ_PASSWORD=guest
     networks:
       - stock-network
+      - microservices-network
 
   # Servicio de base de datos PostgreSQL
   db:
     image: postgres:15
     ports:
-      - "5433:5432"
+      - "5434:5432"
     environment:
       - POSTGRES_DB=postgres
       - POSTGRES_USER=postgres
@@ -33,6 +38,8 @@ services:
 networks:
   stock-network:
     driver: bridge
+  microservices-network:
+    external: true
 
 volumes:
-  postgres-data: 
+  postgres-data:

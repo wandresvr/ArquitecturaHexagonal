@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RecipeMapper.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">stock</a> &gt; <a href="index.source.html" class="el_package">com.itm.edu.stock.infrastructure.api.mapper</a> &gt; <span class="el_source">RecipeMapper.java</span></div><h1>RecipeMapper.java</h1><pre class="source lang-java linenums">package com.itm.edu.stock.infrastructure.api.mapper;
+
+import com.itm.edu.stock.domain.entities.Ingredient;
+import com.itm.edu.stock.domain.entities.Recipe;
+import com.itm.edu.stock.domain.entities.RecipeIngredient;
+import com.itm.edu.stock.domain.repository.IngredientRepository;
+import com.itm.edu.stock.infrastructure.api.dto.CreateRecipeRequestDto;
+import com.itm.edu.stock.infrastructure.api.dto.CreateRecipeIngredientDto;
+import com.itm.edu.stock.infrastructure.api.dto.IngredientResponseDto;
+import com.itm.edu.stock.infrastructure.api.dto.RecipeResponseDto;
+import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.UUID;
+
+@Component
+public class RecipeMapper {
+
+    private final IngredientMapper ingredientMapper;
+    private final IngredientRepository ingredientRepository;
+
+<span class="fc" id="L24">    public RecipeMapper(IngredientMapper ingredientMapper, IngredientRepository ingredientRepository) {</span>
+<span class="fc" id="L25">        this.ingredientMapper = ingredientMapper;</span>
+<span class="fc" id="L26">        this.ingredientRepository = ingredientRepository;</span>
+<span class="fc" id="L27">    }</span>
+
+    public RecipeResponseDto toDto(Recipe recipe) {
+<span class="nc" id="L30">        RecipeResponseDto dto = new RecipeResponseDto();</span>
+<span class="nc" id="L31">        dto.setId(recipe.getId());</span>
+<span class="nc" id="L32">        dto.setName(recipe.getName());</span>
+<span class="nc" id="L33">        dto.setDescription(recipe.getDescription());</span>
+<span class="nc" id="L34">        dto.setInstructions(recipe.getInstructions());</span>
+<span class="nc" id="L35">        dto.setPreparationTime(recipe.getPreparationTime());</span>
+<span class="nc" id="L36">        dto.setDifficulty(recipe.getDifficulty());</span>
+<span class="nc" id="L37">        dto.setIngredients(recipe.getRecipeIngredients().stream()</span>
+<span class="nc" id="L38">            .map(ri -&gt; ingredientMapper.toDto(ri.getIngredient()))</span>
+<span class="nc" id="L39">            .collect(Collectors.toList()));</span>
+<span class="nc" id="L40">        dto.setCost(recipe.getCost());</span>
+<span class="nc" id="L41">        return dto;</span>
+    }
+
+    public Recipe toEntity(CreateRecipeRequestDto dto) {
+<span class="nc" id="L45">        Recipe recipe = new Recipe();</span>
+<span class="nc" id="L46">        recipe.setName(dto.getName());</span>
+<span class="nc" id="L47">        recipe.setDescription(dto.getDescription());</span>
+<span class="nc" id="L48">        recipe.setInstructions(dto.getInstructions());</span>
+<span class="nc" id="L49">        recipe.setPreparationTime(dto.getPreparationTime());</span>
+<span class="nc" id="L50">        recipe.setDifficulty(dto.getDifficulty());</span>
+        // Crear la lista de RecipeIngredient
+<span class="nc" id="L52">        List&lt;RecipeIngredient&gt; recipeIngredients = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L53" title="All 2 branches missed.">        for (CreateRecipeIngredientDto ingredientDto : dto.getIngredients()) {</span>
+<span class="nc" id="L54">            Ingredient ingredient = ingredientRepository.findById(ingredientDto.getIngredientId())</span>
+<span class="nc" id="L55">                .orElseThrow(() -&gt; new RuntimeException(&quot;Ingrediente no encontrado: &quot; + ingredientDto.getIngredientId()));</span>
+<span class="nc" id="L56">            RecipeIngredient recipeIngredient = new RecipeIngredient();</span>
+<span class="nc" id="L57">            recipeIngredient.setRecipe(recipe);</span>
+<span class="nc" id="L58">            recipeIngredient.setIngredient(ingredient);</span>
+            // Asignar cantidad y unidad si existen en el DTO
+<span class="nc bnc" id="L60" title="All 2 branches missed.">            if (ingredientDto.getQuantity() != null) {</span>
+                // Si tienes un value object Quantity, adáptalo aquí
+<span class="nc" id="L62">                recipeIngredient.setQuantity(new com.itm.edu.stock.domain.valueobjects.Quantity(ingredientDto.getQuantity()));</span>
+            }
+<span class="nc bnc" id="L64" title="All 2 branches missed.">            if (ingredientDto.getUnit() != null) {</span>
+<span class="nc" id="L65">                recipeIngredient.setUnit(new com.itm.edu.stock.domain.valueobjects.Unit(ingredientDto.getUnit()));</span>
+            }
+<span class="nc" id="L67">            recipeIngredients.add(recipeIngredient);</span>
+<span class="nc" id="L68">        }</span>
+<span class="nc" id="L69">        recipe.setRecipeIngredients(recipeIngredients);</span>
+        // Relación bidireccional
+<span class="nc bnc" id="L71" title="All 2 branches missed.">        for (RecipeIngredient ri : recipeIngredients) {</span>
+<span class="nc" id="L72">            ri.setRecipe(recipe);</span>
+<span class="nc" id="L73">        }</span>
+<span class="nc" id="L74">        return recipe;</span>
+    }
+} 
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
