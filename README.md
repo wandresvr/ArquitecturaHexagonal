@@ -1,38 +1,44 @@
-# ArquitecuraHexagonal
+# Sistema de Gestión de Pedidos de Restaurante
 
-Librería común para microservicios con arquitectura hexagonal.
+### Wilson Andrés Vargas Rojas
+### Yeison Fabian Suarez Alba
 
-## Instalación
+## Contexto:
+Una cadena de restaurantes necesita un sistema para gestionar pedidos en línea.
+El sistema debe manejar la creación de pedidos, gestionar el inventario de
+ingredientes y facilitar la comunicación entre el área de recepción de pedidos y la
+cocina.
 
-```gradle
-repositories {
-    maven { url 'https://jitpack.io' }
-}
+- ## APIs creadas con Java Spring Boot y Arquitectura Hexagonal
+Este proyecto es una implementación de dos API en la que se ha desarrollado utilizando Java Spring Boot como framework principal, siguiendo los principios de arquitectura hexagonal para fomentar una separación clara entre las capas de dominio, infraestructura y aplicaciones.
 
-dependencies {
-    implementation 'com.github.wandresvr:ArquitecuraHexagonal:1.0.0'
-}
-```
+- ## Uso de Lombok
+El proyecto utiliza Lombok, una biblioteca de Java que ayuda a reducir el código repetitivo y hacer el código más limpio y mantenible. Con Lombok, se automatiza la generación de métodos comunes. Esto mejora la productividad y la legibilidad del código.
 
-## Uso
+- ## Uso de PostgresSQL
+El proyecto usa PostgresSQL como base de datos, en el archivo ``` aplication.properties ``` se encuentran los parámetros de configuración de la conexión.
 
-La librería proporciona DTOs comunes para la comunicación entre microservicios:
+- ## Uso de Docker
+El proyecto lanza varios tres contenedores donde se encuentra la APIs y la base de datos.
 
-- `OrderMessageDTO`: Mensaje para la creación de órdenes
-- `ClientDTO`: Información del cliente
-- `AddressShippingDTO`: Dirección de envío
-- `ProductOrderDTO`: Producto en una orden
+<br>
+ 
+# Tabla de contenido
 
-## Estructura del Proyecto
-
-```
-src/main/java/com/itm/edu/common/dto/
-├── OrderMessageDTO.java
-├── ClientDTO.java
-├── AddressShippingDTO.java
-└── ProductOrderDTO.java
-```
-
-## Licencia
-
-Apache License 2.0 
+1. [API Gestión de pedidos](order)
+  * Estructura
+  * Diagrama del dominio
+  * Headers
+  * Endpoints
+  * Lanzamiento del docker
+  * Ajustes del docker
+  * Casos de prueba
+2. [API Gestión de inventarios](stock)
+  * Estructura
+  * Diagrama del dominio
+  * Headers
+  * Endpoints
+  * Lanzamiento del docker
+  * Ajustes del docker
+  * Casos de prueba
+3. [Notas](#notas)
