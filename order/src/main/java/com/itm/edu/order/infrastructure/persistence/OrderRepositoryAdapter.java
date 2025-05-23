@@ -2,53 +2,53 @@ package com.itm.edu.order.infrastructure.persistence;
 
 import com.itm.edu.order.domain.model.Order;
 import com.itm.edu.order.application.ports.outputs.OrderRepositoryPort;
-import org.springframework.stereotype.Repository;
+import com.itm.edu.order.infrastructure.persistence.entities.OrderEntity;
+import com.itm.edu.order.infrastructure.persistence.mapper.OrderMapper;
+import com.itm.edu.order.infrastructure.persistence.repository.JpaOrderRepository;
+import org.springframework.stereotype.Component;
+import lombok.RequiredArgsConstructor;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
-@Repository
-@Transactional
+@Component
+@RequiredArgsConstructor
 public class OrderRepositoryAdapter implements OrderRepositoryPort {
 
-    @PersistenceContext
-    private EntityManager entityManager;
+    private final JpaOrderRepository jpaOrderRepository;
+    private final OrderMapper orderMapper;
 
     @Override
     public Order save(Order order) {
-        if (order.getOrderId() == null) {
-            entityManager.persist(order);
-        } else {
-            entityManager.merge(order);
-        }
-        return order;
+        OrderEntity entity = orderMapper.toEntity(order);
+        OrderEntity savedEntity = jpaOrderRepository.save(entity);
+        return orderMapper.toDomain(savedEntity);
     }
 
     @Override
     public Optional<Order> findById(UUID orderId) {
-        return Optional.ofNullable(entityManager.find(Order.class, orderId));
+        return jpaOrderRepository.findById(orderId)
+                .map(orderMapper::toDomain);
     }
 
     @Override
     public List<Order> findAll() {
-        return entityManager.createQuery("SELECT o FROM Order o", Order.class)
-                .getResultList();
+        return jpaOrderRepository.findAll().stream()
+                .map(orderMapper::toDomain)
+                .collect(Collectors.toList());
     }
 
     @Override
     public void deleteById(UUID orderId) {
-        Order order = entityManager.find(Order.class, orderId);
-        if (order != null) {
-            entityManager.remove(order);
-        }
+        jpaOrderRepository.deleteById(orderId);
     }
 
     @Override
     public Order update(Order order) {
-        return entityManager.merge(order);
+        OrderEntity entity = orderMapper.toEntity(order);
+        OrderEntity updatedEntity = jpaOrderRepository.save(entity);
+        return orderMapper.toDomain(updatedEntity);
     }
 } 

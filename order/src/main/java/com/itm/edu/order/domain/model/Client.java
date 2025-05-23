@@ -1,33 +1,27 @@
 package com.itm.edu.order.domain.model;
 
-import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.util.UUID;
 
-@Entity
-@Table(name = "clients")
 @Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
 public class Client {
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    private final UUID id;
+    private final String name;
+    private final String email;
+    private final String phone;
 
-    private String name;
-    private String email;
-    private String phone;
+    public Client(UUID id, String name, String email, String phone) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+        this.phone = phone;
+        validate();
+    }
 
-    @PrePersist
-    @PreUpdate
-    public void validate() {
+    private void validate() {
         if (name == null || name.trim().isEmpty()) {
             throw new IllegalArgumentException("El nombre del cliente no puede estar vacío");
         }

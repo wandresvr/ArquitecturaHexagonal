@@ -4,7 +4,7 @@ import com.itm.edu.order.application.ports.inputs.*;
 import com.itm.edu.order.domain.model.Product;
 import com.itm.edu.order.domain.exception.ApiError;
 import com.itm.edu.order.infrastructure.rest.dto.ProductDto;
-import com.itm.edu.order.infrastructure.rest.mapper.ProductMapper;
+import com.itm.edu.order.infrastructure.rest.mapper.ProductDtoMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,7 +22,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/products")
+@RequestMapping("/api/v1/products")
 @RequiredArgsConstructor
 @Tag(name = "Productos", description = "API para la gestión de productos")
 public class ProductController {
@@ -29,7 +30,7 @@ public class ProductController {
     private final GetProductUseCase getProductUseCase;
     private final UpdateProductUseCase updateProductUseCase;
     private final DeleteProductUseCase deleteProductUseCase;
-    private final ProductMapper productMapper;
+    private final ProductDtoMapper productMapper;
 
     @Operation(summary = "Crear un nuevo producto")
     @ApiResponses(value = {
@@ -45,28 +46,13 @@ public class ProductController {
             content = @Content(schema = @Schema(implementation = ApiError.class)))
     })
     @PostMapping
-    public ResponseEntity<ProductDto> createProduct(@RequestBody ProductDto productDto) {
-        Product createdProduct;
-        if (productDto.getId() != null) {
-            createdProduct = createProductUseCase.createProduct(
-                productDto.getId(),
-                productDto.getName(),
-                productDto.getDescription(),
-                productDto.getPrice(),
-                productDto.getStock()
-            );
-        } else {
-            createdProduct = createProductUseCase.createProduct(
-                productDto.getName(),
-                productDto.getDescription(),
-                productDto.getPrice(),
-                productDto.getStock()
-            );
-        }
+    public ResponseEntity<ProductDto> createProduct(@Valid @RequestBody ProductDto request) {
+        Product product = productMapper.toDomain(request);
+        Product createdProduct = createProductUseCase.createProduct(product);
         return ResponseEntity.ok(productMapper.toDto(createdProduct));
     }
 
-    @Operation(summary = "Obtener un producto por su ID")
+    @Operation(summary = "Obtener un producto por ID")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Producto encontrado",
             content = @Content(schema = @Schema(implementation = ProductDto.class))),
@@ -76,12 +62,10 @@ public class ProductController {
             content = @Content(schema = @Schema(implementation = ApiError.class)))
     })
     @GetMapping("/{id}")
-    public ResponseEntity<ProductDto> getProduct(
-            @Parameter(description = "ID del producto", required = true)
-            @PathVariable UUID id) {
+    public ResponseEntity<ProductDto> getProduct(@PathVariable UUID id) {
         return getProductUseCase.getProduct(id)
-                .map(product -> ResponseEntity.ok(productMapper.toDto(product)))
-                .orElse(ResponseEntity.notFound().build());
+            .map(product -> ResponseEntity.ok(productMapper.toDto(product)))
+            .orElse(ResponseEntity.notFound().build());
     }
 
     @Operation(summary = "Obtener todos los productos")
@@ -94,12 +78,13 @@ public class ProductController {
     @GetMapping
     public ResponseEntity<List<ProductDto>> getAllProducts() {
         List<Product> products = getProductUseCase.getAllProducts();
-        return ResponseEntity.ok(products.stream()
-                .map(productMapper::toDto)
-                .collect(Collectors.toList()));
+        List<ProductDto> productDtos = products.stream()
+            .map(productMapper::toDto)
+            .collect(Collectors.toList());
+        return ResponseEntity.ok(productDtos);
     }
 
-    @Operation(summary = "Actualizar un producto existente")
+    @Operation(summary = "Actualizar un producto")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Producto actualizado exitosamente",
             content = @Content(schema = @Schema(implementation = ProductDto.class))),
@@ -116,16 +101,10 @@ public class ProductController {
     })
     @PutMapping("/{id}")
     public ResponseEntity<ProductDto> updateProduct(
-            @Parameter(description = "ID del producto", required = true)
             @PathVariable UUID id,
-            @RequestBody ProductDto productDto) {
-        Product updatedProduct = updateProductUseCase.updateProduct(
-            id,
-            productDto.getName(),
-            productDto.getDescription(),
-            productDto.getPrice(),
-            productDto.getStock()
-        );
+            @Valid @RequestBody ProductDto request) {
+        Product product = productMapper.toDomain(request);
+        Product updatedProduct = updateProductUseCase.updateProduct(id, product);
         return ResponseEntity.ok(productMapper.toDto(updatedProduct));
     }
 
@@ -138,9 +117,7 @@ public class ProductController {
             content = @Content(schema = @Schema(implementation = ApiError.class)))
     })
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteProduct(
-            @Parameter(description = "ID del producto", required = true)
-            @PathVariable UUID id) {
+    public ResponseEntity<Void> deleteProduct(@PathVariable UUID id) {
         deleteProductUseCase.deleteProduct(id);
         return ResponseEntity.noContent().build();
     }

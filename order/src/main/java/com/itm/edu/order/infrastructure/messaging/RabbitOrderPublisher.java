@@ -18,13 +18,12 @@ public class RabbitOrderPublisher implements OrderPublisherPort {
     @Override
     public void publish(OrderMessageDTO orderMessage) {
         try {
-            // Enviar al exchange de órdenes
             rabbitTemplate.convertAndSend(
                 RabbitMQConfig.ORDER_EXCHANGE,
                 RabbitMQConfig.ORDER_ROUTING_KEY,
                 orderMessage
             );
-            log.info("✅ Mensaje de orden enviado: {}", orderMessage);
+            log.info("✅ Mensaje de orden enviado a {}: {}", RabbitMQConfig.ORDER_EXCHANGE, orderMessage);
         } catch (Exception e) {
             log.error("❌ Error enviando mensaje: {}", e.getMessage());
             e.printStackTrace();

@@ -2,61 +2,54 @@ package com.itm.edu.order.application.services;
 
 import com.itm.edu.order.application.ports.inputs.UpdateProductUseCase;
 import com.itm.edu.order.application.ports.outputs.ProductRepositoryPort;
-import com.itm.edu.order.domain.exception.ProductNotFoundException;
 import com.itm.edu.order.domain.model.Product;
+import com.itm.edu.order.domain.exception.BusinessException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class UpdateProductService implements UpdateProductUseCase {
-
-    private final ProductRepositoryPort productRepositoryPort;
-
-    public UpdateProductService(ProductRepositoryPort productRepositoryPort) {
-        this.productRepositoryPort = productRepositoryPort;
-    }
+    private final ProductRepositoryPort productRepository;
 
     @Override
-    public Product updateProduct(UUID id, String name, String description, BigDecimal price, Integer stock) {
-        validateProductParameters(name, description, price, stock);
+    @Transactional
+    public Product updateProduct(UUID id, Product product) {
+        validateProductData(product);
+        
+        Product existingProduct = productRepository.findById(id)
+            .orElseThrow(() -> new BusinessException("Producto no encontrado con ID: " + id));
 
-        Product existingProduct = productRepositoryPort.findById(id)
-                .orElseThrow(() -> new ProductNotFoundException("Product not found with id: " + id));
+        Product updatedProduct = Product.builder()
+            .id(existingProduct.getId())
+            .name(product.getName())
+            .description(product.getDescription())
+            .price(product.getPrice())
+            .stock(product.getStock())
+            .build();
 
-        existingProduct.setName(name);
-        existingProduct.setDescription(description);
-        existingProduct.setPrice(price);
-        existingProduct.setStock(stock);
-
-        return productRepositoryPort.save(existingProduct);
+        return productRepository.save(updatedProduct);
     }
 
-    private void validateProductParameters(String name, String description, BigDecimal price, Integer stock) {
-        if (!StringUtils.hasText(name)) {
-            throw new IllegalArgumentException("Product name cannot be null or empty");
+    private void validateProductData(Product product) {
+        if (product == null) {
+            throw new BusinessException("El producto no puede ser nulo");
         }
-
-        if (!StringUtils.hasText(description)) {
-            throw new IllegalArgumentException("Product description cannot be null or empty");
+        if (product.getName() == null || product.getName().trim().isEmpty()) {
+            throw new BusinessException("El nombre del producto no puede estar vacío");
         }
-
-        if (price == null) {
-            throw new IllegalArgumentException("Product price cannot be null");
+        if (product.getDescription() == null || product.getDescription().trim().isEmpty()) {
+            throw new BusinessException("La descripción del producto no puede estar vacía");
         }
-
-        if (price.compareTo(BigDecimal.ZERO) < 0) {
-            throw new IllegalArgumentException("Product price cannot be negative");
+        if (product.getPrice() == null || product.getPrice().compareTo(BigDecimal.ZERO) < 0) {
+            throw new BusinessException("El precio no puede ser negativo");
         }
-
-        if (stock == null) {
-            throw new IllegalArgumentException("Product stock cannot be null");
-        }
-
-        if (stock < 0) {
-            throw new IllegalArgumentException("Product stock cannot be negative");
+        if (product.getStock() == null || product.getStock() < 0) {
+            throw new BusinessException("El stock no puede ser negativo");
         }
     }
 } 

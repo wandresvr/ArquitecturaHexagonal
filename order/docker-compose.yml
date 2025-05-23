@@ -13,13 +13,10 @@ services:
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=postgres
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
-      - RABBITMQ_HOST=rabbitmq
-      - RABBITMQ_PORT=5672
-      - RABBITMQ_USERNAME=guest
-      - RABBITMQ_PASSWORD=guest
-      - RABBITMQ_EXCHANGE=order.exchange
-      - RABBITMQ_ROUTING_KEY=order.key
-      - RABBITMQ_QUEUE=order.queue
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_RABBITMQ_USERNAME=guest
+      - SPRING_RABBITMQ_PASSWORD=guest
     networks:
       - order-network
       - microservices-network
@@ -38,11 +35,11 @@ services:
     networks:
       - order-network
 
+volumes:
+  postgres_data:
+
 networks:
   order-network:
     driver: bridge
   microservices-network:
-    external: true
-
-volumes:
-  postgres_data: 
+    external: true 

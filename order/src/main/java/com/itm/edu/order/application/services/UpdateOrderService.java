@@ -2,45 +2,39 @@ package com.itm.edu.order.application.services;
 
 import com.itm.edu.order.application.ports.inputs.UpdateOrderUseCase;
 import com.itm.edu.order.application.ports.outputs.OrderRepositoryPort;
-import com.itm.edu.order.domain.exception.OrderNotFoundException;
 import com.itm.edu.order.domain.model.Order;
+import com.itm.edu.order.domain.exception.BusinessException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class UpdateOrderService implements UpdateOrderUseCase {
-
-    private final OrderRepositoryPort orderRepositoryPort;
-
-    public UpdateOrderService(OrderRepositoryPort orderRepositoryPort) {
-        this.orderRepositoryPort = orderRepositoryPort;
-    }
+    private final OrderRepositoryPort orderRepository;
 
     @Override
     @Transactional
-    public Order updateOrder(UUID id, Order orderDetails) {
-        if (id == null) {
-            throw new IllegalArgumentException("Order ID cannot be null");
-        }
+    public Order updateOrder(UUID orderId, Order orderDetails) {
+        Order existingOrder = orderRepository.findById(orderId)
+                .orElseThrow(() -> new BusinessException("Orden no encontrada con ID: " + orderId));
 
-        if (orderDetails == null) {
-            throw new IllegalArgumentException("Order details cannot be null");
+        Order updatedOrder = existingOrder;
+        
+        if (orderDetails.getOrderStatus() != null) {
+            updatedOrder = updatedOrder.withUpdatedStatus(orderDetails.getOrderStatus());
         }
-
-        Order existingOrder = orderRepositoryPort.findById(id)
-                .orElseThrow(() -> new OrderNotFoundException("Order not found with id: " + id));
-
-        // Actualizar los campos necesarios
-        existingOrder.setOrderStatus(orderDetails.getOrderStatus());
-        if (orderDetails.getDeliveryAddress() != null) {
-            existingOrder.setDeliveryAddress(orderDetails.getDeliveryAddress());
-        }
+        
         if (orderDetails.getClient() != null) {
-            existingOrder.setClient(orderDetails.getClient());
+            updatedOrder = updatedOrder.withUpdatedClient(orderDetails.getClient());
         }
 
-        return orderRepositoryPort.update(existingOrder);
+        if (orderDetails.getDeliveryAddress() != null) {
+            updatedOrder = updatedOrder.withUpdatedDeliveryAddress(orderDetails.getDeliveryAddress());
+        }
+
+        return orderRepository.save(updatedOrder);
     }
 } 

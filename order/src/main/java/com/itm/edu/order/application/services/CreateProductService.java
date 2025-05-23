@@ -3,73 +3,40 @@ package com.itm.edu.order.application.services;
 import com.itm.edu.order.application.ports.inputs.CreateProductUseCase;
 import com.itm.edu.order.application.ports.outputs.ProductRepositoryPort;
 import com.itm.edu.order.domain.model.Product;
+import com.itm.edu.order.domain.exception.BusinessException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class CreateProductService implements CreateProductUseCase {
-
-    private final ProductRepositoryPort productRepositoryPort;
-
-    public CreateProductService(ProductRepositoryPort productRepositoryPort) {
-        this.productRepositoryPort = productRepositoryPort;
-    }
+    private final ProductRepositoryPort productRepository;
 
     @Override
-    public Product createProduct(String name, String description, BigDecimal price, Integer stock) {
-        validateProductParameters(name, description, price, stock);
-
-        Product product = Product.builder()
-                .id(UUID.randomUUID())
-                .name(name)
-                .description(description)
-                .price(price)
-                .stock(stock)
-                .build();
-        
-        return productRepositoryPort.save(product);
+    @Transactional
+    public Product createProduct(Product product) {
+        validateProductData(product);
+        return productRepository.save(product);
     }
 
-    public Product createProduct(UUID id, String name, String description, BigDecimal price, Integer stock) {
-        validateProductParameters(name, description, price, stock);
-
-        Product product = Product.builder()
-                .id(id)
-                .name(name)
-                .description(description)
-                .price(price)
-                .stock(stock)
-                .build();
-        
-        return productRepositoryPort.save(product);
-    }
-
-    private void validateProductParameters(String name, String description, BigDecimal price, Integer stock) {
-        if (!StringUtils.hasText(name)) {
-            throw new IllegalArgumentException("Product name cannot be null or empty");
+    private void validateProductData(Product product) {
+        if (product == null) {
+            throw new BusinessException("El producto no puede ser nulo");
         }
-
-        if (!StringUtils.hasText(description)) {
-            throw new IllegalArgumentException("Product description cannot be null or empty");
+        if (product.getName() == null || product.getName().trim().isEmpty()) {
+            throw new BusinessException("El nombre del producto no puede estar vacío");
         }
-
-        if (price == null) {
-            throw new IllegalArgumentException("Product price cannot be null");
+        if (product.getDescription() == null || product.getDescription().trim().isEmpty()) {
+            throw new BusinessException("La descripción del producto no puede estar vacía");
         }
-
-        if (price.compareTo(BigDecimal.ZERO) < 0) {
-            throw new IllegalArgumentException("Product price cannot be negative");
+        if (product.getPrice() == null || product.getPrice().compareTo(BigDecimal.ZERO) < 0) {
+            throw new BusinessException("El precio no puede ser negativo");
         }
-
-        if (stock == null) {
-            throw new IllegalArgumentException("Product stock cannot be null");
-        }
-
-        if (stock < 0) {
-            throw new IllegalArgumentException("Product stock cannot be negative");
+        if (product.getStock() == null || product.getStock() < 0) {
+            throw new BusinessException("El stock no puede ser negativo");
         }
     }
 } 
