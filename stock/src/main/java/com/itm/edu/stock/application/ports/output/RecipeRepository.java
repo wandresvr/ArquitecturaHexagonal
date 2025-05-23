@@ -1,14 +1,16 @@
 package com.itm.edu.stock.application.ports.output;
 
-import com.itm.edu.stock.domain.entities.Recipe;
+import com.itm.edu.stock.application.dto.RecipeResponse;
+import com.itm.edu.stock.infrastructure.persistence.dto.RecipeDto;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 public interface RecipeRepository {
-    Recipe save(Recipe recipe);
-    Optional<Recipe> findById(UUID id);
-    List<Recipe> findAll();
+    RecipeResponse save(RecipeDto recipe);
+    Optional<RecipeResponse> findById(UUID id);
+    List<RecipeResponse> findAll();
     void deleteById(UUID id);
-    List<Recipe> findByDifficulty(String difficulty);
+    boolean existsById(UUID id);
+    List<RecipeResponse> findByDifficulty(String difficulty);
 } 

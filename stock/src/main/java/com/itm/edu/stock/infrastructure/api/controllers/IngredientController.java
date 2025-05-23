@@ -1,9 +1,11 @@
 package com.itm.edu.stock.infrastructure.api.controllers;
 
-import com.itm.edu.stock.application.ports.input.IngredientUseCase;
+import com.itm.edu.stock.application.ports.input.CreateIngredientUseCase;
+import com.itm.edu.stock.application.ports.input.GetIngredientUseCase;
 import com.itm.edu.stock.infrastructure.api.dto.CreateIngredientRequestDto;
 import com.itm.edu.stock.infrastructure.api.dto.IngredientResponseDto;
 import com.itm.edu.stock.infrastructure.api.dto.ErrorResponse;
+import com.itm.edu.stock.infrastructure.api.mapper.IngredientApiMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/ingredients")
@@ -26,7 +29,9 @@ import java.util.UUID;
 @Tag(name = "Ingredientes", description = "API para la gestión de ingredientes")
 public class IngredientController {
 
-    private final IngredientUseCase ingredientUseCase;
+    private final CreateIngredientUseCase createIngredientUseCase;
+    private final GetIngredientUseCase getIngredientUseCase;
+    private final IngredientApiMapper ingredientMapper;
 
     @Operation(summary = "Crear un nuevo ingrediente", description = "Crea un nuevo ingrediente con los datos especificados")
     @ApiResponses(value = {
@@ -38,9 +43,10 @@ public class IngredientController {
             content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping
-    public ResponseEntity<IngredientResponseDto> createIngredient(
-            @Valid @RequestBody CreateIngredientRequestDto request) {
-        return new ResponseEntity<>(ingredientUseCase.createIngredient(request), HttpStatus.CREATED);
+    public ResponseEntity<IngredientResponseDto> createIngredient(@RequestBody CreateIngredientRequestDto request) {
+        var command = ingredientMapper.toCommand(request);
+        var response = createIngredientUseCase.createIngredient(command);
+        return ResponseEntity.ok(ingredientMapper.toResponseDto(response));
     }
 
     @Operation(summary = "Obtener todos los ingredientes", description = "Retorna una lista de todos los ingredientes disponibles")
@@ -52,7 +58,11 @@ public class IngredientController {
     })
     @GetMapping
     public ResponseEntity<List<IngredientResponseDto>> getAllIngredients() {
-        return ResponseEntity.ok(ingredientUseCase.getAllIngredients());
+        var ingredients = getIngredientUseCase.getAllIngredients();
+        var response = ingredients.stream()
+                .map(ingredientMapper::toResponseDto)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(response);
     }
 
     @Operation(summary = "Obtener un ingrediente por ID", description = "Retorna un ingrediente específico basado en su ID")
@@ -65,10 +75,9 @@ public class IngredientController {
             content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @GetMapping("/{id}")
-    public ResponseEntity<IngredientResponseDto> getIngredientById(
-            @Parameter(description = "ID del ingrediente", required = true)
-            @PathVariable UUID id) {
-        return ResponseEntity.ok(ingredientUseCase.getIngredientById(id));
+    public ResponseEntity<IngredientResponseDto> getIngredientById(@PathVariable UUID id) {
+        var ingredient = getIngredientUseCase.getIngredientById(id);
+        return ResponseEntity.ok(ingredientMapper.toResponseDto(ingredient));
     }
 
     @Operation(summary = "Actualizar un ingrediente", description = "Actualiza un ingrediente existente con nuevos datos")
@@ -87,7 +96,9 @@ public class IngredientController {
             @Parameter(description = "ID del ingrediente", required = true)
             @PathVariable UUID id,
             @Valid @RequestBody CreateIngredientRequestDto request) {
-        return ResponseEntity.ok(ingredientUseCase.updateIngredient(id, request));
+        var command = ingredientMapper.toCommand(request);
+        var response = createIngredientUseCase.updateIngredient(id, command);
+        return ResponseEntity.ok(ingredientMapper.toResponseDto(response));
     }
 
     @Operation(summary = "Eliminar un ingrediente", description = "Elimina un ingrediente específico basado en su ID")
@@ -99,10 +110,8 @@ public class IngredientController {
             content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteIngredient(
-            @Parameter(description = "ID del ingrediente", required = true)
-            @PathVariable UUID id) {
-        ingredientUseCase.deleteIngredient(id);
+    public ResponseEntity<Void> deleteIngredient(@PathVariable UUID id) {
+        createIngredientUseCase.deleteIngredient(id);
         return ResponseEntity.noContent().build();
     }
 
@@ -119,6 +128,10 @@ public class IngredientController {
     public ResponseEntity<List<IngredientResponseDto>> getIngredientsBySupplier(
             @Parameter(description = "Nombre del proveedor", required = true)
             @PathVariable String supplier) {
-        return ResponseEntity.ok(ingredientUseCase.getIngredientsBySupplier(supplier));
+        var responses = getIngredientUseCase.getIngredientsBySupplier(supplier);
+        var dtos = responses.stream()
+                .map(ingredientMapper::toResponseDto)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
     }
 } 

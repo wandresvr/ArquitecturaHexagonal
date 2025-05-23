@@ -1,15 +1,18 @@
 package com.itm.edu.stock.domain.valueobjects;
 
 import java.math.BigDecimal;
+import lombok.Value;
 
+@Value
 public class Quantity {
-    private final BigDecimal value;
+    BigDecimal value;
+
+    public static Quantity of(BigDecimal value) {
+        return new Quantity(value);
+    }
 
     public Quantity(BigDecimal value) {
-        if (value == null) {
-            throw new IllegalArgumentException("La cantidad no puede ser nula");
-        }
-        if (value.compareTo(BigDecimal.ZERO) < 0) {
+        if (value == null || value.compareTo(BigDecimal.ZERO) < 0) {
             throw new IllegalArgumentException("La cantidad no puede ser negativa");
         }
         this.value = value;
@@ -20,8 +23,7 @@ public class Quantity {
     }
 
     public Quantity subtract(Quantity other) {
-        BigDecimal result = this.value.subtract(other.value);
-        return new Quantity(result);
+        return new Quantity(this.value.subtract(other.value));
     }
 
     public boolean isLessThan(Quantity other) {

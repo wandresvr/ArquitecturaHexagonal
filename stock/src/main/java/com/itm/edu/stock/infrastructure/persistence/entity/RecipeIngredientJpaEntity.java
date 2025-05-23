@@ -1,18 +1,24 @@
 package com.itm.edu.stock.infrastructure.persistence.entity;
 
-import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
 import com.itm.edu.stock.domain.entities.RecipeIngredient;
-import com.itm.edu.stock.domain.valueobjects.Quantity;
-import com.itm.edu.stock.domain.valueobjects.Unit;
 import com.itm.edu.stock.infrastructure.persistence.base.BaseJpaEntity;
+import jakarta.persistence.*;
+import lombok.*;
+import java.math.BigDecimal;
+import java.util.UUID;
 
 @Entity
 @Table(name = "recipe_ingredients")
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class RecipeIngredientJpaEntity extends BaseJpaEntity<RecipeIngredient> {
+    @Id
+    @GeneratedValue
+    private UUID id;
+
     @ManyToOne
     @JoinColumn(name = "recipe_id")
     private RecipeJpaEntity recipe;
@@ -21,32 +27,18 @@ public class RecipeIngredientJpaEntity extends BaseJpaEntity<RecipeIngredient> {
     @JoinColumn(name = "ingredient_id")
     private IngredientJpaEntity ingredient;
 
-    @Embedded
-    private Quantity quantity;
-
-    @Embedded
-    private Unit unit;
-
-    public static RecipeIngredientJpaEntity fromDomain(RecipeIngredient recipeIngredient) {
-        if (recipeIngredient == null) return null;
-        
-        RecipeIngredientJpaEntity entity = new RecipeIngredientJpaEntity();
-        entity.setId(recipeIngredient.getId());
-        entity.setRecipe(RecipeJpaEntity.fromDomain(recipeIngredient.getRecipe()));
-        entity.setIngredient(IngredientJpaEntity.fromDomain(recipeIngredient.getIngredient()));
-        entity.setQuantity(recipeIngredient.getQuantity());
-        entity.setUnit(recipeIngredient.getUnit());
-        return entity;
-    }
+    private BigDecimal quantity;
+    private String unit;
 
     @Override
     public RecipeIngredient toDomain() {
-        return new RecipeIngredient(
-            this.id,
-            this.recipe.toDomain(),
-            this.ingredient.toDomain(),
-            this.quantity,
-            this.unit
-        );
+        return RecipeIngredient.builder()
+            .id(this.id)
+            .recipeId(this.recipe != null ? this.recipe.getId() : null)
+            .ingredientId(this.ingredient != null ? this.ingredient.getId() : null)
+            .ingredientName(this.ingredient != null ? this.ingredient.getName() : null)
+            .quantity(this.quantity)
+            .unit(this.unit)
+            .build();
     }
 } 

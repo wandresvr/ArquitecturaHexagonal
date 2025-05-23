@@ -1,33 +1,61 @@
 package com.itm.edu.stock.infrastructure.persistence.adapter;
 
-import com.itm.edu.stock.domain.entities.Recipe;
-import com.itm.edu.stock.domain.repository.RecipeRepository;
-import com.itm.edu.stock.infrastructure.persistence.base.BaseRepositoryAdapter;
-import com.itm.edu.stock.infrastructure.persistence.entity.RecipeJpaEntity;
+import com.itm.edu.stock.application.ports.output.RecipeRepository;
+import com.itm.edu.stock.application.dto.RecipeResponse;
+import com.itm.edu.stock.infrastructure.persistence.dto.RecipeDto;
+import com.itm.edu.stock.infrastructure.persistence.mapper.RecipeMapper;
 import com.itm.edu.stock.infrastructure.persistence.repository.RecipeJpaRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Component
-public class RecipeRepositoryAdapter extends BaseRepositoryAdapter<RecipeJpaEntity, Recipe> implements RecipeRepository {
-    
-    private final RecipeJpaRepository recipeJpaRepository;
+@RequiredArgsConstructor
+public class RecipeRepositoryAdapter implements RecipeRepository {
+    private final RecipeJpaRepository jpaRepository;
+    private final RecipeMapper mapper;
 
-    public RecipeRepositoryAdapter(RecipeJpaRepository recipeJpaRepository) {
-        super(recipeJpaRepository);
-        this.recipeJpaRepository = recipeJpaRepository;
+    @Override
+    public RecipeResponse save(RecipeDto recipe) {
+        var entity = mapper.toEntity(recipe);
+        var savedEntity = jpaRepository.save(entity);
+        return mapper.toResponse(mapper.toDto(savedEntity));
     }
 
     @Override
-    protected RecipeJpaEntity toJpaEntity(Recipe recipe) {
-        return RecipeJpaEntity.fromDomain(recipe);
+    public Optional<RecipeResponse> findById(UUID id) {
+        return jpaRepository.findById(id)
+                .map(mapper::toDto)
+                .map(mapper::toResponse);
     }
 
     @Override
-    public List<Recipe> findByDifficulty(String difficulty) {
-        return recipeJpaRepository.findByDifficulty(difficulty).stream()
-                .map(RecipeJpaEntity::toDomain)
+    public List<RecipeResponse> findAll() {
+        return jpaRepository.findAll().stream()
+                .map(mapper::toDto)
+                .map(mapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public void deleteById(UUID id) {
+        jpaRepository.deleteById(id);
+    }
+
+    @Override
+    public boolean existsById(UUID id) {
+        return jpaRepository.existsById(id);
+    }
+
+    @Override
+    public List<RecipeResponse> findByDifficulty(String difficulty) {
+        return jpaRepository.findByDifficulty(difficulty).stream()
+                .map(mapper::toDto)
+                .map(mapper::toResponse)
                 .collect(Collectors.toList());
     }
 } 

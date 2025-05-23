@@ -1,40 +1,50 @@
 package com.itm.edu.stock.domain.entities;
 
-import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.With;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
 @Getter
-@NoArgsConstructor
+@Builder(toBuilder = true)
 @AllArgsConstructor
+@With
 public class Recipe {
-    private UUID id;
-    private String name;
-    private String description;
-    private String instructions;
-    private Integer preparationTime;
-    private String difficulty;
-    private BigDecimal cost;
-    private List<RecipeIngredient> recipeIngredients;
+    private final UUID id;
+    private final String name;
+    private final String description;
+    private final String instructions;
+    private final Integer preparationTime;
+    private final String difficulty;
+    private final BigDecimal cost;
+    private final List<RecipeIngredient> recipeIngredients;
 
-    public void updateCost(BigDecimal newCost) {
-        if (newCost.compareTo(BigDecimal.ZERO) < 0) {
-            throw new IllegalArgumentException("El costo no puede ser negativo");
-        }
-        this.cost = newCost;
+    public Recipe withCost(BigDecimal newCost) {
+        return Recipe.builder()
+                .id(this.id)
+                .name(this.name)
+                .description(this.description)
+                .instructions(this.instructions)
+                .preparationTime(this.preparationTime)
+                .difficulty(this.difficulty)
+                .recipeIngredients(this.recipeIngredients)
+                .cost(newCost)
+                .build();
     }
 
-    public void addIngredient(RecipeIngredient ingredient) {
-        if (ingredient == null) {
-            throw new IllegalArgumentException("El ingrediente no puede ser nulo");
-        }
-        this.recipeIngredients.add(ingredient);
-    }
-
-    public void removeIngredient(RecipeIngredient ingredient) {
-        this.recipeIngredients.remove(ingredient);
+    public Recipe withRecipeIngredients(List<RecipeIngredient> newIngredients) {
+        return Recipe.builder()
+                .id(this.id)
+                .name(this.name)
+                .description(this.description)
+                .instructions(this.instructions)
+                .preparationTime(this.preparationTime)
+                .difficulty(this.difficulty)
+                .recipeIngredients(newIngredients)
+                .cost(this.cost)
+                .build();
     }
 }

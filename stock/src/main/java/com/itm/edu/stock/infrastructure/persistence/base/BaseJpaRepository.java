@@ -5,5 +5,5 @@ import org.springframework.data.repository.NoRepositoryBean;
 import java.util.UUID;
 
 @NoRepositoryBean
-public interface BaseJpaRepository<T extends BaseJpaEntity<D>, D> extends JpaRepository<T, UUID> {
+public interface BaseJpaRepository<T extends BaseJpaEntity<?>> extends JpaRepository<T, UUID> {
 } 

@@ -1,6 +1,5 @@
 package com.itm.edu.stock.infrastructure.persistence.valueobjects;
 
-import com.itm.edu.stock.domain.valueobjects.Quantity;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Column;
 import java.math.BigDecimal;
@@ -13,16 +12,15 @@ public class QuantityJpaValue {
     public QuantityJpaValue() {
     }
 
-    public QuantityJpaValue(Quantity quantity) {
-        this.value = quantity.getValue();
+    public QuantityJpaValue(BigDecimal value) {
+        this.value = value;
     }
 
-    public Quantity toDomain() {
-        return new Quantity(value);
+    public BigDecimal getValue() {
+        return value;
     }
 
-    public static QuantityJpaValue fromDomain(Quantity quantity) {
-        if (quantity == null) return null;
-        return new QuantityJpaValue(quantity);
+    public void setValue(BigDecimal value) {
+        this.value = value;
     }
 } 

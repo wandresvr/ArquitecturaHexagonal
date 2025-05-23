@@ -4,6 +4,7 @@ import com.itm.edu.stock.application.ports.input.RecipeUseCase;
 import com.itm.edu.stock.infrastructure.api.dto.CreateRecipeRequestDto;
 import com.itm.edu.stock.infrastructure.api.dto.RecipeResponseDto;
 import com.itm.edu.stock.infrastructure.api.dto.ErrorResponse;
+import com.itm.edu.stock.infrastructure.api.mapper.RecipeApiMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -19,14 +20,16 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/v1/recipes")
+@RequestMapping("/api/recipes")
 @RequiredArgsConstructor
 @Tag(name = "Recetas", description = "API para la gestión de recetas")
 public class RecipeController {
 
     private final RecipeUseCase recipeUseCase;
+    private final RecipeApiMapper recipeApiMapper;
 
     @Operation(summary = "Crear una nueva receta", description = "Crea una nueva receta con los ingredientes especificados")
     @ApiResponses(value = {
@@ -38,9 +41,10 @@ public class RecipeController {
             content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping
-    public ResponseEntity<RecipeResponseDto> createRecipe(
-            @Valid @RequestBody CreateRecipeRequestDto request) {
-        return new ResponseEntity<>(recipeUseCase.createRecipe(request), HttpStatus.CREATED);
+    public ResponseEntity<RecipeResponseDto> createRecipe(@Valid @RequestBody CreateRecipeRequestDto request) {
+        var command = recipeApiMapper.toCommand(request);
+        var response = recipeUseCase.createRecipe(command);
+        return ResponseEntity.ok(recipeApiMapper.toDto(response));
     }
 
     @Operation(summary = "Obtener todas las recetas", description = "Retorna una lista de todas las recetas disponibles")
@@ -52,7 +56,11 @@ public class RecipeController {
     })
     @GetMapping
     public ResponseEntity<List<RecipeResponseDto>> getAllRecipes() {
-        return ResponseEntity.ok(recipeUseCase.getAllRecipes());
+        var responses = recipeUseCase.getAllRecipes();
+        var dtos = responses.stream()
+                .map(recipeApiMapper::toDto)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
     }
 
     @Operation(summary = "Obtener una receta por ID", description = "Retorna una receta específica basada en su ID")
@@ -65,10 +73,9 @@ public class RecipeController {
             content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @GetMapping("/{id}")
-    public ResponseEntity<RecipeResponseDto> getRecipeById(
-            @Parameter(description = "ID de la receta", required = true)
-            @PathVariable UUID id) {
-        return ResponseEntity.ok(recipeUseCase.getRecipeById(id));
+    public ResponseEntity<RecipeResponseDto> getRecipeById(@PathVariable UUID id) {
+        var response = recipeUseCase.getRecipeById(id);
+        return ResponseEntity.ok(recipeApiMapper.toDto(response));
     }
 
     @Operation(summary = "Actualizar una receta", description = "Actualiza una receta existente con nuevos datos")
@@ -87,7 +94,9 @@ public class RecipeController {
             @Parameter(description = "ID de la receta", required = true)
             @PathVariable UUID id,
             @Valid @RequestBody CreateRecipeRequestDto request) {
-        return ResponseEntity.ok(recipeUseCase.updateRecipe(id, request));
+        var command = recipeApiMapper.toCommand(request);
+        var response = recipeUseCase.updateRecipe(id, command);
+        return ResponseEntity.ok(recipeApiMapper.toDto(response));
     }
 
     @Operation(summary = "Obtener recetas por dificultad", description = "Retorna una lista de recetas filtradas por nivel de dificultad")
@@ -100,10 +109,12 @@ public class RecipeController {
             content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @GetMapping("/difficulty/{difficulty}")
-    public ResponseEntity<List<RecipeResponseDto>> getRecipesByDifficulty(
-            @Parameter(description = "Nivel de dificultad", required = true)
-            @PathVariable String difficulty) {
-        return ResponseEntity.ok(recipeUseCase.getRecipesByDifficulty(difficulty));
+    public ResponseEntity<List<RecipeResponseDto>> getRecipesByDifficulty(@PathVariable String difficulty) {
+        var responses = recipeUseCase.getRecipesByDifficulty(difficulty);
+        var dtos = responses.stream()
+                .map(recipeApiMapper::toDto)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
     }
 
     @Operation(summary = "Eliminar una receta", description = "Elimina una receta específica basada en su ID")
@@ -115,9 +126,7 @@ public class RecipeController {
             content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteRecipe(
-            @Parameter(description = "ID de la receta", required = true)
-            @PathVariable UUID id) {
+    public ResponseEntity<Void> deleteRecipe(@PathVariable UUID id) {
         recipeUseCase.deleteRecipe(id);
         return ResponseEntity.noContent().build();
     }

@@ -6,9 +6,9 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 public abstract class BaseRepositoryAdapter<T extends BaseJpaEntity<D>, D> {
-    protected final BaseJpaRepository<T, D> repository;
+    protected final BaseJpaRepository<T> repository;
 
-    protected BaseRepositoryAdapter(BaseJpaRepository<T, D> repository) {
+    protected BaseRepositoryAdapter(BaseJpaRepository<T> repository) {
         this.repository = repository;
     }
 

@@ -1,11 +1,13 @@
-package com.itm.edu.stock.infrastructure.api.dto;
+package com.itm.edu.stock.application.dto;
 
-import lombok.Value;
 import java.math.BigDecimal;
 import java.util.UUID;
+import lombok.Builder;
+import lombok.Value;
 
 @Value
-public class IngredientResponseDto {
+@Builder
+public class IngredientResponse {
     UUID id;
     String name;
     String description;
@@ -13,4 +15,5 @@ public class IngredientResponseDto {
     String unit;
     String supplier;
     BigDecimal minimumStock;
+    BigDecimal price;
 } 

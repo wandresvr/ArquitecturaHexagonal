@@ -1,60 +1,51 @@
 package com.itm.edu.stock.infrastructure.persistence.entity;
 
-import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
 import com.itm.edu.stock.domain.entities.Ingredient;
-import com.itm.edu.stock.infrastructure.persistence.base.BaseJpaEntity;
+import jakarta.persistence.*;
+import lombok.*;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 @Entity
 @Table(name = "ingredients")
 @Getter
 @Setter
-public class IngredientJpaEntity extends BaseJpaEntity<Ingredient> {
-    @Column(nullable = false)
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class IngredientJpaEntity {
+    @Id
+    private UUID id;
     private String name;
-
-    @Column(length = 1000)
     private String description;
-
-    @Column(nullable = false)
     private BigDecimal quantity;
-
-    @Column(nullable = false)
     private String unit;
-
-    @Column(nullable = false)
     private BigDecimal price;
-
-    @Column(nullable = false)
     private String supplier;
+    private BigDecimal minimumStock;
 
     public static IngredientJpaEntity fromDomain(Ingredient ingredient) {
-        if (ingredient == null) return null;
-        
-        IngredientJpaEntity entity = new IngredientJpaEntity();
-        entity.setId(ingredient.getId());
-        entity.setName(ingredient.getName());
-        entity.setDescription(ingredient.getDescription());
-        entity.setQuantity(ingredient.getQuantity());
-        entity.setUnit(ingredient.getUnit());
-        entity.setPrice(ingredient.getPrice());
-        entity.setSupplier(ingredient.getSupplier());
-        return entity;
+        return IngredientJpaEntity.builder()
+                .id(ingredient.getId())
+                .name(ingredient.getName())
+                .description(ingredient.getDescription())
+                .quantity(ingredient.getQuantity())
+                .unit(ingredient.getUnit())
+                .supplier(ingredient.getSupplier())
+                .minimumStock(ingredient.getMinimumStock())
+                .build();
     }
 
-    @Override
     public Ingredient toDomain() {
-        return new Ingredient(
-            this.id,
-            this.name,
-            this.description,
-            this.quantity,
-            this.unit,
-            this.price,
-            this.supplier
-        );
+        return Ingredient.builder()
+                .id(this.id)
+                .name(this.name)
+                .description(this.description)
+                .quantity(this.quantity)
+                .unit(this.unit)
+                .supplier(this.supplier)
+                .minimumStock(this.minimumStock)
+                .build();
     }
 } 

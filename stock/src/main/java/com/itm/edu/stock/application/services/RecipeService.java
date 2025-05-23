@@ -2,12 +2,17 @@ package com.itm.edu.stock.application.services;
 
 import com.itm.edu.stock.application.ports.input.RecipeUseCase;
 import com.itm.edu.stock.application.ports.output.RecipeRepository;
-import com.itm.edu.stock.domain.entities.Recipe;
-import com.itm.edu.stock.infrastructure.api.dto.CreateRecipeRequestDto;
-import com.itm.edu.stock.infrastructure.api.dto.RecipeResponseDto;
-import com.itm.edu.stock.infrastructure.api.mapper.RecipeMapper;
+import com.itm.edu.stock.application.ports.output.IngredientRepository;
+import com.itm.edu.stock.application.dto.CreateRecipeCommand;
+import com.itm.edu.stock.application.dto.RecipeResponse;
+import com.itm.edu.stock.application.dto.RecipeIngredientResponse;
+import com.itm.edu.stock.domain.exception.BusinessException;
+import com.itm.edu.stock.infrastructure.persistence.dto.RecipeDto;
+import com.itm.edu.stock.infrastructure.persistence.mapper.RecipeMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
@@ -17,72 +22,97 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class RecipeService implements RecipeUseCase {
     private final RecipeRepository recipeRepository;
+    private final IngredientRepository ingredientRepository;
     private final RecipeMapper recipeMapper;
 
     @Override
-    public RecipeResponseDto createRecipe(CreateRecipeRequestDto request) {
-        Recipe recipe = recipeMapper.toEntity(request);
-        calculateRecipeCost(recipe);
-        Recipe savedRecipe = recipeRepository.save(recipe);
-        return recipeMapper.toDto(savedRecipe);
-    }
-
-    @Override
-    public List<RecipeResponseDto> getAllRecipes() {
-        return recipeRepository.findAll().stream()
-                .map(recipeMapper::toDto)
+    @Transactional
+    public RecipeResponse createRecipe(CreateRecipeCommand command) {
+        // Validar que todos los ingredientes existan
+        List<UUID> nonExistentIngredients = command.getIngredients().stream()
+                .map(ingredient -> ingredient.getIngredientId())
+                .filter(ingredientId -> !ingredientRepository.existsById(ingredientId))
                 .collect(Collectors.toList());
+
+        if (!nonExistentIngredients.isEmpty()) {
+            throw new BusinessException("Los siguientes ingredientes no existen: " + 
+                nonExistentIngredients.stream()
+                    .map(UUID::toString)
+                    .collect(Collectors.joining(", ")));
+        }
+
+        RecipeDto dto = recipeMapper.fromCommand(command);
+        return recipeRepository.save(dto);
     }
 
     @Override
-    public RecipeResponseDto getRecipeById(UUID id) {
-        Recipe recipe = recipeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Recipe not found"));
-        return recipeMapper.toDto(recipe);
+    @Transactional(readOnly = true)
+    public List<RecipeResponse> getAllRecipes() {
+        return recipeRepository.findAll();
     }
 
     @Override
-    public RecipeResponseDto updateRecipe(UUID id, CreateRecipeRequestDto request) {
-        Recipe existingRecipe = recipeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Recipe not found"));
+    @Transactional(readOnly = true)
+    public RecipeResponse getRecipeById(UUID id) {
+        return recipeRepository.findById(id)
+                .orElseThrow(() -> new BusinessException("Receta no encontrada"));
+    }
+
+    @Override
+    @Transactional
+    public RecipeResponse updateRecipe(UUID id, CreateRecipeCommand command) {
+        if (!recipeRepository.existsById(id)) {
+            throw new RuntimeException("Recipe not found");
+        }
         
-        Recipe updatedRecipe = recipeMapper.toEntity(request);
-        existingRecipe.setName(updatedRecipe.getName());
-        existingRecipe.setDescription(updatedRecipe.getDescription());
-        existingRecipe.setInstructions(updatedRecipe.getInstructions());
-        existingRecipe.setPreparationTime(updatedRecipe.getPreparationTime());
-        existingRecipe.setDifficulty(updatedRecipe.getDifficulty());
-        existingRecipe.setRecipeIngredients(updatedRecipe.getRecipeIngredients());
-        
-        calculateRecipeCost(existingRecipe);
-        Recipe savedRecipe = recipeRepository.save(existingRecipe);
-        return recipeMapper.toDto(savedRecipe);
-    }
-
-    @Override
-    public List<RecipeResponseDto> getRecipesByDifficulty(String difficulty) {
-        return recipeRepository.findByDifficulty(difficulty).stream()
-                .map(recipeMapper::toDto)
+        // Validar que todos los ingredientes existan
+        List<UUID> nonExistentIngredients = command.getIngredients().stream()
+                .map(ingredient -> ingredient.getIngredientId())
+                .filter(ingredientId -> !ingredientRepository.existsById(ingredientId))
                 .collect(Collectors.toList());
+
+        if (!nonExistentIngredients.isEmpty()) {
+            throw new BusinessException("Los siguientes ingredientes no existen: " + 
+                nonExistentIngredients.stream()
+                    .map(UUID::toString)
+                    .collect(Collectors.joining(", ")));
+        }
+        
+        RecipeDto dto = recipeMapper.fromCommand(command);
+        return recipeRepository.save(dto);
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public List<RecipeResponse> getRecipesByDifficulty(String difficulty) {
+        return recipeRepository.findByDifficulty(difficulty);
+    }
+
+    @Override
+    @Transactional
     public void deleteRecipe(UUID id) {
+        if (!recipeRepository.existsById(id)) {
+            throw new BusinessException("Receta no encontrada");
+        }
         recipeRepository.deleteById(id);
     }
 
     @Override
+    @Transactional
     public BigDecimal calculateRecipeCost(UUID id) {
-        Recipe recipe = recipeRepository.findById(id)
+        RecipeResponse recipe = recipeRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Recipe not found"));
-        calculateRecipeCost(recipe);
-        return recipe.getCost();
+        
+        return calculateRecipeCost(recipe.getIngredients());
     }
 
-    private void calculateRecipeCost(Recipe recipe) {
-        BigDecimal totalCost = recipe.getRecipeIngredients().stream()
-                .map(ri -> ri.getIngredient().getPrice().multiply(ri.getQuantity().getValue()))
+    private BigDecimal calculateRecipeCost(List<RecipeIngredientResponse> ingredients) {
+        return ingredients.stream()
+                .map(ingredient -> {
+                    var ingredientData = ingredientRepository.findById(ingredient.getIngredientId())
+                            .orElseThrow(() -> new RuntimeException("Ingredient not found"));
+                    return ingredientData.getPrice().multiply(ingredient.getQuantity());
+                })
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-        recipe.setCost(totalCost);
     }
 } 

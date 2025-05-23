@@ -1,33 +1,27 @@
 package com.itm.edu.stock.domain.entities;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import com.itm.edu.stock.domain.valueobjects.Quantity;
-import com.itm.edu.stock.domain.valueobjects.Unit;
+import lombok.Builder;
+import lombok.Value;
+import java.math.BigDecimal;
 import java.util.UUID;
 
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
+@Value
+@Builder(toBuilder = true)
 public class RecipeIngredient {
-    private UUID id;
-    private Recipe recipe;
-    private Ingredient ingredient;
-    private Quantity quantity;
-    private Unit unit;
+    UUID id;
+    UUID recipeId;
+    UUID ingredientId;
+    String ingredientName;
+    BigDecimal quantity;
+    String unit;
 
-    public void updateQuantity(Quantity newQuantity) {
-        if (newQuantity == null) {
-            throw new IllegalArgumentException("La cantidad no puede ser nula");
-        }
-        this.quantity = newQuantity;
+    public RecipeIngredient withQuantity(BigDecimal newQuantity) {
+        return this.toBuilder().quantity(newQuantity).build();
     }
 
-    public void updateUnit(Unit newUnit) {
-        if (newUnit == null) {
-            throw new IllegalArgumentException("La unidad no puede ser nula");
-        }
-        this.unit = newUnit;
+    public RecipeIngredient withUnit(String newUnit) {
+        return this.toBuilder()
+                .unit(newUnit)
+                .build();
     }
 } 

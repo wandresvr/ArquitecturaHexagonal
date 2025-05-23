@@ -1,6 +1,5 @@
 package com.itm.edu.stock.infrastructure.persistence.valueobjects;
 
-import com.itm.edu.stock.domain.valueobjects.Unit;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Column;
 
@@ -12,16 +11,15 @@ public class UnitJpaValue {
     public UnitJpaValue() {
     }
 
-    public UnitJpaValue(Unit unit) {
-        this.value = unit.getValue();
+    public UnitJpaValue(String value) {
+        this.value = value;
     }
 
-    public Unit toDomain() {
-        return new Unit(value);
+    public String getValue() {
+        return value;
     }
 
-    public static UnitJpaValue fromDomain(Unit unit) {
-        if (unit == null) return null;
-        return new UnitJpaValue(unit);
+    public void setValue(String value) {
+        this.value = value;
     }
 } 

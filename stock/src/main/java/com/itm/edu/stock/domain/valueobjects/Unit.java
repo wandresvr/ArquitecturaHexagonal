@@ -1,7 +1,10 @@
 package com.itm.edu.stock.domain.valueobjects;
 
+import lombok.Value;
+
+@Value
 public class Unit {
-    private final String value;
+    String value;
 
     public Unit(String value) {
         if (value == null || value.trim().isEmpty()) {
@@ -12,6 +15,10 @@ public class Unit {
 
     public String getValue() {
         return value;
+    }
+
+    public static Unit of(String value) {
+        return new Unit(value);
     }
 
     @Override

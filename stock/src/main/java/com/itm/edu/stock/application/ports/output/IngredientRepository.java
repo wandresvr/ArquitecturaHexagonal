@@ -1,14 +1,16 @@
 package com.itm.edu.stock.application.ports.output;
 
-import com.itm.edu.stock.domain.entities.Ingredient;
+import com.itm.edu.stock.application.dto.IngredientResponse;
+import com.itm.edu.stock.infrastructure.persistence.dto.IngredientDto;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 public interface IngredientRepository {
-    Ingredient save(Ingredient ingredient);
-    Optional<Ingredient> findById(UUID id);
-    List<Ingredient> findAll();
+    IngredientResponse save(IngredientDto ingredient);
+    Optional<IngredientResponse> findById(UUID id);
+    List<IngredientResponse> findAll();
     void deleteById(UUID id);
-    List<Ingredient> findBySupplier(String supplier);
+    boolean existsById(UUID id);
+    List<IngredientResponse> findBySupplier(String supplier);
 } 

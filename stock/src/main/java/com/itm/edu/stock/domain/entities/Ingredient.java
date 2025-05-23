@@ -1,34 +1,33 @@
 package com.itm.edu.stock.domain.entities;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.util.UUID;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.AllArgsConstructor;
+import lombok.With;
 
 @Getter
-@NoArgsConstructor
+@Builder(toBuilder = true)
 @AllArgsConstructor
+@With
 public class Ingredient {
-    private UUID id;
-    private String name;
-    private String description;
-    private BigDecimal quantity;
-    private String unit;
-    private BigDecimal price;
-    private String supplier;
-
-    public void updateQuantity(BigDecimal newQuantity) {
-        if (newQuantity.compareTo(BigDecimal.ZERO) < 0) {
-            throw new IllegalArgumentException("La cantidad no puede ser negativa");
-        }
-        this.quantity = newQuantity;
+    private final UUID id;
+    private final String name;
+    private final String description;
+    private final BigDecimal quantity;
+    private final String unit;
+    private final BigDecimal price;
+    private final String supplier;
+    private final BigDecimal minimumStock;
+    
+    public boolean hasLowStock() {
+        return quantity.compareTo(minimumStock) <= 0;
     }
-
-    public void updatePrice(BigDecimal newPrice) {
-        if (newPrice.compareTo(BigDecimal.ZERO) < 0) {
-            throw new IllegalArgumentException("El precio no puede ser negativo");
-        }
-        this.price = newPrice;
+    
+    public Ingredient withQuantity(BigDecimal newQuantity) {
+        return this.toBuilder()
+                .quantity(newQuantity)
+                .build();
     }
 } 
