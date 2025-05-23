@@ -7,12 +7,20 @@ import com.itm.edu.order.domain.model.Product;
 import com.itm.edu.order.domain.valueobjects.AddressShipping;
 import com.itm.edu.order.domain.valueobjects.OrderTotalValue;
 import com.itm.edu.order.infrastructure.rest.dto.OrderDto;
+import com.itm.edu.order.infrastructure.rest.dto.OrderItemResponseDto;
+import com.itm.edu.order.infrastructure.rest.dto.ProductDto;
 import org.springframework.stereotype.Component;
 
 import java.util.stream.Collectors;
 
 @Component
 public class OrderDtoMapper {
+    
+    private final ProductDtoMapper productDtoMapper;
+
+    public OrderDtoMapper(ProductDtoMapper productDtoMapper) {
+        this.productDtoMapper = productDtoMapper;
+    }
     
     public OrderDto toDto(Order domain) {
         if (domain == null) return null;
@@ -45,7 +53,6 @@ public class OrderDtoMapper {
         if (domain == null) return null;
         
         return OrderDto.OrderItemDto.builder()
-                .id(domain.getId())
                 .product(toProductDto(domain.getProduct()))
                 .quantity(domain.getQuantity())
                 .build();

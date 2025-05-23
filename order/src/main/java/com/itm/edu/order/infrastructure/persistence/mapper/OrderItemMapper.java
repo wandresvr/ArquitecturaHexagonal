@@ -18,7 +18,6 @@ public class OrderItemMapper implements DomainMapper<OrderItem, OrderItemEntity>
         if (entity == null) return null;
 
         return OrderItem.builder()
-                .id(entity.getId())
                 .product(productMapper.toDomain(entity.getProduct()))
                 .quantity(entity.getQuantity())
                 .build();
@@ -29,9 +28,16 @@ public class OrderItemMapper implements DomainMapper<OrderItem, OrderItemEntity>
         if (domain == null) return null;
 
         return OrderItemEntity.builder()
-                .id(domain.getId())
                 .product(productMapper.toEntity(domain.getProduct()))
                 .quantity(domain.getQuantity())
                 .build();
+    }
+
+    public OrderItemEntity toEntityWithId(OrderItem domain, OrderItemEntity existingEntity) {
+        OrderItemEntity entity = toEntity(domain);
+        if (existingEntity != null) {
+            entity.setId(existingEntity.getId());
+        }
+        return entity;
     }
 } 

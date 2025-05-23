@@ -9,11 +9,10 @@ import java.util.UUID;
 @Getter
 @Builder
 public class OrderItem {
-    private final UUID id;
     private final Product product;
     private final int quantity;
 
-    public OrderItem(UUID id, Product product, int quantity) {
+    public OrderItem(Product product, int quantity) {
         if (product == null) {
             throw new IllegalArgumentException("El producto no puede ser nulo");
         }
@@ -21,7 +20,6 @@ public class OrderItem {
             throw new IllegalArgumentException("La cantidad debe ser mayor a 0");
         }
         
-        this.id = id;
         this.product = product;
         this.quantity = quantity;
     }
@@ -31,6 +29,6 @@ public class OrderItem {
     }
 
     public static OrderItem create(Product product, int quantity) {
-        return new OrderItem(UUID.randomUUID(), product, quantity);
+        return new OrderItem(product, quantity);
     }
 } 
