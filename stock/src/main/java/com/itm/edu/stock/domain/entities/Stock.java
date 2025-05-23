@@ -9,17 +9,15 @@ import java.util.UUID;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Ingredient {
+public class Stock {
     private UUID id;
-    private String name;
-    private String description;
-    private BigDecimal quantity;
+    private Ingredient ingredient;
+    private Integer quantity;
     private String unit;
     private BigDecimal price;
-    private String supplier;
 
-    public void updateQuantity(BigDecimal newQuantity) {
-        if (newQuantity.compareTo(BigDecimal.ZERO) < 0) {
+    public void updateQuantity(Integer newQuantity) {
+        if (newQuantity < 0) {
             throw new IllegalArgumentException("La cantidad no puede ser negativa");
         }
         this.quantity = newQuantity;

@@ -1,39 +1,40 @@
 package com.itm.edu.stock.domain.entities;
 
-import lombok.Data;
-import org.hibernate.annotations.GenericGenerator;
-import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
-@Data
-@Entity
-@Table(name = "recipes")
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Recipe {
-    @Id
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     private UUID id;
-
-    @Column(nullable = false)
     private String name;
-
-    @Column(length = 1000)
     private String description;
-
-    @Column(length = 2000)
     private String instructions;
-
-    @Column(name = "preparation_time")
     private Integer preparationTime;
-
-    @Column(nullable = false)
     private String difficulty;
-
-    @Column(name = "cost", precision = 10, scale = 2)
     private BigDecimal cost;
-
-    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RecipeIngredient> recipeIngredients;
+
+    public void updateCost(BigDecimal newCost) {
+        if (newCost.compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("El costo no puede ser negativo");
+        }
+        this.cost = newCost;
+    }
+
+    public void addIngredient(RecipeIngredient ingredient) {
+        if (ingredient == null) {
+            throw new IllegalArgumentException("El ingrediente no puede ser nulo");
+        }
+        this.recipeIngredients.add(ingredient);
+    }
+
+    public void removeIngredient(RecipeIngredient ingredient) {
+        this.recipeIngredients.remove(ingredient);
+    }
 }

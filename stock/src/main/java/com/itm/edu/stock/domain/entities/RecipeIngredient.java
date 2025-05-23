@@ -1,38 +1,33 @@
 package com.itm.edu.stock.domain.entities;
 
-import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.Setter;
-import jakarta.persistence.*;
-import java.util.UUID;
+import lombok.NoArgsConstructor;
 import com.itm.edu.stock.domain.valueobjects.Quantity;
 import com.itm.edu.stock.domain.valueobjects.Unit;
-import org.hibernate.annotations.GenericGenerator;
+import java.util.UUID;
 
-@Entity
-@Table(name = "recipe_ingredients")
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class RecipeIngredient {
-    @Id
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     private UUID id;
-    
-    @ManyToOne
-    @JoinColumn(name = "recipe_id")
     private Recipe recipe;
-    
-    @ManyToOne
-    @JoinColumn(name = "ingredient_id")
     private Ingredient ingredient;
-    
-    @Embedded
     private Quantity quantity;
-    
-    @Embedded
     private Unit unit;
+
+    public void updateQuantity(Quantity newQuantity) {
+        if (newQuantity == null) {
+            throw new IllegalArgumentException("La cantidad no puede ser nula");
+        }
+        this.quantity = newQuantity;
+    }
+
+    public void updateUnit(Unit newUnit) {
+        if (newUnit == null) {
+            throw new IllegalArgumentException("La unidad no puede ser nula");
+        }
+        this.unit = newUnit;
+    }
 } 
