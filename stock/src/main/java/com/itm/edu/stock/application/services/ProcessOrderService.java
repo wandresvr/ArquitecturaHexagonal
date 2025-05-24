@@ -33,11 +33,24 @@ public class ProcessOrderService implements ProcessOrderUseCase {
                 IngredientResponse ingredient = ingredientRepository.findById(recipeIngredient.getIngredientId())
                         .orElseThrow(() -> new BusinessException("Ingrediente no encontrado: " + recipeIngredient.getIngredientName()));
 
+                if (recipeIngredient.getUnit() == null) {
+                    throw new BusinessException("La unidad no está especificada en la receta para el ingrediente: " + ingredient.getName());
+                }
+                if (ingredient.getUnit() == null) {
+                    throw new BusinessException("La unidad no está especificada en el ingrediente: " + ingredient.getName());
+                }
+                if (!recipeIngredient.getUnit().equals(ingredient.getUnit())) {
+                    throw new BusinessException("Las unidades no coinciden para el ingrediente " + ingredient.getName() + 
+                        ". Receta: " + recipeIngredient.getUnit() + ", Ingrediente: " + ingredient.getUnit());
+                }
+
                 BigDecimal requiredQuantity = recipeIngredient.getQuantity()
                     .multiply(BigDecimal.valueOf(product.getQuantity()));
 
                 if (ingredient.getQuantity().compareTo(requiredQuantity) < 0) {
-                    throw new BusinessException("Stock insuficiente para el ingrediente: " + ingredient.getName());
+                    throw new BusinessException("Stock insuficiente para el ingrediente: " + ingredient.getName() + 
+                        ". Requerido: " + requiredQuantity + " " + ingredient.getUnit() + 
+                        ", Disponible: " + ingredient.getQuantity() + " " + ingredient.getUnit());
                 }
 
                 IngredientDto updatedIngredient = IngredientDto.builder()
@@ -46,6 +59,7 @@ public class ProcessOrderService implements ProcessOrderUseCase {
                     .description(ingredient.getDescription())
                     .quantity(ingredient.getQuantity().subtract(requiredQuantity))
                     .unit(ingredient.getUnit())
+                    .price(ingredient.getPrice())
                     .supplier(ingredient.getSupplier())
                     .minimumStock(ingredient.getMinimumStock())
                     .build();

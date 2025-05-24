@@ -18,6 +18,7 @@ import java.util.UUID;
 @Builder
 public class RecipeJpaEntity extends BaseJpaEntity<Recipe> {
     @Id
+    @Column(updatable = false)
     private UUID id;
 
     @Column(nullable = false)
@@ -41,6 +42,14 @@ public class RecipeJpaEntity extends BaseJpaEntity<Recipe> {
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<RecipeIngredientJpaEntity> recipeIngredients = new ArrayList<>();
+
+    public void setRecipeIngredients(List<RecipeIngredientJpaEntity> recipeIngredients) {
+        this.recipeIngredients.clear();
+        if (recipeIngredients != null) {
+            recipeIngredients.forEach(ri -> ri.setRecipe(this));
+            this.recipeIngredients.addAll(recipeIngredients);
+        }
+    }
 
     @Override
     public Recipe toDomain() {

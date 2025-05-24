@@ -22,6 +22,14 @@ public class RecipeRepositoryAdapter implements RecipeRepository {
     @Override
     public RecipeResponse save(RecipeDto recipe) {
         var entity = mapper.toEntity(recipe);
+        
+        // Si la entidad ya existe, cargar sus relaciones existentes
+        if (jpaRepository.existsById(entity.getId())) {
+            var existingEntity = jpaRepository.findById(entity.getId())
+                    .orElseThrow(() -> new RuntimeException("Recipe not found"));
+            entity.getRecipeIngredients().forEach(ri -> ri.setRecipe(entity));
+        }
+        
         var savedEntity = jpaRepository.save(entity);
         return mapper.toResponse(mapper.toDto(savedEntity));
     }

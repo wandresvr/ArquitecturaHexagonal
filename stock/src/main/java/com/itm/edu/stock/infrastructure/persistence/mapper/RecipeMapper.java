@@ -53,13 +53,15 @@ public class RecipeMapper {
         var ingredientResponse = ingredientRepository.findById(dto.getIngredientId())
                 .orElseThrow(() -> new BusinessException("Ingrediente no encontrado"));
         
-        return RecipeIngredientJpaEntity.builder()
+        var entity = RecipeIngredientJpaEntity.builder()
                 .id(dto.getId())
                 .recipe(recipe)
                 .ingredient(ingredientMapper.fromResponse(ingredientResponse))
                 .quantity(dto.getQuantity())
-                .unit(dto.getUnit())
+                .unit(dto.getUnit() != null ? dto.getUnit() : ingredientResponse.getUnit())
                 .build();
+                
+        return entity;
     }
 
     public RecipeJpaEntity toEntity(RecipeDto dto) {
@@ -100,9 +102,12 @@ public class RecipeMapper {
     }
 
     public RecipeDto fromCommand(CreateRecipeCommand command) {
-        var recipeId = UUID.randomUUID();
+        return fromCommand(command, UUID.randomUUID());
+    }
+
+    public RecipeDto fromCommand(CreateRecipeCommand command, UUID id) {
         return RecipeDto.builder()
-                .id(recipeId)
+                .id(id)
                 .name(command.getName())
                 .description(command.getDescription())
                 .instructions(command.getInstructions())
@@ -112,7 +117,7 @@ public class RecipeMapper {
                     command.getIngredients().stream()
                         .map(ingredient -> RecipeIngredientDto.builder()
                             .id(UUID.randomUUID())
-                            .recipeId(recipeId)
+                            .recipeId(id)
                             .ingredientId(ingredient.getIngredientId())
                             .quantity(ingredient.getQuantity())
                             .unit(ingredient.getUnit())
