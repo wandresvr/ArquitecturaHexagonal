@@ -33,7 +33,8 @@ public class IngredientApiMapper {
             dto.getQuantity(),
             dto.getUnit(),
             dto.getSupplier(),
-            BigDecimal.ZERO
+            BigDecimal.ZERO,
+            dto.getPrice()
         );
     }
 } 

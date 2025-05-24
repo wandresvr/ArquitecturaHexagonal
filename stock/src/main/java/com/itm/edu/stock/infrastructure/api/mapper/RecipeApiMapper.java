@@ -7,6 +7,7 @@ import com.itm.edu.stock.infrastructure.api.dto.CreateRecipeRequestDto;
 import com.itm.edu.stock.infrastructure.api.dto.RecipeResponseDto;
 import com.itm.edu.stock.infrastructure.api.dto.CreateRecipeIngredientDto;
 import com.itm.edu.stock.infrastructure.api.dto.IngredientResponseDto;
+import com.itm.edu.stock.infrastructure.api.dto.UpdateRecipeRequestDto;
 import org.springframework.stereotype.Component;
 import lombok.RequiredArgsConstructor;
 import java.util.stream.Collectors;
@@ -27,6 +28,21 @@ public class RecipeApiMapper {
             request.getIngredients().stream()
                 .map(this::toIngredientCommand)
                 .collect(Collectors.toList())
+        );
+    }
+
+    public CreateRecipeCommand toCommand(UpdateRecipeRequestDto request) {
+        return new CreateRecipeCommand(
+            request.getName(),
+            request.getDescription(),
+            request.getInstructions(),
+            request.getPreparationTime(),
+            request.getDifficulty(),
+            request.getIngredients() != null ?
+                request.getIngredients().stream()
+                    .map(this::toIngredientCommand)
+                    .collect(Collectors.toList()) :
+                null
         );
     }
 

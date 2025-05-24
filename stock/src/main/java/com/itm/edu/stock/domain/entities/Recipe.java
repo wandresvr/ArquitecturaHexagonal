@@ -3,6 +3,7 @@ package com.itm.edu.stock.domain.entities;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.With;
 import java.math.BigDecimal;
 import java.util.List;
@@ -11,40 +12,27 @@ import java.util.UUID;
 @Getter
 @Builder(toBuilder = true)
 @AllArgsConstructor
+@NoArgsConstructor
 @With
 public class Recipe {
-    private final UUID id;
-    private final String name;
-    private final String description;
-    private final String instructions;
-    private final Integer preparationTime;
-    private final String difficulty;
-    private final BigDecimal cost;
-    private final List<RecipeIngredient> recipeIngredients;
+    private UUID id;
+    private String name;
+    private String description;
+    private String instructions;
+    private Integer preparationTime;
+    private String difficulty;
+    private BigDecimal cost;
+    private List<RecipeIngredient> recipeIngredients;
 
     public Recipe withCost(BigDecimal newCost) {
-        return Recipe.builder()
-                .id(this.id)
-                .name(this.name)
-                .description(this.description)
-                .instructions(this.instructions)
-                .preparationTime(this.preparationTime)
-                .difficulty(this.difficulty)
-                .recipeIngredients(this.recipeIngredients)
+        return this.toBuilder()
                 .cost(newCost)
                 .build();
     }
 
     public Recipe withRecipeIngredients(List<RecipeIngredient> newIngredients) {
-        return Recipe.builder()
-                .id(this.id)
-                .name(this.name)
-                .description(this.description)
-                .instructions(this.instructions)
-                .preparationTime(this.preparationTime)
-                .difficulty(this.difficulty)
+        return this.toBuilder()
                 .recipeIngredients(newIngredients)
-                .cost(this.cost)
                 .build();
     }
 }

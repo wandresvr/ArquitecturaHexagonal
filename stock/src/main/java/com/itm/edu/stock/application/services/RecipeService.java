@@ -8,6 +8,7 @@ import com.itm.edu.stock.application.dto.RecipeResponse;
 import com.itm.edu.stock.application.dto.RecipeIngredientResponse;
 import com.itm.edu.stock.domain.exception.BusinessException;
 import com.itm.edu.stock.infrastructure.persistence.dto.RecipeDto;
+import com.itm.edu.stock.infrastructure.persistence.dto.RecipeIngredientDto;
 import com.itm.edu.stock.infrastructure.persistence.mapper.RecipeMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -61,24 +62,56 @@ public class RecipeService implements RecipeUseCase {
     @Override
     @Transactional
     public RecipeResponse updateRecipe(UUID id, CreateRecipeCommand command) {
-        if (!recipeRepository.existsById(id)) {
-            throw new RuntimeException("Recipe not found");
-        }
+        // Verificar que la receta existe
+        RecipeResponse existingRecipe = recipeRepository.findById(id)
+                .orElseThrow(() -> new BusinessException("Receta no encontrada"));
         
-        // Validar que todos los ingredientes existan
-        List<UUID> nonExistentIngredients = command.getIngredients().stream()
-                .map(ingredient -> ingredient.getIngredientId())
-                .filter(ingredientId -> !ingredientRepository.existsById(ingredientId))
-                .collect(Collectors.toList());
+        // Validar que todos los ingredientes existan si se proporcionan
+        if (command.getIngredients() != null && !command.getIngredients().isEmpty()) {
+            List<UUID> nonExistentIngredients = command.getIngredients().stream()
+                    .map(ingredient -> ingredient.getIngredientId())
+                    .filter(ingredientId -> !ingredientRepository.existsById(ingredientId))
+                    .collect(Collectors.toList());
 
-        if (!nonExistentIngredients.isEmpty()) {
-            throw new BusinessException("Los siguientes ingredientes no existen: " + 
-                nonExistentIngredients.stream()
-                    .map(UUID::toString)
-                    .collect(Collectors.joining(", ")));
+            if (!nonExistentIngredients.isEmpty()) {
+                throw new BusinessException("Los siguientes ingredientes no existen: " + 
+                    nonExistentIngredients.stream()
+                        .map(UUID::toString)
+                        .collect(Collectors.joining(", ")));
+            }
         }
         
-        RecipeDto dto = recipeMapper.fromCommand(command);
+        // Crear el DTO con los valores existentes y actualizar solo los campos proporcionados
+        RecipeDto dto = RecipeDto.builder()
+                .id(id)
+                .name(command.getName() != null ? command.getName() : existingRecipe.getName())
+                .description(command.getDescription() != null ? command.getDescription() : existingRecipe.getDescription())
+                .instructions(command.getInstructions() != null ? command.getInstructions() : existingRecipe.getInstructions())
+                .preparationTime(command.getPreparationTime() != null ? command.getPreparationTime() : existingRecipe.getPreparationTime())
+                .difficulty(command.getDifficulty() != null ? command.getDifficulty() : existingRecipe.getDifficulty())
+                .cost(existingRecipe.getCost())
+                .recipeIngredients(command.getIngredients() != null ? 
+                    command.getIngredients().stream()
+                        .map(ingredient -> RecipeIngredientDto.builder()
+                            .id(UUID.randomUUID())
+                            .recipeId(id)
+                            .ingredientId(ingredient.getIngredientId())
+                            .quantity(ingredient.getQuantity())
+                            .unit(ingredient.getUnit())
+                            .build())
+                        .collect(Collectors.toList()) :
+                    existingRecipe.getIngredients().stream()
+                        .map(ingredient -> RecipeIngredientDto.builder()
+                            .id(UUID.randomUUID())
+                            .recipeId(id)
+                            .ingredientId(ingredient.getIngredientId())
+                            .quantity(ingredient.getQuantity())
+                            .unit(ingredient.getUnit())
+                            .build())
+                        .collect(Collectors.toList()))
+                .build();
+                
+        // Guardar la receta actualizada
         return recipeRepository.save(dto);
     }
 

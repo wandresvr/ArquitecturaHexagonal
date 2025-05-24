@@ -45,11 +45,21 @@ public class IngredientService implements CreateIngredientUseCase, GetIngredient
     @Override
     @Transactional
     public IngredientResponse updateIngredient(UUID id, CreateIngredientCommand command) {
-        if (!ingredientRepository.existsById(id)) {
-            throw new RuntimeException("Ingrediente no encontrado");
-        }
+        var existingIngredient = ingredientRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Ingrediente no encontrado"));
         
-        var dto = ingredientMapper.fromCommand(command);
+        // Crear el DTO con los valores existentes y actualizar solo los campos proporcionados
+        var dto = IngredientDto.builder()
+                .id(id)
+                .name(command.getName() != null ? command.getName() : existingIngredient.getName())
+                .description(command.getDescription() != null ? command.getDescription() : existingIngredient.getDescription())
+                .quantity(command.getQuantity() != null ? command.getQuantity() : existingIngredient.getQuantity())
+                .unit(command.getUnit() != null ? command.getUnit() : existingIngredient.getUnit())
+                .price(command.getPrice() != null ? command.getPrice() : existingIngredient.getPrice())
+                .supplier(command.getSupplier() != null ? command.getSupplier() : existingIngredient.getSupplier())
+                .minimumStock(command.getMinimumStock() != null ? command.getMinimumStock() : existingIngredient.getMinimumStock())
+                .build();
+                
         return ingredientRepository.save(dto);
     }
 

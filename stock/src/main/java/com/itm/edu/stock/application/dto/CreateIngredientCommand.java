@@ -11,4 +11,5 @@ public class CreateIngredientCommand {
     String unit;
     String supplier;
     BigDecimal minimumStock;
+    BigDecimal price;
 } 

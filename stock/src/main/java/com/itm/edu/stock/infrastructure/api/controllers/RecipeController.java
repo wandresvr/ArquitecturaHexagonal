@@ -4,6 +4,7 @@ import com.itm.edu.stock.application.ports.input.RecipeUseCase;
 import com.itm.edu.stock.infrastructure.api.dto.CreateRecipeRequestDto;
 import com.itm.edu.stock.infrastructure.api.dto.RecipeResponseDto;
 import com.itm.edu.stock.infrastructure.api.dto.ErrorResponse;
+import com.itm.edu.stock.infrastructure.api.dto.UpdateRecipeRequestDto;
 import com.itm.edu.stock.infrastructure.api.mapper.RecipeApiMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -23,7 +24,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/recipes")
+@RequestMapping("/api/v1/recipes")
 @RequiredArgsConstructor
 @Tag(name = "Recetas", description = "API para la gestión de recetas")
 public class RecipeController {
@@ -93,7 +94,7 @@ public class RecipeController {
     public ResponseEntity<RecipeResponseDto> updateRecipe(
             @Parameter(description = "ID de la receta", required = true)
             @PathVariable UUID id,
-            @Valid @RequestBody CreateRecipeRequestDto request) {
+            @Valid @RequestBody UpdateRecipeRequestDto request) {
         var command = recipeApiMapper.toCommand(request);
         var response = recipeUseCase.updateRecipe(id, command);
         return ResponseEntity.ok(recipeApiMapper.toDto(response));

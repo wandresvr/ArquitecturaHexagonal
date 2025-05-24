@@ -5,21 +5,23 @@ import java.util.UUID;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.With;
 
 @Getter
 @Builder(toBuilder = true)
 @AllArgsConstructor
+@NoArgsConstructor
 @With
 public class Ingredient {
-    private final UUID id;
-    private final String name;
-    private final String description;
-    private final BigDecimal quantity;
-    private final String unit;
-    private final BigDecimal price;
-    private final String supplier;
-    private final BigDecimal minimumStock;
+    private UUID id;
+    private String name;
+    private String description;
+    private BigDecimal quantity;
+    private String unit;
+    private BigDecimal price;
+    private String supplier;
+    private BigDecimal minimumStock;
     
     public boolean hasLowStock() {
         return quantity.compareTo(minimumStock) <= 0;

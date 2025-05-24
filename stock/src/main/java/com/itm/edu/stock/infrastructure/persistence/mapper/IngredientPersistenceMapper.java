@@ -58,6 +58,7 @@ public class IngredientPersistenceMapper {
                 .unit(command.getUnit())
                 .supplier(command.getSupplier())
                 .minimumStock(command.getMinimumStock())
+                .price(command.getPrice())
                 .build();
     }
 
