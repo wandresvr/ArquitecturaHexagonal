@@ -1,17 +1,42 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Unit.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">stock</a> &gt; <a href="index.source.html" class="el_package">com.itm.edu.stock.domain.valueobjects</a> &gt; <span class="el_source">Unit.java</span></div><h1>Unit.java</h1><pre class="source lang-java linenums">package com.itm.edu.stock.domain.valueobjects;
 
-import jakarta.persistence.Embeddable;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Value;
 
-@Getter
-<span class="fc" id="L10">@Setter</span>
-<span class="fc" id="L11">@AllArgsConstructor</span>
-<span class="fc" id="L12">@NoArgsConstructor</span>
-@Embeddable
+@Value
 public class Unit {
-<span class="fc" id="L15">    private String value;</span>
+    String value;
+
+<span class="fc" id="L9">    public Unit(String value) {</span>
+<span class="fc bfc" id="L10" title="All 4 branches covered.">        if (value == null || value.trim().isEmpty()) {</span>
+<span class="fc" id="L11">            throw new IllegalArgumentException(&quot;La unidad no puede estar vacía&quot;);</span>
+        }
+<span class="fc" id="L13">        this.value = value;</span>
+<span class="fc" id="L14">    }</span>
+
+    public String getValue() {
+<span class="fc" id="L17">        return value;</span>
+    }
+
+    public static Unit of(String value) {
+<span class="nc" id="L21">        return new Unit(value);</span>
+    }
+
+    @Override
+    public boolean equals(Object o) {
+<span class="pc bpc" id="L26" title="1 of 2 branches missed.">        if (this == o) return true;</span>
+<span class="pc bpc" id="L27" title="2 of 4 branches missed.">        if (o == null || getClass() != o.getClass()) return false;</span>
+<span class="fc" id="L28">        Unit unit = (Unit) o;</span>
+<span class="fc" id="L29">        return value.equals(unit.value);</span>
+    }
+
+    @Override
+    public int hashCode() {
+<span class="fc" id="L34">        return value.hashCode();</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="nc" id="L39">        return value;</span>
+    }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

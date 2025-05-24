@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RecipeDomainMapper.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">stock</a> &gt; <a href="index.source.html" class="el_package">com.itm.edu.stock.application.mapper</a> &gt; <span class="el_source">RecipeDomainMapper.java</span></div><h1>RecipeDomainMapper.java</h1><pre class="source lang-java linenums">package com.itm.edu.stock.application.mapper;
+
+import com.itm.edu.stock.domain.entities.Recipe;
+import com.itm.edu.stock.domain.entities.RecipeIngredient;
+import com.itm.edu.stock.application.dto.CreateRecipeCommand;
+import com.itm.edu.stock.application.dto.RecipeResponse;
+import com.itm.edu.stock.application.dto.RecipeIngredientResponse;
+import com.itm.edu.stock.application.ports.output.IngredientRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+import java.util.stream.Collectors;
+import java.math.BigDecimal;
+import java.util.UUID;
+import java.util.ArrayList;
+
+@Component
+<span class="fc" id="L17">@RequiredArgsConstructor</span>
+public class RecipeDomainMapper {
+    private final IngredientRepository ingredientRepository;
+    
+    public Recipe toEntity(CreateRecipeCommand command) {
+<span class="nc" id="L22">        return Recipe.builder()</span>
+<span class="nc" id="L23">                .id(UUID.randomUUID())</span>
+<span class="nc" id="L24">                .name(command.getName())</span>
+<span class="nc" id="L25">                .description(command.getDescription())</span>
+<span class="nc" id="L26">                .instructions(command.getInstructions())</span>
+<span class="nc" id="L27">                .preparationTime(command.getPreparationTime())</span>
+<span class="nc" id="L28">                .difficulty(command.getDifficulty())</span>
+<span class="nc" id="L29">                .recipeIngredients(new ArrayList&lt;&gt;())</span>
+<span class="nc" id="L30">                .cost(BigDecimal.ZERO)</span>
+<span class="nc" id="L31">                .build();</span>
+    }
+
+    public RecipeResponse toResponse(Recipe recipe) {
+<span class="nc" id="L35">        return RecipeResponse.builder()</span>
+<span class="nc" id="L36">            .id(recipe.getId())</span>
+<span class="nc" id="L37">            .name(recipe.getName())</span>
+<span class="nc" id="L38">            .description(recipe.getDescription())</span>
+<span class="nc" id="L39">            .instructions(recipe.getInstructions())</span>
+<span class="nc" id="L40">            .preparationTime(recipe.getPreparationTime())</span>
+<span class="nc" id="L41">            .difficulty(recipe.getDifficulty())</span>
+<span class="nc" id="L42">            .cost(recipe.getCost())</span>
+<span class="nc" id="L43">            .ingredients(</span>
+<span class="nc" id="L44">                recipe.getRecipeIngredients().stream()</span>
+<span class="nc" id="L45">                    .map(this::toIngredientResponse)</span>
+<span class="nc" id="L46">                    .collect(Collectors.toList())</span>
+            )
+<span class="nc" id="L48">            .build();</span>
+    }
+
+    private RecipeIngredientResponse toIngredientResponse(RecipeIngredient ri) {
+<span class="nc" id="L52">        return RecipeIngredientResponse.builder()</span>
+<span class="nc" id="L53">            .id(ri.getId())</span>
+<span class="nc" id="L54">            .recipeId(ri.getRecipeId())</span>
+<span class="nc" id="L55">            .ingredientId(ri.getIngredientId())</span>
+<span class="nc" id="L56">            .ingredientName(ri.getIngredientName())</span>
+<span class="nc" id="L57">            .quantity(ri.getQuantity())</span>
+<span class="nc" id="L58">            .unit(ri.getUnit())</span>
+<span class="nc" id="L59">            .build();</span>
+    }
+} 
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

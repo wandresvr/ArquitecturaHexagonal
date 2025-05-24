@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>IngredientService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">stock</a> &gt; <a href="index.source.html" class="el_package">com.itm.edu.stock.application.services</a> &gt; <span class="el_source">IngredientService.java</span></div><h1>IngredientService.java</h1><pre class="source lang-java linenums">package com.itm.edu.stock.application.services;
 
+import com.itm.edu.stock.application.ports.input.CreateIngredientUseCase;
+import com.itm.edu.stock.application.ports.input.GetIngredientUseCase;
 import com.itm.edu.stock.application.ports.input.IngredientUseCase;
-import com.itm.edu.stock.domain.entities.Ingredient;
-import com.itm.edu.stock.domain.repository.IngredientRepository;
-import com.itm.edu.stock.infrastructure.api.dto.CreateIngredientRequestDto;
-import com.itm.edu.stock.infrastructure.api.dto.IngredientResponseDto;
-import com.itm.edu.stock.infrastructure.api.mapper.IngredientMapper;
+import com.itm.edu.stock.application.ports.output.IngredientRepository;
+import com.itm.edu.stock.application.dto.CreateIngredientCommand;
+import com.itm.edu.stock.application.dto.IngredientResponse;
+import com.itm.edu.stock.infrastructure.persistence.dto.IngredientDto;
+import com.itm.edu.stock.infrastructure.persistence.mapper.IngredientPersistenceMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,69 +15,84 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
-<span class="fc" id="L19">@RequiredArgsConstructor</span>
-public class IngredientService implements IngredientUseCase {
-
+<span class="fc" id="L20">@RequiredArgsConstructor</span>
+public class IngredientService implements CreateIngredientUseCase, GetIngredientUseCase, IngredientUseCase {
     private final IngredientRepository ingredientRepository;
-    private final IngredientMapper ingredientMapper;
+    private final IngredientPersistenceMapper ingredientMapper;
 
     @Override
     @Transactional
-    public IngredientResponseDto createIngredient(CreateIngredientRequestDto request) {
-<span class="fc" id="L28">        Ingredient ingredient = ingredientMapper.toEntity(request);</span>
-<span class="fc" id="L29">        Ingredient savedIngredient = ingredientRepository.save(ingredient);</span>
-<span class="fc" id="L30">        return ingredientMapper.toDto(savedIngredient);</span>
+    public IngredientResponse createIngredient(CreateIngredientCommand command) {
+<span class="fc" id="L28">        var dto = ingredientMapper.fromCommand(command);</span>
+<span class="fc" id="L29">        return ingredientRepository.save(dto);</span>
     }
 
     @Override
-    public List&lt;IngredientResponseDto&gt; getAllIngredients() {
-<span class="fc" id="L35">        return ingredientRepository.findAll().stream()</span>
-<span class="fc" id="L36">            .map(ingredientMapper::toDto)</span>
-<span class="fc" id="L37">            .collect(Collectors.toList());</span>
+    @Transactional(readOnly = true)
+    public List&lt;IngredientResponse&gt; getAllIngredients() {
+<span class="fc" id="L35">        return ingredientRepository.findAll();</span>
     }
 
     @Override
-    public IngredientResponseDto getIngredientById(UUID id) {
-<span class="fc" id="L42">        Ingredient ingredient = ingredientRepository.findById(id)</span>
-<span class="pc" id="L43">            .orElseThrow(() -&gt; new RuntimeException(&quot;Ingrediente no encontrado&quot;));</span>
-<span class="fc" id="L44">        return ingredientMapper.toDto(ingredient);</span>
+    @Transactional(readOnly = true)
+    public IngredientResponse getIngredientById(UUID id) {
+<span class="fc" id="L41">        return ingredientRepository.findById(id)</span>
+<span class="pc" id="L42">                .orElseThrow(() -&gt; new RuntimeException(&quot;Ingredient not found&quot;));</span>
     }
 
     @Override
     @Transactional
-    public IngredientResponseDto updateIngredient(UUID id, CreateIngredientRequestDto request) {
-<span class="nc" id="L50">        Ingredient existingIngredient = ingredientRepository.findById(id)</span>
-<span class="nc" id="L51">            .orElseThrow(() -&gt; new RuntimeException(&quot;Ingrediente no encontrado&quot;));</span>
-
-<span class="nc" id="L53">        Ingredient updatedIngredient = ingredientMapper.toEntity(request);</span>
-<span class="nc" id="L54">        updatedIngredient.setId(id);</span>
-<span class="nc" id="L55">        Ingredient savedIngredient = ingredientRepository.save(updatedIngredient);</span>
-<span class="nc" id="L56">        return ingredientMapper.toDto(savedIngredient);</span>
+    public IngredientResponse updateIngredient(UUID id, CreateIngredientCommand command) {
+<span class="nc" id="L48">        var existingIngredient = ingredientRepository.findById(id)</span>
+<span class="nc" id="L49">                .orElseThrow(() -&gt; new RuntimeException(&quot;Ingrediente no encontrado&quot;));</span>
+        
+        // Crear el DTO con los valores existentes y actualizar solo los campos proporcionados
+<span class="nc" id="L52">        var dto = IngredientDto.builder()</span>
+<span class="nc" id="L53">                .id(id)</span>
+<span class="nc bnc" id="L54" title="All 2 branches missed.">                .name(command.getName() != null ? command.getName() : existingIngredient.getName())</span>
+<span class="nc bnc" id="L55" title="All 2 branches missed.">                .description(command.getDescription() != null ? command.getDescription() : existingIngredient.getDescription())</span>
+<span class="nc bnc" id="L56" title="All 2 branches missed.">                .quantity(command.getQuantity() != null ? command.getQuantity() : existingIngredient.getQuantity())</span>
+<span class="nc bnc" id="L57" title="All 2 branches missed.">                .unit(command.getUnit() != null ? command.getUnit() : existingIngredient.getUnit())</span>
+<span class="nc bnc" id="L58" title="All 2 branches missed.">                .price(command.getPrice() != null ? command.getPrice() : existingIngredient.getPrice())</span>
+<span class="nc bnc" id="L59" title="All 2 branches missed.">                .supplier(command.getSupplier() != null ? command.getSupplier() : existingIngredient.getSupplier())</span>
+<span class="nc bnc" id="L60" title="All 2 branches missed.">                .minimumStock(command.getMinimumStock() != null ? command.getMinimumStock() : existingIngredient.getMinimumStock())</span>
+<span class="nc" id="L61">                .build();</span>
+                
+<span class="nc" id="L63">        return ingredientRepository.save(dto);</span>
     }
 
     @Override
     @Transactional
     public void deleteIngredient(UUID id) {
-<span class="nc" id="L62">        ingredientRepository.deleteById(id);</span>
-<span class="nc" id="L63">    }</span>
+<span class="nc" id="L69">        ingredientRepository.deleteById(id);</span>
+<span class="nc" id="L70">    }</span>
 
     @Override
-    public List&lt;IngredientResponseDto&gt; getIngredientsBySupplier(String supplier) {
-<span class="nc" id="L67">        return ingredientRepository.findBySupplier(supplier).stream()</span>
-<span class="nc" id="L68">            .map(ingredientMapper::toDto)</span>
-<span class="nc" id="L69">            .collect(Collectors.toList());</span>
+    @Transactional(readOnly = true)
+    public List&lt;IngredientResponse&gt; getIngredientsBySupplier(String supplier) {
+<span class="nc" id="L75">        return ingredientRepository.findBySupplier(supplier);</span>
     }
 
     @Override
     @Transactional
     public void updateIngredientQuantity(UUID id, BigDecimal quantity) {
-<span class="nc" id="L75">        Ingredient ingredient = ingredientRepository.findById(id)</span>
-<span class="nc" id="L76">            .orElseThrow(() -&gt; new RuntimeException(&quot;Ingrediente no encontrado&quot;));</span>
-<span class="nc" id="L77">        ingredient.setQuantity(quantity);</span>
-<span class="nc" id="L78">        ingredientRepository.save(ingredient);</span>
-<span class="nc" id="L79">    }</span>
+<span class="nc" id="L81">        var ingredient = ingredientRepository.findById(id)</span>
+<span class="nc" id="L82">                .orElseThrow(() -&gt; new RuntimeException(&quot;Ingrediente no encontrado&quot;));</span>
+        
+<span class="nc" id="L84">        var dto = IngredientDto.builder()</span>
+<span class="nc" id="L85">                .id(ingredient.getId())</span>
+<span class="nc" id="L86">                .name(ingredient.getName())</span>
+<span class="nc" id="L87">                .description(ingredient.getDescription())</span>
+<span class="nc" id="L88">                .quantity(quantity)</span>
+<span class="nc" id="L89">                .unit(ingredient.getUnit())</span>
+<span class="nc" id="L90">                .price(ingredient.getPrice())</span>
+<span class="nc" id="L91">                .supplier(ingredient.getSupplier())</span>
+<span class="nc" id="L92">                .minimumStock(ingredient.getMinimumStock())</span>
+<span class="nc" id="L93">                .build();</span>
+                
+<span class="nc" id="L95">        ingredientRepository.save(dto);</span>
+<span class="nc" id="L96">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

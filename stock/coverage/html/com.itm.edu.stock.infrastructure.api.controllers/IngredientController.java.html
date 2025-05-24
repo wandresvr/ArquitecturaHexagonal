@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>IngredientController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">stock</a> &gt; <a href="index.source.html" class="el_package">com.itm.edu.stock.infrastructure.api.controllers</a> &gt; <span class="el_source">IngredientController.java</span></div><h1>IngredientController.java</h1><pre class="source lang-java linenums">package com.itm.edu.stock.infrastructure.api.controllers;
 
-import com.itm.edu.stock.application.ports.input.IngredientUseCase;
+import com.itm.edu.stock.application.ports.input.CreateIngredientUseCase;
+import com.itm.edu.stock.application.ports.input.GetIngredientUseCase;
 import com.itm.edu.stock.infrastructure.api.dto.CreateIngredientRequestDto;
 import com.itm.edu.stock.infrastructure.api.dto.IngredientResponseDto;
 import com.itm.edu.stock.infrastructure.api.dto.ErrorResponse;
+import com.itm.edu.stock.infrastructure.api.mapper.IngredientApiMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -19,14 +21,17 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(&quot;/api/v1/ingredients&quot;)
-<span class="fc" id="L25">@RequiredArgsConstructor</span>
+<span class="fc" id="L28">@RequiredArgsConstructor</span>
 @Tag(name = &quot;Ingredientes&quot;, description = &quot;API para la gestión de ingredientes&quot;)
 public class IngredientController {
 
-    private final IngredientUseCase ingredientUseCase;
+    private final CreateIngredientUseCase createIngredientUseCase;
+    private final GetIngredientUseCase getIngredientUseCase;
+    private final IngredientApiMapper ingredientMapper;
 
     @Operation(summary = &quot;Crear un nuevo ingrediente&quot;, description = &quot;Crea un nuevo ingrediente con los datos especificados&quot;)
     @ApiResponses(value = {
@@ -38,9 +43,10 @@ public class IngredientController {
             content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping
-    public ResponseEntity&lt;IngredientResponseDto&gt; createIngredient(
-            @Valid @RequestBody CreateIngredientRequestDto request) {
-<span class="nc" id="L43">        return new ResponseEntity&lt;&gt;(ingredientUseCase.createIngredient(request), HttpStatus.CREATED);</span>
+    public ResponseEntity&lt;IngredientResponseDto&gt; createIngredient(@RequestBody CreateIngredientRequestDto request) {
+<span class="nc" id="L47">        var command = ingredientMapper.toCommand(request);</span>
+<span class="nc" id="L48">        var response = createIngredientUseCase.createIngredient(command);</span>
+<span class="nc" id="L49">        return ResponseEntity.ok(ingredientMapper.toResponseDto(response));</span>
     }
 
     @Operation(summary = &quot;Obtener todos los ingredientes&quot;, description = &quot;Retorna una lista de todos los ingredientes disponibles&quot;)
@@ -52,7 +58,11 @@ public class IngredientController {
     })
     @GetMapping
     public ResponseEntity&lt;List&lt;IngredientResponseDto&gt;&gt; getAllIngredients() {
-<span class="nc" id="L55">        return ResponseEntity.ok(ingredientUseCase.getAllIngredients());</span>
+<span class="nc" id="L61">        var ingredients = getIngredientUseCase.getAllIngredients();</span>
+<span class="nc" id="L62">        var response = ingredients.stream()</span>
+<span class="nc" id="L63">                .map(ingredientMapper::toResponseDto)</span>
+<span class="nc" id="L64">                .collect(Collectors.toList());</span>
+<span class="nc" id="L65">        return ResponseEntity.ok(response);</span>
     }
 
     @Operation(summary = &quot;Obtener un ingrediente por ID&quot;, description = &quot;Retorna un ingrediente específico basado en su ID&quot;)
@@ -65,10 +75,9 @@ public class IngredientController {
             content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @GetMapping(&quot;/{id}&quot;)
-    public ResponseEntity&lt;IngredientResponseDto&gt; getIngredientById(
-            @Parameter(description = &quot;ID del ingrediente&quot;, required = true)
-            @PathVariable UUID id) {
-<span class="nc" id="L71">        return ResponseEntity.ok(ingredientUseCase.getIngredientById(id));</span>
+    public ResponseEntity&lt;IngredientResponseDto&gt; getIngredientById(@PathVariable UUID id) {
+<span class="nc" id="L79">        var ingredient = getIngredientUseCase.getIngredientById(id);</span>
+<span class="nc" id="L80">        return ResponseEntity.ok(ingredientMapper.toResponseDto(ingredient));</span>
     }
 
     @Operation(summary = &quot;Actualizar un ingrediente&quot;, description = &quot;Actualiza un ingrediente existente con nuevos datos&quot;)
@@ -87,7 +96,9 @@ public class IngredientController {
             @Parameter(description = &quot;ID del ingrediente&quot;, required = true)
             @PathVariable UUID id,
             @Valid @RequestBody CreateIngredientRequestDto request) {
-<span class="nc" id="L90">        return ResponseEntity.ok(ingredientUseCase.updateIngredient(id, request));</span>
+<span class="nc" id="L99">        var command = ingredientMapper.toCommand(request);</span>
+<span class="nc" id="L100">        var response = createIngredientUseCase.updateIngredient(id, command);</span>
+<span class="nc" id="L101">        return ResponseEntity.ok(ingredientMapper.toResponseDto(response));</span>
     }
 
     @Operation(summary = &quot;Eliminar un ingrediente&quot;, description = &quot;Elimina un ingrediente específico basado en su ID&quot;)
@@ -99,11 +110,9 @@ public class IngredientController {
             content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @DeleteMapping(&quot;/{id}&quot;)
-    public ResponseEntity&lt;Void&gt; deleteIngredient(
-            @Parameter(description = &quot;ID del ingrediente&quot;, required = true)
-            @PathVariable UUID id) {
-<span class="nc" id="L105">        ingredientUseCase.deleteIngredient(id);</span>
-<span class="nc" id="L106">        return ResponseEntity.noContent().build();</span>
+    public ResponseEntity&lt;Void&gt; deleteIngredient(@PathVariable UUID id) {
+<span class="nc" id="L114">        createIngredientUseCase.deleteIngredient(id);</span>
+<span class="nc" id="L115">        return ResponseEntity.noContent().build();</span>
     }
 
     @Operation(summary = &quot;Obtener ingredientes por proveedor&quot;, description = &quot;Retorna una lista de ingredientes filtrados por proveedor&quot;)
@@ -119,7 +128,11 @@ public class IngredientController {
     public ResponseEntity&lt;List&lt;IngredientResponseDto&gt;&gt; getIngredientsBySupplier(
             @Parameter(description = &quot;Nombre del proveedor&quot;, required = true)
             @PathVariable String supplier) {
-<span class="nc" id="L122">        return ResponseEntity.ok(ingredientUseCase.getIngredientsBySupplier(supplier));</span>
+<span class="nc" id="L131">        var responses = getIngredientUseCase.getIngredientsBySupplier(supplier);</span>
+<span class="nc" id="L132">        var dtos = responses.stream()</span>
+<span class="nc" id="L133">                .map(ingredientMapper::toResponseDto)</span>
+<span class="nc" id="L134">                .collect(Collectors.toList());</span>
+<span class="nc" id="L135">        return ResponseEntity.ok(dtos);</span>
     }
 } 
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

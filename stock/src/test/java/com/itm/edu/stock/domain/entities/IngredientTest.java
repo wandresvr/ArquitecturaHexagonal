@@ -9,6 +9,7 @@ class IngredientTest {
 
     @Test
     void testCreateIngredient() {
+        // Arrange
         UUID id = UUID.randomUUID();
         String name = "Harina";
         String description = "Harina de trigo";
@@ -17,15 +18,18 @@ class IngredientTest {
         BigDecimal price = new BigDecimal("2.50");
         String supplier = "Proveedor A";
 
-        Ingredient ingredient = new Ingredient();
-        ingredient.setId(id);
-        ingredient.setName(name);
-        ingredient.setDescription(description);
-        ingredient.setQuantity(quantity);
-        ingredient.setUnit(unit);
-        ingredient.setPrice(price);
-        ingredient.setSupplier(supplier);
+        // Act
+        Ingredient ingredient = Ingredient.builder()
+            .id(id)
+            .name(name)
+            .description(description)
+            .quantity(quantity)
+            .unit(unit)
+            .price(price)
+            .supplier(supplier)
+            .build();
 
+        // Assert
         assertEquals(id, ingredient.getId());
         assertEquals(name, ingredient.getName());
         assertEquals(description, ingredient.getDescription());
@@ -36,23 +40,44 @@ class IngredientTest {
     }
 
     @Test
-    void testCreateIngredientWithConstructor() {
-        UUID id = UUID.randomUUID();
-        String name = "Azúcar";
-        String description = "Azúcar refinada";
-        BigDecimal quantity = new BigDecimal("500");
-        String unit = "gramos";
-        BigDecimal price = new BigDecimal("1.50");
-        String supplier = "Proveedor B";
+    void testIngredientWithNullValues() {
+        // Act
+        Ingredient ingredient = Ingredient.builder().build();
 
-        Ingredient ingredient = new Ingredient(id, name, description, quantity, unit, price, supplier);
+        // Assert
+        assertNull(ingredient.getId());
+        assertNull(ingredient.getName());
+        assertNull(ingredient.getDescription());
+        assertNull(ingredient.getQuantity());
+        assertNull(ingredient.getUnit());
+        assertNull(ingredient.getPrice());
+        assertNull(ingredient.getSupplier());
+    }
 
-        assertEquals(id, ingredient.getId());
-        assertEquals(name, ingredient.getName());
-        assertEquals(description, ingredient.getDescription());
-        assertEquals(quantity, ingredient.getQuantity());
-        assertEquals(unit, ingredient.getUnit());
-        assertEquals(price, ingredient.getPrice());
-        assertEquals(supplier, ingredient.getSupplier());
+    @Test
+    void testIngredientWithUpdates() {
+        // Arrange
+        Ingredient ingredient = Ingredient.builder()
+            .id(UUID.randomUUID())
+            .name("Azúcar")
+            .quantity(new BigDecimal("500"))
+            .unit("gramos")
+            .price(new BigDecimal("1.50"))
+            .build();
+
+        // Act
+        BigDecimal newQuantity = new BigDecimal("750");
+        BigDecimal newPrice = new BigDecimal("2.00");
+        
+        Ingredient updatedIngredient = ingredient.toBuilder()
+            .quantity(newQuantity)
+            .price(newPrice)
+            .build();
+
+        // Assert
+        assertEquals(ingredient.getId(), updatedIngredient.getId());
+        assertEquals(ingredient.getName(), updatedIngredient.getName());
+        assertEquals(newQuantity, updatedIngredient.getQuantity());
+        assertEquals(newPrice, updatedIngredient.getPrice());
     }
 } 

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RecipeApiMapper.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">stock</a> &gt; <a href="index.source.html" class="el_package">com.itm.edu.stock.infrastructure.api.mapper</a> &gt; <span class="el_source">RecipeApiMapper.java</span></div><h1>RecipeApiMapper.java</h1><pre class="source lang-java linenums">package com.itm.edu.stock.infrastructure.api.mapper;
+
+import com.itm.edu.stock.application.dto.CreateRecipeCommand;
+import com.itm.edu.stock.application.dto.RecipeResponse;
+import com.itm.edu.stock.application.dto.RecipeIngredientCommand;
+import com.itm.edu.stock.infrastructure.api.dto.CreateRecipeRequestDto;
+import com.itm.edu.stock.infrastructure.api.dto.RecipeResponseDto;
+import com.itm.edu.stock.infrastructure.api.dto.CreateRecipeIngredientDto;
+import com.itm.edu.stock.infrastructure.api.dto.IngredientResponseDto;
+import com.itm.edu.stock.infrastructure.api.dto.UpdateRecipeRequestDto;
+import org.springframework.stereotype.Component;
+import lombok.RequiredArgsConstructor;
+import java.util.stream.Collectors;
+import java.util.UUID;
+import java.util.ArrayList;
+
+@Component
+<span class="fc" id="L18">@RequiredArgsConstructor</span>
+public class RecipeApiMapper {
+    
+    public CreateRecipeCommand toCommand(CreateRecipeRequestDto request) {
+<span class="nc" id="L22">        return new CreateRecipeCommand(</span>
+<span class="nc" id="L23">            request.getName(),</span>
+<span class="nc" id="L24">            request.getDescription(),</span>
+<span class="nc" id="L25">            request.getInstructions(),</span>
+<span class="nc" id="L26">            request.getPreparationTime(),</span>
+<span class="nc" id="L27">            request.getDifficulty(),</span>
+<span class="nc" id="L28">            request.getIngredients().stream()</span>
+<span class="nc" id="L29">                .map(this::toIngredientCommand)</span>
+<span class="nc" id="L30">                .collect(Collectors.toList())</span>
+        );
+    }
+
+    public CreateRecipeCommand toCommand(UpdateRecipeRequestDto request) {
+<span class="nc" id="L35">        return new CreateRecipeCommand(</span>
+<span class="nc" id="L36">            request.getName(),</span>
+<span class="nc" id="L37">            request.getDescription(),</span>
+<span class="nc" id="L38">            request.getInstructions(),</span>
+<span class="nc" id="L39">            request.getPreparationTime(),</span>
+<span class="nc" id="L40">            request.getDifficulty(),</span>
+<span class="nc bnc" id="L41" title="All 2 branches missed.">            request.getIngredients() != null ?</span>
+<span class="nc" id="L42">                request.getIngredients().stream()</span>
+<span class="nc" id="L43">                    .map(this::toIngredientCommand)</span>
+<span class="nc" id="L44">                    .collect(Collectors.toList()) :</span>
+<span class="nc" id="L45">                null</span>
+        );
+    }
+
+    private RecipeIngredientCommand toIngredientCommand(CreateRecipeIngredientDto dto) {
+<span class="nc" id="L50">        return new RecipeIngredientCommand(</span>
+<span class="nc" id="L51">            dto.getIngredientId(),</span>
+<span class="nc" id="L52">            dto.getQuantity(),</span>
+<span class="nc" id="L53">            dto.getUnit()</span>
+        );
+    }
+
+    public RecipeResponseDto toDto(RecipeResponse response) {
+<span class="nc" id="L58">        var dto = new RecipeResponseDto();</span>
+<span class="nc" id="L59">        dto.setId(response.getId());</span>
+<span class="nc" id="L60">        dto.setName(response.getName());</span>
+<span class="nc" id="L61">        dto.setDescription(response.getDescription());</span>
+<span class="nc" id="L62">        dto.setInstructions(response.getInstructions());</span>
+<span class="nc" id="L63">        dto.setPreparationTime(response.getPreparationTime());</span>
+<span class="nc" id="L64">        dto.setDifficulty(response.getDifficulty());</span>
+<span class="nc" id="L65">        dto.setCost(response.getCost());</span>
+<span class="nc" id="L66">        dto.setIngredients(response.getIngredients().stream()</span>
+<span class="nc" id="L67">            .map(ingredient -&gt; new IngredientResponseDto(</span>
+<span class="nc" id="L68">                ingredient.getIngredientId(),</span>
+<span class="nc" id="L69">                ingredient.getIngredientName(),</span>
+                &quot;&quot;,  // description
+<span class="nc" id="L71">                ingredient.getQuantity(),</span>
+<span class="nc" id="L72">                ingredient.getUnit(),</span>
+                &quot;&quot;,  // supplier
+                null  // minimumStock
+            ))
+<span class="nc" id="L76">            .collect(Collectors.toList()));</span>
+<span class="nc" id="L77">        return dto;</span>
+    }
+} 
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

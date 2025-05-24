@@ -12,6 +12,7 @@ import com.itm.edu.stock.infrastructure.persistence.entity.RecipeIngredientJpaEn
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.stream.Collectors;
 import java.util.UUID;
 
@@ -22,6 +23,9 @@ public class RecipeMapper {
     private final IngredientRepository ingredientRepository;
     
     public RecipeDto toDto(RecipeJpaEntity entity) {
+        if (entity == null) {
+            return null;
+        }
         return RecipeDto.builder()
                 .id(entity.getId())
                 .name(entity.getName())
@@ -34,16 +38,19 @@ public class RecipeMapper {
                         .map(this::toRecipeIngredientDto)
                         .collect(Collectors.toList())
                 )
-                .cost(entity.getCost())
+                .cost(entity.getCost() != null ? entity.getCost() : BigDecimal.ZERO)
                 .build();
     }
 
     private RecipeIngredientDto toRecipeIngredientDto(RecipeIngredientJpaEntity entity) {
+        if (entity == null) {
+            return null;
+        }
         return RecipeIngredientDto.builder()
                 .id(entity.getId())
-                .recipeId(entity.getRecipe().getId())
-                .ingredientId(entity.getIngredient().getId())
-                .ingredientName(entity.getIngredient().getName())
+                .recipeId(entity.getRecipe() != null ? entity.getRecipe().getId() : null)
+                .ingredientId(entity.getIngredient() != null ? entity.getIngredient().getId() : null)
+                .ingredientName(entity.getIngredient() != null ? entity.getIngredient().getName() : null)
                 .quantity(entity.getQuantity())
                 .unit(entity.getUnit())
                 .build();
@@ -85,6 +92,9 @@ public class RecipeMapper {
     }
 
     public RecipeResponse toResponse(RecipeDto dto) {
+        if (dto == null) {
+            return null;
+        }
         return RecipeResponse.builder()
             .id(dto.getId())
             .name(dto.getName())
@@ -92,12 +102,36 @@ public class RecipeMapper {
             .instructions(dto.getInstructions())
             .preparationTime(dto.getPreparationTime())
             .difficulty(dto.getDifficulty())
-            .cost(dto.getCost())
+            .cost(dto.getCost() != null ? dto.getCost() : BigDecimal.ZERO)
             .ingredients(
-                dto.getRecipeIngredients().stream()
-                    .map(this::toIngredientResponse)
-                    .collect(Collectors.toList())
+                dto.getRecipeIngredients() != null ?
+                    dto.getRecipeIngredients().stream()
+                        .map(this::toIngredientResponse)
+                        .collect(Collectors.toList()) :
+                    null
             )
+            .build();
+    }
+
+    private RecipeIngredientResponse toIngredientResponse(RecipeIngredientDto ri) {
+        if (ri == null) {
+            return null;
+        }
+        
+        var ingredientName = ri.getIngredientName();
+        if (ingredientName == null && ri.getIngredientId() != null) {
+            ingredientName = ingredientRepository.findById(ri.getIngredientId())
+                .map(ingredient -> ingredient.getName())
+                .orElse(null);
+        }
+        
+        return RecipeIngredientResponse.builder()
+            .id(ri.getId())
+            .recipeId(ri.getRecipeId())
+            .ingredientId(ri.getIngredientId())
+            .ingredientName(ingredientName)
+            .quantity(ri.getQuantity())
+            .unit(ri.getUnit())
             .build();
     }
 
@@ -106,6 +140,9 @@ public class RecipeMapper {
     }
 
     public RecipeDto fromCommand(CreateRecipeCommand command, UUID id) {
+        if (command == null) {
+            return null;
+        }
         return RecipeDto.builder()
                 .id(id)
                 .name(command.getName())
@@ -113,28 +150,20 @@ public class RecipeMapper {
                 .instructions(command.getInstructions())
                 .preparationTime(command.getPreparationTime())
                 .difficulty(command.getDifficulty())
+                .cost(BigDecimal.ZERO)
                 .recipeIngredients(
-                    command.getIngredients().stream()
-                        .map(ingredient -> RecipeIngredientDto.builder()
-                            .id(UUID.randomUUID())
-                            .recipeId(id)
-                            .ingredientId(ingredient.getIngredientId())
-                            .quantity(ingredient.getQuantity())
-                            .unit(ingredient.getUnit())
-                            .build())
-                        .collect(Collectors.toList())
+                    command.getIngredients() != null ?
+                        command.getIngredients().stream()
+                            .map(ingredient -> RecipeIngredientDto.builder()
+                                .id(UUID.randomUUID())
+                                .recipeId(id)
+                                .ingredientId(ingredient.getIngredientId())
+                                .quantity(ingredient.getQuantity())
+                                .unit(ingredient.getUnit())
+                                .build())
+                            .collect(Collectors.toList()) :
+                        null
                 )
                 .build();
-    }
-
-    private RecipeIngredientResponse toIngredientResponse(RecipeIngredientDto ri) {
-        return RecipeIngredientResponse.builder()
-            .id(ri.getId())
-            .recipeId(ri.getRecipeId())
-            .ingredientId(ri.getIngredientId())
-            .ingredientName(ri.getIngredientName())
-            .quantity(ri.getQuantity())
-            .unit(ri.getUnit())
-            .build();
     }
 } 

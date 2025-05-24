@@ -29,6 +29,14 @@ public class RecipeService implements RecipeUseCase {
     @Override
     @Transactional
     public RecipeResponse createRecipe(CreateRecipeCommand command) {
+        if (command == null) {
+            throw new BusinessException("El comando de creación no puede ser nulo");
+        }
+
+        if (command.getIngredients() == null || command.getIngredients().isEmpty()) {
+            throw new BusinessException("La lista de ingredientes no puede estar vacía");
+        }
+
         // Validar que todos los ingredientes existan
         List<UUID> nonExistentIngredients = command.getIngredients().stream()
                 .map(ingredient -> ingredient.getIngredientId())
@@ -62,6 +70,10 @@ public class RecipeService implements RecipeUseCase {
     @Override
     @Transactional
     public RecipeResponse updateRecipe(UUID id, CreateRecipeCommand command) {
+        if (command == null) {
+            throw new BusinessException("El comando de actualización no puede ser nulo");
+        }
+
         // Verificar que la receta existe
         RecipeResponse existingRecipe = recipeRepository.findById(id)
                 .orElseThrow(() -> new BusinessException("Receta no encontrada"));
@@ -140,6 +152,10 @@ public class RecipeService implements RecipeUseCase {
     }
 
     private BigDecimal calculateRecipeCost(List<RecipeIngredientResponse> ingredients) {
+        if (ingredients == null || ingredients.isEmpty()) {
+            return BigDecimal.ZERO;
+        }
+
         return ingredients.stream()
                 .map(ingredient -> {
                     var ingredientData = ingredientRepository.findById(ingredient.getIngredientId())

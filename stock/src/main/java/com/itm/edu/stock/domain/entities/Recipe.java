@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.With;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -22,7 +23,9 @@ public class Recipe {
     private Integer preparationTime;
     private String difficulty;
     private BigDecimal cost;
-    private List<RecipeIngredient> recipeIngredients;
+    
+    @Builder.Default
+    private List<RecipeIngredient> recipeIngredients = new ArrayList<>();
 
     public Recipe withCost(BigDecimal newCost) {
         return this.toBuilder()
@@ -32,7 +35,7 @@ public class Recipe {
 
     public Recipe withRecipeIngredients(List<RecipeIngredient> newIngredients) {
         return this.toBuilder()
-                .recipeIngredients(newIngredients)
+                .recipeIngredients(newIngredients != null ? newIngredients : new ArrayList<>())
                 .build();
     }
 }

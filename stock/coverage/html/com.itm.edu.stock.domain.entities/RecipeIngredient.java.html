@@ -1,39 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RecipeIngredient.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">stock</a> &gt; <a href="index.source.html" class="el_package">com.itm.edu.stock.domain.entities</a> &gt; <span class="el_source">RecipeIngredient.java</span></div><h1>RecipeIngredient.java</h1><pre class="source lang-java linenums">package com.itm.edu.stock.domain.entities;
 
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
-import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.With;
+import java.math.BigDecimal;
 import java.util.UUID;
-import com.itm.edu.stock.domain.valueobjects.Quantity;
-import com.itm.edu.stock.domain.valueobjects.Unit;
-import org.hibernate.annotations.GenericGenerator;
 
-@Entity
-@Table(name = &quot;recipe_ingredients&quot;)
 @Getter
-<span class="pc" id="L16">@Setter</span>
-<span class="fc" id="L17">@NoArgsConstructor</span>
-<span class="fc" id="L18">@AllArgsConstructor</span>
+<span class="pc" id="L12">@Builder(toBuilder = true)</span>
+<span class="fc" id="L13">@AllArgsConstructor</span>
+<span class="nc" id="L14">@NoArgsConstructor</span>
+@With
 public class RecipeIngredient {
-    @Id
-    @GeneratedValue(generator = &quot;UUID&quot;)
-    @GenericGenerator(name = &quot;UUID&quot;, strategy = &quot;org.hibernate.id.UUIDGenerator&quot;)
-<span class="fc" id="L23">    private UUID id;</span>
-    
-    @ManyToOne
-    @JoinColumn(name = &quot;recipe_id&quot;)
-<span class="fc" id="L27">    private Recipe recipe;</span>
-    
-    @ManyToOne
-    @JoinColumn(name = &quot;ingredient_id&quot;)
-<span class="fc" id="L31">    private Ingredient ingredient;</span>
-    
-    @Embedded
-<span class="fc" id="L34">    private Quantity quantity;</span>
-    
-    @Embedded
-<span class="fc" id="L37">    private Unit unit;</span>
+<span class="pc bnc" id="L17" title="All 2 branches missed.">    private UUID id;</span>
+<span class="nc bnc" id="L18" title="All 2 branches missed.">    private UUID recipeId;</span>
+<span class="pc bnc" id="L19" title="All 2 branches missed.">    private UUID ingredientId;</span>
+<span class="pc bnc" id="L20" title="All 2 branches missed.">    private String ingredientName;</span>
+<span class="fc" id="L21">    private BigDecimal quantity;</span>
+<span class="fc" id="L22">    private String unit;</span>
+
+    public RecipeIngredient withQuantity(BigDecimal newQuantity) {
+<span class="nc" id="L25">        return this.toBuilder()</span>
+<span class="nc" id="L26">                .quantity(newQuantity)</span>
+<span class="nc" id="L27">                .build();</span>
+    }
+
+    public RecipeIngredient withUnit(String newUnit) {
+<span class="nc" id="L31">        return this.toBuilder()</span>
+<span class="nc" id="L32">                .unit(newUnit)</span>
+<span class="nc" id="L33">                .build();</span>
+    }
 } 
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

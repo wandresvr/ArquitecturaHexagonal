@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RecipeIngredientJpaEntity.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">stock</a> &gt; <a href="index.source.html" class="el_package">com.itm.edu.stock.infrastructure.persistence.entity</a> &gt; <span class="el_source">RecipeIngredientJpaEntity.java</span></div><h1>RecipeIngredientJpaEntity.java</h1><pre class="source lang-java linenums">package com.itm.edu.stock.infrastructure.persistence.entity;
+
+import com.itm.edu.stock.domain.entities.RecipeIngredient;
+import com.itm.edu.stock.infrastructure.persistence.base.BaseJpaEntity;
+import jakarta.persistence.*;
+import lombok.*;
+import java.math.BigDecimal;
+import java.util.UUID;
+
+@Entity
+@Table(name = &quot;recipe_ingredients&quot;)
+@Getter
+<span class="nc" id="L13">@Setter</span>
+<span class="fc" id="L14">@NoArgsConstructor</span>
+<span class="nc" id="L15">@AllArgsConstructor</span>
+<span class="nc" id="L16">@Builder</span>
+public class RecipeIngredientJpaEntity extends BaseJpaEntity&lt;RecipeIngredient&gt; {
+    @Id
+    @GeneratedValue
+<span class="nc" id="L20">    private UUID id;</span>
+
+    @ManyToOne
+    @JoinColumn(name = &quot;recipe_id&quot;)
+<span class="nc" id="L24">    private RecipeJpaEntity recipe;</span>
+
+    @ManyToOne
+    @JoinColumn(name = &quot;ingredient_id&quot;)
+<span class="nc" id="L28">    private IngredientJpaEntity ingredient;</span>
+
+<span class="nc" id="L30">    private BigDecimal quantity;</span>
+<span class="nc" id="L31">    private String unit;</span>
+
+    @Override
+    public RecipeIngredient toDomain() {
+<span class="nc" id="L35">        return RecipeIngredient.builder()</span>
+<span class="nc" id="L36">            .id(this.id)</span>
+<span class="nc bnc" id="L37" title="All 2 branches missed.">            .recipeId(this.recipe != null ? this.recipe.getId() : null)</span>
+<span class="nc bnc" id="L38" title="All 2 branches missed.">            .ingredientId(this.ingredient != null ? this.ingredient.getId() : null)</span>
+<span class="nc bnc" id="L39" title="All 2 branches missed.">            .ingredientName(this.ingredient != null ? this.ingredient.getName() : null)</span>
+<span class="nc" id="L40">            .quantity(this.quantity)</span>
+<span class="nc" id="L41">            .unit(this.unit)</span>
+<span class="nc" id="L42">            .build();</span>
+    }
+} 
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

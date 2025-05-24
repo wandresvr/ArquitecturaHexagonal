@@ -12,16 +12,21 @@ class CreateIngredientRequestDtoTest {
     private final ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
     private final Validator validator = factory.getValidator();
 
+    private CreateIngredientRequestDto createValidDto() {
+        CreateIngredientRequestDto dto = new CreateIngredientRequestDto();
+        dto.setName("Harina");
+        dto.setDescription("Harina de trigo");
+        dto.setQuantity(new BigDecimal("1000"));
+        dto.setUnit("gramos");
+        dto.setPrice(new BigDecimal("2.50"));
+        dto.setSupplier("Proveedor A");
+        return dto;
+    }
+
     @Test
     void whenCreateValidIngredientDto_thenNoViolations() {
         // Given
-        CreateIngredientRequestDto dto = new CreateIngredientRequestDto();
-        dto.setName("Flour");
-        dto.setDescription("All purpose flour");
-        dto.setQuantity(new BigDecimal("1000"));
-        dto.setUnit("g");
-        dto.setPrice(new BigDecimal("2.50"));
-        dto.setSupplier("Proveedor A");
+        CreateIngredientRequestDto dto = createValidDto();
 
         // When
         var violations = validator.validate(dto);
@@ -33,12 +38,8 @@ class CreateIngredientRequestDtoTest {
     @Test
     void whenCreateIngredientDtoWithoutName_thenViolation() {
         // Given
-        CreateIngredientRequestDto dto = new CreateIngredientRequestDto();
-        dto.setDescription("All purpose flour");
-        dto.setQuantity(new BigDecimal("1000"));
-        dto.setUnit("g");
-        dto.setPrice(new BigDecimal("2.50"));
-        dto.setSupplier("Proveedor A");
+        CreateIngredientRequestDto dto = createValidDto();
+        dto.setName(null);
 
         // When
         var violations = validator.validate(dto);
@@ -52,12 +53,8 @@ class CreateIngredientRequestDtoTest {
     @Test
     void whenCreateIngredientDtoWithoutQuantity_thenViolation() {
         // Given
-        CreateIngredientRequestDto dto = new CreateIngredientRequestDto();
-        dto.setName("Flour");
-        dto.setDescription("All purpose flour");
-        dto.setUnit("g");
-        dto.setPrice(new BigDecimal("2.50"));
-        dto.setSupplier("Proveedor A");
+        CreateIngredientRequestDto dto = createValidDto();
+        dto.setQuantity(null);
 
         // When
         var violations = validator.validate(dto);
@@ -71,13 +68,8 @@ class CreateIngredientRequestDtoTest {
     @Test
     void whenCreateIngredientDtoWithNegativeQuantity_thenViolation() {
         // Given
-        CreateIngredientRequestDto dto = new CreateIngredientRequestDto();
-        dto.setName("Flour");
-        dto.setDescription("All purpose flour");
+        CreateIngredientRequestDto dto = createValidDto();
         dto.setQuantity(new BigDecimal("-1000"));
-        dto.setUnit("g");
-        dto.setPrice(new BigDecimal("2.50"));
-        dto.setSupplier("Proveedor A");
 
         // When
         var violations = validator.validate(dto);
@@ -91,12 +83,8 @@ class CreateIngredientRequestDtoTest {
     @Test
     void whenCreateIngredientDtoWithoutUnit_thenViolation() {
         // Given
-        CreateIngredientRequestDto dto = new CreateIngredientRequestDto();
-        dto.setName("Flour");
-        dto.setDescription("All purpose flour");
-        dto.setQuantity(new BigDecimal("1000"));
-        dto.setPrice(new BigDecimal("2.50"));
-        dto.setSupplier("Proveedor A");
+        CreateIngredientRequestDto dto = createValidDto();
+        dto.setUnit(null);
 
         // When
         var violations = validator.validate(dto);
@@ -105,5 +93,50 @@ class CreateIngredientRequestDtoTest {
         assertFalse(violations.isEmpty());
         assertEquals(1, violations.size());
         assertEquals("La unidad es requerida", violations.iterator().next().getMessage());
+    }
+
+    @Test
+    void whenCreateIngredientDtoWithoutPrice_thenViolation() {
+        // Given
+        CreateIngredientRequestDto dto = createValidDto();
+        dto.setPrice(null);
+
+        // When
+        var violations = validator.validate(dto);
+
+        // Then
+        assertFalse(violations.isEmpty());
+        assertEquals(1, violations.size());
+        assertEquals("El precio es requerido", violations.iterator().next().getMessage());
+    }
+
+    @Test
+    void whenCreateIngredientDtoWithNegativePrice_thenViolation() {
+        // Given
+        CreateIngredientRequestDto dto = createValidDto();
+        dto.setPrice(new BigDecimal("-2.50"));
+
+        // When
+        var violations = validator.validate(dto);
+
+        // Then
+        assertFalse(violations.isEmpty());
+        assertEquals(1, violations.size());
+        assertEquals("El precio debe ser mayor o igual a 0", violations.iterator().next().getMessage());
+    }
+
+    @Test
+    void whenCreateIngredientDtoWithoutSupplier_thenViolation() {
+        // Given
+        CreateIngredientRequestDto dto = createValidDto();
+        dto.setSupplier(null);
+
+        // When
+        var violations = validator.validate(dto);
+
+        // Then
+        assertFalse(violations.isEmpty());
+        assertEquals(1, violations.size());
+        assertEquals("El proveedor es requerido", violations.iterator().next().getMessage());
     }
 } 

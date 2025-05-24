@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RecipeMapper.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">stock</a> &gt; <a href="index.source.html" class="el_package">com.itm.edu.stock.infrastructure.persistence.mapper</a> &gt; <span class="el_source">RecipeMapper.java</span></div><h1>RecipeMapper.java</h1><pre class="source lang-java linenums">package com.itm.edu.stock.infrastructure.persistence.mapper;
+
+import com.itm.edu.stock.application.dto.CreateRecipeCommand;
+import com.itm.edu.stock.application.dto.RecipeResponse;
+import com.itm.edu.stock.application.dto.RecipeIngredientResponse;
+import com.itm.edu.stock.application.ports.output.IngredientRepository;
+import com.itm.edu.stock.domain.exception.BusinessException;
+import com.itm.edu.stock.infrastructure.persistence.dto.RecipeDto;
+import com.itm.edu.stock.infrastructure.persistence.dto.RecipeIngredientDto;
+import com.itm.edu.stock.infrastructure.persistence.entity.RecipeJpaEntity;
+import com.itm.edu.stock.infrastructure.persistence.entity.RecipeIngredientJpaEntity;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+
+import java.math.BigDecimal;
+import java.util.stream.Collectors;
+import java.util.UUID;
+
+@Component
+<span class="fc" id="L20">@RequiredArgsConstructor</span>
+public class RecipeMapper {
+    private final IngredientPersistenceMapper ingredientMapper;
+    private final IngredientRepository ingredientRepository;
+    
+    public RecipeDto toDto(RecipeJpaEntity entity) {
+<span class="nc bnc" id="L26" title="All 2 branches missed.">        if (entity == null) {</span>
+<span class="nc" id="L27">            return null;</span>
+        }
+<span class="nc" id="L29">        return RecipeDto.builder()</span>
+<span class="nc" id="L30">                .id(entity.getId())</span>
+<span class="nc" id="L31">                .name(entity.getName())</span>
+<span class="nc" id="L32">                .description(entity.getDescription())</span>
+<span class="nc" id="L33">                .instructions(entity.getInstructions())</span>
+<span class="nc" id="L34">                .preparationTime(entity.getPreparationTime())</span>
+<span class="nc" id="L35">                .difficulty(entity.getDifficulty())</span>
+<span class="nc" id="L36">                .recipeIngredients(</span>
+<span class="nc" id="L37">                    entity.getRecipeIngredients().stream()</span>
+<span class="nc" id="L38">                        .map(this::toRecipeIngredientDto)</span>
+<span class="nc" id="L39">                        .collect(Collectors.toList())</span>
+                )
+<span class="nc bnc" id="L41" title="All 2 branches missed.">                .cost(entity.getCost() != null ? entity.getCost() : BigDecimal.ZERO)</span>
+<span class="nc" id="L42">                .build();</span>
+    }
+
+    private RecipeIngredientDto toRecipeIngredientDto(RecipeIngredientJpaEntity entity) {
+<span class="nc bnc" id="L46" title="All 2 branches missed.">        if (entity == null) {</span>
+<span class="nc" id="L47">            return null;</span>
+        }
+<span class="nc" id="L49">        return RecipeIngredientDto.builder()</span>
+<span class="nc" id="L50">                .id(entity.getId())</span>
+<span class="nc bnc" id="L51" title="All 2 branches missed.">                .recipeId(entity.getRecipe() != null ? entity.getRecipe().getId() : null)</span>
+<span class="nc bnc" id="L52" title="All 2 branches missed.">                .ingredientId(entity.getIngredient() != null ? entity.getIngredient().getId() : null)</span>
+<span class="nc bnc" id="L53" title="All 2 branches missed.">                .ingredientName(entity.getIngredient() != null ? entity.getIngredient().getName() : null)</span>
+<span class="nc" id="L54">                .quantity(entity.getQuantity())</span>
+<span class="nc" id="L55">                .unit(entity.getUnit())</span>
+<span class="nc" id="L56">                .build();</span>
+    }
+
+    private RecipeIngredientJpaEntity toRecipeIngredientJpa(RecipeIngredientDto dto, RecipeJpaEntity recipe) {
+<span class="nc" id="L60">        var ingredientResponse = ingredientRepository.findById(dto.getIngredientId())</span>
+<span class="nc" id="L61">                .orElseThrow(() -&gt; new BusinessException(&quot;Ingrediente no encontrado&quot;));</span>
+        
+<span class="nc" id="L63">        var entity = RecipeIngredientJpaEntity.builder()</span>
+<span class="nc" id="L64">                .id(dto.getId())</span>
+<span class="nc" id="L65">                .recipe(recipe)</span>
+<span class="nc" id="L66">                .ingredient(ingredientMapper.fromResponse(ingredientResponse))</span>
+<span class="nc" id="L67">                .quantity(dto.getQuantity())</span>
+<span class="nc bnc" id="L68" title="All 2 branches missed.">                .unit(dto.getUnit() != null ? dto.getUnit() : ingredientResponse.getUnit())</span>
+<span class="nc" id="L69">                .build();</span>
+                
+<span class="nc" id="L71">        return entity;</span>
+    }
+
+    public RecipeJpaEntity toEntity(RecipeDto dto) {
+<span class="nc" id="L75">        var entity = RecipeJpaEntity.builder()</span>
+<span class="nc" id="L76">                .id(dto.getId())</span>
+<span class="nc" id="L77">                .name(dto.getName())</span>
+<span class="nc" id="L78">                .description(dto.getDescription())</span>
+<span class="nc" id="L79">                .instructions(dto.getInstructions())</span>
+<span class="nc" id="L80">                .preparationTime(dto.getPreparationTime())</span>
+<span class="nc" id="L81">                .difficulty(dto.getDifficulty())</span>
+<span class="nc" id="L82">                .cost(dto.getCost())</span>
+<span class="nc" id="L83">                .build();</span>
+
+<span class="nc" id="L85">        entity.setRecipeIngredients(</span>
+<span class="nc" id="L86">            dto.getRecipeIngredients().stream()</span>
+<span class="nc" id="L87">                .map(ingredientDto -&gt; toRecipeIngredientJpa(ingredientDto, entity))</span>
+<span class="nc" id="L88">                .collect(Collectors.toList())</span>
+        );
+
+<span class="nc" id="L91">        return entity;</span>
+    }
+
+    public RecipeResponse toResponse(RecipeDto dto) {
+<span class="nc bnc" id="L95" title="All 2 branches missed.">        if (dto == null) {</span>
+<span class="nc" id="L96">            return null;</span>
+        }
+<span class="nc" id="L98">        return RecipeResponse.builder()</span>
+<span class="nc" id="L99">            .id(dto.getId())</span>
+<span class="nc" id="L100">            .name(dto.getName())</span>
+<span class="nc" id="L101">            .description(dto.getDescription())</span>
+<span class="nc" id="L102">            .instructions(dto.getInstructions())</span>
+<span class="nc" id="L103">            .preparationTime(dto.getPreparationTime())</span>
+<span class="nc" id="L104">            .difficulty(dto.getDifficulty())</span>
+<span class="nc bnc" id="L105" title="All 2 branches missed.">            .cost(dto.getCost() != null ? dto.getCost() : BigDecimal.ZERO)</span>
+<span class="nc" id="L106">            .ingredients(</span>
+<span class="nc bnc" id="L107" title="All 2 branches missed.">                dto.getRecipeIngredients() != null ?</span>
+<span class="nc" id="L108">                    dto.getRecipeIngredients().stream()</span>
+<span class="nc" id="L109">                        .map(this::toIngredientResponse)</span>
+<span class="nc" id="L110">                        .collect(Collectors.toList()) :</span>
+<span class="nc" id="L111">                    null</span>
+            )
+<span class="nc" id="L113">            .build();</span>
+    }
+
+    private RecipeIngredientResponse toIngredientResponse(RecipeIngredientDto ri) {
+<span class="nc bnc" id="L117" title="All 2 branches missed.">        if (ri == null) {</span>
+<span class="nc" id="L118">            return null;</span>
+        }
+        
+<span class="nc" id="L121">        var ingredientName = ri.getIngredientName();</span>
+<span class="nc bnc" id="L122" title="All 4 branches missed.">        if (ingredientName == null &amp;&amp; ri.getIngredientId() != null) {</span>
+<span class="nc" id="L123">            ingredientName = ingredientRepository.findById(ri.getIngredientId())</span>
+<span class="nc" id="L124">                .map(ingredient -&gt; ingredient.getName())</span>
+<span class="nc" id="L125">                .orElse(null);</span>
+        }
+        
+<span class="nc" id="L128">        return RecipeIngredientResponse.builder()</span>
+<span class="nc" id="L129">            .id(ri.getId())</span>
+<span class="nc" id="L130">            .recipeId(ri.getRecipeId())</span>
+<span class="nc" id="L131">            .ingredientId(ri.getIngredientId())</span>
+<span class="nc" id="L132">            .ingredientName(ingredientName)</span>
+<span class="nc" id="L133">            .quantity(ri.getQuantity())</span>
+<span class="nc" id="L134">            .unit(ri.getUnit())</span>
+<span class="nc" id="L135">            .build();</span>
+    }
+
+    public RecipeDto fromCommand(CreateRecipeCommand command) {
+<span class="nc" id="L139">        return fromCommand(command, UUID.randomUUID());</span>
+    }
+
+    public RecipeDto fromCommand(CreateRecipeCommand command, UUID id) {
+<span class="nc bnc" id="L143" title="All 2 branches missed.">        if (command == null) {</span>
+<span class="nc" id="L144">            return null;</span>
+        }
+<span class="nc" id="L146">        return RecipeDto.builder()</span>
+<span class="nc" id="L147">                .id(id)</span>
+<span class="nc" id="L148">                .name(command.getName())</span>
+<span class="nc" id="L149">                .description(command.getDescription())</span>
+<span class="nc" id="L150">                .instructions(command.getInstructions())</span>
+<span class="nc" id="L151">                .preparationTime(command.getPreparationTime())</span>
+<span class="nc" id="L152">                .difficulty(command.getDifficulty())</span>
+<span class="nc" id="L153">                .cost(BigDecimal.ZERO)</span>
+<span class="nc" id="L154">                .recipeIngredients(</span>
+<span class="nc bnc" id="L155" title="All 2 branches missed.">                    command.getIngredients() != null ?</span>
+<span class="nc" id="L156">                        command.getIngredients().stream()</span>
+<span class="nc" id="L157">                            .map(ingredient -&gt; RecipeIngredientDto.builder()</span>
+<span class="nc" id="L158">                                .id(UUID.randomUUID())</span>
+<span class="nc" id="L159">                                .recipeId(id)</span>
+<span class="nc" id="L160">                                .ingredientId(ingredient.getIngredientId())</span>
+<span class="nc" id="L161">                                .quantity(ingredient.getQuantity())</span>
+<span class="nc" id="L162">                                .unit(ingredient.getUnit())</span>
+<span class="nc" id="L163">                                .build())</span>
+<span class="nc" id="L164">                            .collect(Collectors.toList()) :</span>
+<span class="nc" id="L165">                        null</span>
+                )
+<span class="nc" id="L167">                .build();</span>
+    }
+} 
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

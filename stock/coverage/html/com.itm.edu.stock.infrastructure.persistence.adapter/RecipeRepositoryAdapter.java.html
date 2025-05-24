@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RecipeRepositoryAdapter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">stock</a> &gt; <a href="index.source.html" class="el_package">com.itm.edu.stock.infrastructure.persistence.adapter</a> &gt; <span class="el_source">RecipeRepositoryAdapter.java</span></div><h1>RecipeRepositoryAdapter.java</h1><pre class="source lang-java linenums">package com.itm.edu.stock.infrastructure.persistence.adapter;
+
+import com.itm.edu.stock.application.ports.output.RecipeRepository;
+import com.itm.edu.stock.application.dto.RecipeResponse;
+import com.itm.edu.stock.infrastructure.persistence.dto.RecipeDto;
+import com.itm.edu.stock.infrastructure.persistence.mapper.RecipeMapper;
+import com.itm.edu.stock.infrastructure.persistence.repository.RecipeJpaRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+@Component
+<span class="fc" id="L17">@RequiredArgsConstructor</span>
+public class RecipeRepositoryAdapter implements RecipeRepository {
+    private final RecipeJpaRepository jpaRepository;
+    private final RecipeMapper mapper;
+
+    @Override
+    public RecipeResponse save(RecipeDto recipe) {
+<span class="nc" id="L24">        var entity = mapper.toEntity(recipe);</span>
+        
+        // Si la entidad ya existe, cargar sus relaciones existentes
+<span class="nc bnc" id="L27" title="All 2 branches missed.">        if (jpaRepository.existsById(entity.getId())) {</span>
+<span class="nc" id="L28">            var existingEntity = jpaRepository.findById(entity.getId())</span>
+<span class="nc" id="L29">                    .orElseThrow(() -&gt; new RuntimeException(&quot;Recipe not found&quot;));</span>
+<span class="nc" id="L30">            entity.getRecipeIngredients().forEach(ri -&gt; ri.setRecipe(entity));</span>
+        }
+        
+<span class="nc" id="L33">        var savedEntity = jpaRepository.save(entity);</span>
+<span class="nc" id="L34">        return mapper.toResponse(mapper.toDto(savedEntity));</span>
+    }
+
+    @Override
+    public Optional&lt;RecipeResponse&gt; findById(UUID id) {
+<span class="nc" id="L39">        return jpaRepository.findById(id)</span>
+<span class="nc" id="L40">                .map(mapper::toDto)</span>
+<span class="nc" id="L41">                .map(mapper::toResponse);</span>
+    }
+
+    @Override
+    public List&lt;RecipeResponse&gt; findAll() {
+<span class="nc" id="L46">        return jpaRepository.findAll().stream()</span>
+<span class="nc" id="L47">                .map(mapper::toDto)</span>
+<span class="nc" id="L48">                .map(mapper::toResponse)</span>
+<span class="nc" id="L49">                .collect(Collectors.toList());</span>
+    }
+
+    @Override
+    public void deleteById(UUID id) {
+<span class="nc" id="L54">        jpaRepository.deleteById(id);</span>
+<span class="nc" id="L55">    }</span>
+
+    @Override
+    public boolean existsById(UUID id) {
+<span class="nc" id="L59">        return jpaRepository.existsById(id);</span>
+    }
+
+    @Override
+    public List&lt;RecipeResponse&gt; findByDifficulty(String difficulty) {
+<span class="nc" id="L64">        return jpaRepository.findByDifficulty(difficulty).stream()</span>
+<span class="nc" id="L65">                .map(mapper::toDto)</span>
+<span class="nc" id="L66">                .map(mapper::toResponse)</span>
+<span class="nc" id="L67">                .collect(Collectors.toList());</span>
+    }
+} 
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

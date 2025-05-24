@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>IngredientJpaEntity.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">stock</a> &gt; <a href="index.source.html" class="el_package">com.itm.edu.stock.infrastructure.persistence.entity</a> &gt; <span class="el_source">IngredientJpaEntity.java</span></div><h1>IngredientJpaEntity.java</h1><pre class="source lang-java linenums">package com.itm.edu.stock.infrastructure.persistence.entity;
+
+import com.itm.edu.stock.domain.entities.Ingredient;
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.math.BigDecimal;
+import java.util.UUID;
+
+@Entity
+@Table(name = &quot;ingredients&quot;)
+@Getter
+<span class="nc" id="L13">@Setter</span>
+<span class="nc" id="L14">@NoArgsConstructor</span>
+<span class="nc" id="L15">@AllArgsConstructor</span>
+<span class="nc" id="L16">@Builder</span>
+public class IngredientJpaEntity {
+    @Id
+<span class="nc" id="L19">    private UUID id;</span>
+<span class="nc" id="L20">    private String name;</span>
+<span class="nc" id="L21">    private String description;</span>
+<span class="nc" id="L22">    private BigDecimal quantity;</span>
+<span class="nc" id="L23">    private String unit;</span>
+<span class="nc" id="L24">    private BigDecimal price;</span>
+<span class="nc" id="L25">    private String supplier;</span>
+<span class="nc" id="L26">    private BigDecimal minimumStock;</span>
+
+    public static IngredientJpaEntity fromDomain(Ingredient ingredient) {
+<span class="nc" id="L29">        return IngredientJpaEntity.builder()</span>
+<span class="nc" id="L30">                .id(ingredient.getId())</span>
+<span class="nc" id="L31">                .name(ingredient.getName())</span>
+<span class="nc" id="L32">                .description(ingredient.getDescription())</span>
+<span class="nc" id="L33">                .quantity(ingredient.getQuantity())</span>
+<span class="nc" id="L34">                .unit(ingredient.getUnit())</span>
+<span class="nc" id="L35">                .supplier(ingredient.getSupplier())</span>
+<span class="nc" id="L36">                .minimumStock(ingredient.getMinimumStock())</span>
+<span class="nc" id="L37">                .build();</span>
+    }
+
+    public Ingredient toDomain() {
+<span class="nc" id="L41">        return Ingredient.builder()</span>
+<span class="nc" id="L42">                .id(this.id)</span>
+<span class="nc" id="L43">                .name(this.name)</span>
+<span class="nc" id="L44">                .description(this.description)</span>
+<span class="nc" id="L45">                .quantity(this.quantity)</span>
+<span class="nc" id="L46">                .unit(this.unit)</span>
+<span class="nc" id="L47">                .supplier(this.supplier)</span>
+<span class="nc" id="L48">                .minimumStock(this.minimumStock)</span>
+<span class="nc" id="L49">                .build();</span>
+    }
+} 
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

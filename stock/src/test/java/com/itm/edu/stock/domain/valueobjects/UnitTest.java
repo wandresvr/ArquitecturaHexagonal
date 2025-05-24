@@ -6,17 +6,35 @@ import static org.junit.jupiter.api.Assertions.*;
 class UnitTest {
 
     @Test
-    void whenCreateUnit_thenSuccess() {
+    void testUnitCreation() {
+        // Arrange
         String value = "kg";
-        Unit unit = new Unit();
-        unit.setValue(value);
+
+        // Act
+        Unit unit = new Unit(value);
+
+        // Assert
         assertEquals(value, unit.getValue());
     }
 
     @Test
-    void whenCreateUnitWithConstructor_thenSuccess() {
-        String value = "kg";
-        Unit unit = new Unit(value);
-        assertEquals(value, unit.getValue());
+    void testUnitEquality() {
+        // Arrange
+        Unit unit1 = new Unit("kg");
+        Unit unit2 = new Unit("kg");
+        Unit unit3 = new Unit("g");
+
+        // Assert
+        assertEquals(unit1, unit2);
+        assertNotEquals(unit1, unit3);
+        assertEquals(unit1.hashCode(), unit2.hashCode());
+    }
+
+    @Test
+    void testUnitValidation() {
+        // Assert
+        assertThrows(IllegalArgumentException.class, () -> new Unit(null));
+        assertThrows(IllegalArgumentException.class, () -> new Unit(""));
+        assertThrows(IllegalArgumentException.class, () -> new Unit(" "));
     }
 } 

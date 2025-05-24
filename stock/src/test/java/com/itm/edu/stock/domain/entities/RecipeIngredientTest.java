@@ -5,52 +5,72 @@ import java.math.BigDecimal;
 import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.itm.edu.stock.domain.valueobjects.Quantity;
-import com.itm.edu.stock.domain.valueobjects.Unit;
-
 class RecipeIngredientTest {
 
     @Test
-    void whenCreateRecipeIngredient_thenSuccess() {
+    void testRecipeIngredientCreation() {
+        // Arrange
         UUID id = UUID.randomUUID();
-        Ingredient ingredient = new Ingredient();
-        ingredient.setId(UUID.randomUUID());
-        ingredient.setName("Flour");
-        Quantity quantity = new Quantity(new BigDecimal("500"));
-        Unit unit = new Unit("g");
+        UUID ingredientId = UUID.randomUUID();
+        String ingredientName = "Harina";
+        BigDecimal quantity = new BigDecimal("500");
+        String unit = "gramos";
 
-        RecipeIngredient recipeIngredient = new RecipeIngredient();
-        recipeIngredient.setId(id);
-        recipeIngredient.setIngredient(ingredient);
-        recipeIngredient.setQuantity(quantity);
-        recipeIngredient.setUnit(unit);
+        // Act
+        RecipeIngredient recipeIngredient = RecipeIngredient.builder()
+            .id(id)
+            .ingredientId(ingredientId)
+            .ingredientName(ingredientName)
+            .quantity(quantity)
+            .unit(unit)
+            .build();
 
+        // Assert
         assertEquals(id, recipeIngredient.getId());
-        assertEquals(ingredient.getId(), recipeIngredient.getIngredient().getId());
-        assertEquals(quantity.getValue(), recipeIngredient.getQuantity().getValue());
-        assertEquals(unit.getValue(), recipeIngredient.getUnit().getValue());
+        assertEquals(ingredientId, recipeIngredient.getIngredientId());
+        assertEquals(ingredientName, recipeIngredient.getIngredientName());
+        assertEquals(quantity, recipeIngredient.getQuantity());
+        assertEquals(unit, recipeIngredient.getUnit());
     }
 
     @Test
-    void whenCreateRecipeIngredientWithConstructor_thenSuccess() {
-        UUID id = UUID.randomUUID();
-        Recipe recipe = new Recipe();
-        recipe.setId(UUID.randomUUID());
-        recipe.setName("Pizza");
-        
-        Ingredient ingredient = new Ingredient();
-        ingredient.setId(UUID.randomUUID());
-        ingredient.setName("Flour");
-        
-        Quantity quantity = new Quantity(new BigDecimal("500"));
-        Unit unit = new Unit("g");
+    void testRecipeIngredientWithNullValues() {
+        // Act
+        RecipeIngredient recipeIngredient = RecipeIngredient.builder().build();
 
-        RecipeIngredient recipeIngredient = new RecipeIngredient(id, recipe, ingredient, quantity, unit);
+        // Assert
+        assertNull(recipeIngredient.getId());
+        assertNull(recipeIngredient.getIngredientId());
+        assertNull(recipeIngredient.getIngredientName());
+        assertNull(recipeIngredient.getQuantity());
+        assertNull(recipeIngredient.getUnit());
+    }
 
-        assertEquals(id, recipeIngredient.getId());
-        assertEquals(recipe.getId(), recipeIngredient.getRecipe().getId());
-        assertEquals(ingredient.getId(), recipeIngredient.getIngredient().getId());
-        assertEquals(quantity.getValue(), recipeIngredient.getQuantity().getValue());
-        assertEquals(unit.getValue(), recipeIngredient.getUnit().getValue());
+    @Test
+    void testRecipeIngredientWithUpdates() {
+        // Arrange
+        RecipeIngredient recipeIngredient = RecipeIngredient.builder()
+            .id(UUID.randomUUID())
+            .ingredientId(UUID.randomUUID())
+            .ingredientName("Harina")
+            .quantity(new BigDecimal("500"))
+            .unit("gramos")
+            .build();
+
+        // Act
+        BigDecimal newQuantity = new BigDecimal("750");
+        String newUnit = "kilogramos";
+        
+        RecipeIngredient updatedIngredient = recipeIngredient.toBuilder()
+            .quantity(newQuantity)
+            .unit(newUnit)
+            .build();
+
+        // Assert
+        assertEquals(recipeIngredient.getId(), updatedIngredient.getId());
+        assertEquals(recipeIngredient.getIngredientId(), updatedIngredient.getIngredientId());
+        assertEquals(recipeIngredient.getIngredientName(), updatedIngredient.getIngredientName());
+        assertEquals(newQuantity, updatedIngredient.getQuantity());
+        assertEquals(newUnit, updatedIngredient.getUnit());
     }
 } 
