@@ -2,46 +2,40 @@
 
 import com.itm.edu.order.application.ports.inputs.UpdateOrderUseCase;
 import com.itm.edu.order.application.ports.outputs.OrderRepositoryPort;
-import com.itm.edu.order.domain.exception.OrderNotFoundException;
 import com.itm.edu.order.domain.model.Order;
+import com.itm.edu.order.domain.exception.BusinessException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
 @Service
+<span class="nc" id="L14">@RequiredArgsConstructor</span>
 public class UpdateOrderService implements UpdateOrderUseCase {
-
-    private final OrderRepositoryPort orderRepositoryPort;
-
-<span class="nc" id="L17">    public UpdateOrderService(OrderRepositoryPort orderRepositoryPort) {</span>
-<span class="nc" id="L18">        this.orderRepositoryPort = orderRepositoryPort;</span>
-<span class="nc" id="L19">    }</span>
+    private final OrderRepositoryPort orderRepository;
 
     @Override
     @Transactional
-    public Order updateOrder(UUID id, Order orderDetails) {
-<span class="nc bnc" id="L24" title="All 2 branches missed.">        if (id == null) {</span>
-<span class="nc" id="L25">            throw new IllegalArgumentException(&quot;Order ID cannot be null&quot;);</span>
+    public Order updateOrder(UUID orderId, Order orderDetails) {
+<span class="nc" id="L21">        Order existingOrder = orderRepository.findById(orderId)</span>
+<span class="nc" id="L22">                .orElseThrow(() -&gt; new BusinessException(&quot;Orden no encontrada con ID: &quot; + orderId));</span>
+
+<span class="nc" id="L24">        Order updatedOrder = existingOrder;</span>
+        
+<span class="nc bnc" id="L26" title="All 2 branches missed.">        if (orderDetails.getOrderStatus() != null) {</span>
+<span class="nc" id="L27">            updatedOrder = updatedOrder.withUpdatedStatus(orderDetails.getOrderStatus());</span>
+        }
+        
+<span class="nc bnc" id="L30" title="All 2 branches missed.">        if (orderDetails.getClient() != null) {</span>
+<span class="nc" id="L31">            updatedOrder = updatedOrder.withUpdatedClient(orderDetails.getClient());</span>
         }
 
-<span class="nc bnc" id="L28" title="All 2 branches missed.">        if (orderDetails == null) {</span>
-<span class="nc" id="L29">            throw new IllegalArgumentException(&quot;Order details cannot be null&quot;);</span>
+<span class="nc bnc" id="L34" title="All 2 branches missed.">        if (orderDetails.getDeliveryAddress() != null) {</span>
+<span class="nc" id="L35">            updatedOrder = updatedOrder.withUpdatedDeliveryAddress(orderDetails.getDeliveryAddress());</span>
         }
 
-<span class="nc" id="L32">        Order existingOrder = orderRepositoryPort.findById(id)</span>
-<span class="nc" id="L33">                .orElseThrow(() -&gt; new OrderNotFoundException(&quot;Order not found with id: &quot; + id));</span>
-
-        // Actualizar los campos necesarios
-<span class="nc" id="L36">        existingOrder.setOrderStatus(orderDetails.getOrderStatus());</span>
-<span class="nc bnc" id="L37" title="All 2 branches missed.">        if (orderDetails.getDeliveryAddress() != null) {</span>
-<span class="nc" id="L38">            existingOrder.setDeliveryAddress(orderDetails.getDeliveryAddress());</span>
-        }
-<span class="nc bnc" id="L40" title="All 2 branches missed.">        if (orderDetails.getClient() != null) {</span>
-<span class="nc" id="L41">            existingOrder.setClient(orderDetails.getClient());</span>
-        }
-
-<span class="nc" id="L44">        return orderRepositoryPort.update(existingOrder);</span>
+<span class="nc" id="L38">        return orderRepository.save(updatedOrder);</span>
     }
 } 
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

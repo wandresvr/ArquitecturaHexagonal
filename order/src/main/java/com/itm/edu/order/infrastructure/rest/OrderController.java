@@ -55,18 +55,50 @@ public class OrderController {
             content = @Content(schema = @Schema(implementation = ApiError.class)))
     })
     @PostMapping
-    public ResponseEntity<OrderDto> createOrder(@Valid @RequestBody CreateOrderRequest request) {
+    public ResponseEntity<?> createOrder(@Valid @RequestBody CreateOrderRequest request) {
         try {
+            // Validar cliente
+            if (request.getClient() == null) {
+                return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                    .body(ApiError.of(HttpStatus.UNPROCESSABLE_ENTITY, "El cliente no puede ser nulo", "/api/v1/orders"));
+            }
+
+            // Validar dirección de envío
+            if (request.getAddressShipping() == null) {
+                return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                    .body(ApiError.of(HttpStatus.UNPROCESSABLE_ENTITY, "La dirección de envío no puede ser nula", "/api/v1/orders"));
+            }
+
+            // Validar productos y cantidades
+            Map<UUID, BigDecimal> productQuantities = request.getProductQuantities();
+            if (productQuantities == null || productQuantities.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                    .body(ApiError.of(HttpStatus.UNPROCESSABLE_ENTITY, "Debe especificar al menos un producto", "/api/v1/orders"));
+            }
+
+            // Validar cantidades negativas o cero
+            for (Map.Entry<UUID, BigDecimal> entry : productQuantities.entrySet()) {
+                if (entry.getValue() == null || entry.getValue().compareTo(BigDecimal.ZERO) <= 0) {
+                    return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                        .body(ApiError.of(HttpStatus.UNPROCESSABLE_ENTITY, "La cantidad debe ser mayor a cero", "/api/v1/orders"));
+                }
+            }
+
             Order order = createOrderUseCase.createOrder(
                 request.getClient(),
                 request.getProductQuantities(),
                 request.getAddressShipping()
             );
             
-            return ResponseEntity.ok(orderDtoMapper.toDto(order));
+            return ResponseEntity.status(HttpStatus.CREATED).body(orderDtoMapper.toDto(order));
         } catch (BusinessException e) {
             log.error("Error de negocio al crear la orden: {}", e.getMessage());
-            throw new BusinessException(e.getMessage());
+            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .body(ApiError.of(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage(), "/api/v1/orders"));
+        } catch (Exception e) {
+            log.error("Error inesperado al crear la orden: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiError.of(HttpStatus.INTERNAL_SERVER_ERROR, "Error interno del servidor", "/api/v1/orders"));
         }
     }
 

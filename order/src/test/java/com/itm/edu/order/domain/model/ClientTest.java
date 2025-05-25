@@ -12,68 +12,114 @@ import static org.junit.jupiter.api.Assertions.*;
 class ClientTest {
 
     @Test
-    void testClientGettersAndSetters() {
+    void shouldCreateClientSuccessfully() {
         // Arrange
         UUID id = UUID.randomUUID();
         String name = "John Doe";
-        String email = "john.doe@example.com";
+        String email = "john@example.com";
         String phone = "1234567890";
-        
-        Client client = new Client();
-        
+
         // Act
-        client.setId(id);
-        client.setName(name);
-        client.setEmail(email);
-        client.setPhone(phone);
-        
+        Client client = Client.builder()
+                .id(id)
+                .name(name)
+                .email(email)
+                .phone(phone)
+                .build();
+
         // Assert
+        assertNotNull(client);
         assertEquals(id, client.getId());
         assertEquals(name, client.getName());
         assertEquals(email, client.getEmail());
         assertEquals(phone, client.getPhone());
     }
 
+    @Test
+    void shouldThrowExceptionWhenNameIsEmpty() {
+        // Act & Assert
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            Client.builder()
+                    .id(UUID.randomUUID())
+                    .name("")
+                    .email("john@example.com")
+                    .phone("1234567890")
+                    .build();
+        });
+
+        assertEquals("El nombre del cliente no puede estar vacío", exception.getMessage());
+    }
+
+    @Test
+    void shouldThrowExceptionWhenEmailIsEmpty() {
+        // Act & Assert
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            Client.builder()
+                    .id(UUID.randomUUID())
+                    .name("John Doe")
+                    .email("")
+                    .phone("1234567890")
+                    .build();
+        });
+
+        assertEquals("El email del cliente no puede estar vacío", exception.getMessage());
+    }
+
+    @Test
+    void shouldThrowExceptionWhenPhoneIsEmpty() {
+        // Act & Assert
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            Client.builder()
+                    .id(UUID.randomUUID())
+                    .name("John Doe")
+                    .email("john@example.com")
+                    .phone("")
+                    .build();
+        });
+
+        assertEquals("El teléfono del cliente no puede estar vacío", exception.getMessage());
+    }
+
     @ParameterizedTest
     @NullAndEmptySource
     @ValueSource(strings = {" ", "  "})
     void testClientWithInvalidName(String invalidName) {
-        // Arrange & Act & Assert
-        Client client = Client.builder()
-                .name(invalidName)
-                .email("john.doe@example.com")
-                .phone("1234567890")
-                .build();
-        
-        assertThrows(IllegalArgumentException.class, client::validate);
+        // Act & Assert
+        assertThrows(IllegalArgumentException.class, () -> {
+            Client.builder()
+                    .name(invalidName)
+                    .email("john.doe@example.com")
+                    .phone("1234567890")
+                    .build();
+        });
     }
 
     @ParameterizedTest
     @NullAndEmptySource
     @ValueSource(strings = {" ", "  "})
     void testClientWithInvalidEmail(String invalidEmail) {
-        // Arrange & Act & Assert
-        Client client = Client.builder()
-                .name("John Doe")
-                .email(invalidEmail)
-                .phone("1234567890")
-                .build();
-        
-        assertThrows(IllegalArgumentException.class, client::validate);
+        // Act & Assert
+        assertThrows(IllegalArgumentException.class, () -> {
+            Client.builder()
+                    .name("John Doe")
+                    .email(invalidEmail)
+                    .phone("1234567890")
+                    .build();
+        });
     }
 
     @ParameterizedTest
     @NullAndEmptySource
     @ValueSource(strings = {" ", "  "})
     void testClientWithInvalidPhone(String invalidPhone) {
-        // Arrange & Act & Assert
-        Client client = Client.builder()
-                .name("John Doe")
-                .email("john.doe@example.com")
-                .phone(invalidPhone)
-                .build();
-        
-        assertThrows(IllegalArgumentException.class, client::validate);
+        // Act & Assert
+        assertThrows(IllegalArgumentException.class, () -> {
+            Client.builder()
+                    .name("John Doe")
+                    .email("john.doe@example.com")
+                    .phone(invalidPhone)
+                    .build();
+        });
     }
 
     @Test

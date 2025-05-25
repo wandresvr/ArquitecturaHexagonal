@@ -1,46 +1,130 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Product.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">order</a> &gt; <a href="index.source.html" class="el_package">com.itm.edu.order.domain.model</a> &gt; <span class="el_source">Product.java</span></div><h1>Product.java</h1><pre class="source lang-java linenums">package com.itm.edu.order.domain.model;
 
-import com.itm.edu.order.domain.exception.ProductValidationException;
-import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
 import java.math.BigDecimal;
 import java.util.UUID;
 
-@Entity
-@Table(name = &quot;products&quot;)
-@Getter
-<span class="nc" id="L17">@Setter</span>
-<span class="nc" id="L18">@NoArgsConstructor</span>
-<span class="fc" id="L19">@AllArgsConstructor</span>
-<span class="pc" id="L20">@Builder</span>
 public class Product {
-    @Id
-    private UUID id;
-    private String name;
-    private String description;
-    private BigDecimal price;
-    private Integer stock;
+    private final UUID id;
+    private final String name;
+    private final String description;
+    private final BigDecimal price;
+    private final Integer stock;
 
-    @PrePersist
-    @PreUpdate
-    public void validate() {
-<span class="pc bpc" id="L32" title="1 of 4 branches missed.">        if (price != null &amp;&amp; price.compareTo(BigDecimal.ZERO) &lt; 0) {</span>
-<span class="fc" id="L33">            throw new ProductValidationException(&quot;Price cannot be negative&quot;);</span>
-        }
-<span class="pc bpc" id="L35" title="2 of 4 branches missed.">        if (stock != null &amp;&amp; stock &lt; 0) {</span>
-<span class="fc" id="L36">            throw new ProductValidationException(&quot;Stock cannot be negative&quot;);</span>
-        }
-<span class="nc" id="L38">    }</span>
+<span class="fc" id="L13">    private Product(Builder builder) {</span>
+<span class="fc" id="L14">        this.id = builder.id;</span>
+<span class="fc" id="L15">        this.name = builder.name;</span>
+<span class="fc" id="L16">        this.description = builder.description;</span>
+<span class="fc" id="L17">        this.price = builder.price;</span>
+<span class="fc" id="L18">        this.stock = builder.stock;</span>
+<span class="fc" id="L19">    }</span>
 
-<span class="fc" id="L40">    public UUID getId() { return id; }</span>
-<span class="fc" id="L41">    public String getName() { return name; }</span>
-<span class="fc" id="L42">    public String getDescription() { return description; }</span>
-<span class="fc" id="L43">    public BigDecimal getPrice() { return price; }</span>
-<span class="fc" id="L44">    public Integer getStock() { return stock; }</span>
+    public static Product create(String name, String description, BigDecimal price, Integer stock) {
+<span class="nc" id="L22">        return builder()</span>
+<span class="nc" id="L23">                .id(UUID.randomUUID())</span>
+<span class="nc" id="L24">                .name(name)</span>
+<span class="nc" id="L25">                .description(description)</span>
+<span class="nc" id="L26">                .price(price)</span>
+<span class="nc" id="L27">                .stock(stock)</span>
+<span class="nc" id="L28">                .build();</span>
+    }
+
+    public static Product reconstitute(UUID id, String name, String description, BigDecimal price, Integer stock) {
+<span class="nc" id="L32">        return builder()</span>
+<span class="nc" id="L33">                .id(id)</span>
+<span class="nc" id="L34">                .name(name)</span>
+<span class="nc" id="L35">                .description(description)</span>
+<span class="nc" id="L36">                .price(price)</span>
+<span class="nc" id="L37">                .stock(stock)</span>
+<span class="nc" id="L38">                .build();</span>
+    }
+
+    public Product withUpdatedDetails(String name, String description, BigDecimal price, Integer stock) {
+<span class="fc" id="L42">        return builder()</span>
+<span class="fc" id="L43">                .id(this.id)</span>
+<span class="fc" id="L44">                .name(name)</span>
+<span class="fc" id="L45">                .description(description)</span>
+<span class="fc" id="L46">                .price(price)</span>
+<span class="fc" id="L47">                .stock(stock)</span>
+<span class="fc" id="L48">                .build();</span>
+    }
+
+    public static Builder builder() {
+<span class="fc" id="L52">        return new Builder();</span>
+    }
+
+    public UUID getId() {
+<span class="fc" id="L56">        return id;</span>
+    }
+
+    public String getName() {
+<span class="fc" id="L60">        return name;</span>
+    }
+
+    public String getDescription() {
+<span class="fc" id="L64">        return description;</span>
+    }
+
+    public BigDecimal getPrice() {
+<span class="fc" id="L68">        return price;</span>
+    }
+
+    public Integer getStock() {
+<span class="fc" id="L72">        return stock;</span>
+    }
+
+    public static class Builder {
+        private UUID id;
+        private String name;
+        private String description;
+        private BigDecimal price;
+        private Integer stock;
+
+        private Builder() {}
+
+        public Builder id(UUID id) {
+<span class="fc" id="L85">            this.id = id;</span>
+<span class="fc" id="L86">            return this;</span>
+        }
+
+        public Builder name(String name) {
+<span class="fc" id="L90">            this.name = name;</span>
+<span class="fc" id="L91">            return this;</span>
+        }
+
+        public Builder description(String description) {
+<span class="fc" id="L95">            this.description = description;</span>
+<span class="fc" id="L96">            return this;</span>
+        }
+
+        public Builder price(BigDecimal price) {
+<span class="fc" id="L100">            this.price = price;</span>
+<span class="fc" id="L101">            return this;</span>
+        }
+
+        public Builder stock(Integer stock) {
+<span class="fc" id="L105">            this.stock = stock;</span>
+<span class="fc" id="L106">            return this;</span>
+        }
+
+        public Product build() {
+<span class="fc" id="L110">            validate();</span>
+<span class="fc" id="L111">            return new Product(this);</span>
+        }
+
+        private void validate() {
+<span class="pc bpc" id="L115" title="1 of 4 branches missed.">            if (name == null || name.trim().isEmpty()) {</span>
+<span class="fc" id="L116">                throw new IllegalArgumentException(&quot;El nombre del producto no puede estar vacío&quot;);</span>
+            }
+<span class="pc bpc" id="L118" title="1 of 4 branches missed.">            if (description == null || description.trim().isEmpty()) {</span>
+<span class="fc" id="L119">                throw new IllegalArgumentException(&quot;La descripción del producto no puede estar vacía&quot;);</span>
+            }
+<span class="fc bfc" id="L121" title="All 4 branches covered.">            if (price == null || price.compareTo(BigDecimal.ZERO) &lt; 0) {</span>
+<span class="fc" id="L122">                throw new IllegalArgumentException(&quot;El precio no puede ser negativo&quot;);</span>
+            }
+<span class="fc bfc" id="L124" title="All 4 branches covered.">            if (stock == null || stock &lt; 0) {</span>
+<span class="fc" id="L125">                throw new IllegalArgumentException(&quot;El stock no puede ser negativo&quot;);</span>
+            }
+<span class="fc" id="L127">        }</span>
+    }
 } 
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

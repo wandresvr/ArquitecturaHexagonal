@@ -2,10 +2,9 @@ package com.itm.edu.order.application.services;
 
 import com.itm.edu.order.application.ports.outputs.ProductRepositoryPort;
 import com.itm.edu.order.domain.model.Product;
+import com.itm.edu.order.domain.exception.BusinessException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -27,183 +26,133 @@ class CreateProductServiceTest {
     private CreateProductService createProductService;
 
     @Test
-    void shouldCreateProductWithCustomIdSuccessfully() {
+    void shouldCreateProductSuccessfully() {
         // Arrange
-        UUID customId = UUID.randomUUID();
-        String name = "Test Product";
-        String description = "Test Description";
-        BigDecimal price = new BigDecimal("99.99");
-        Integer stock = 100;
-
-        Product expectedProduct = Product.builder()
-                .id(customId)
-                .name(name)
-                .description(description)
-                .price(price)
-                .stock(stock)
+        Product product = Product.builder()
+                .name("Test Product")
+                .description("Test Description")
+                .price(new BigDecimal("99.99"))
+                .stock(100)
                 .build();
 
-        when(productRepositoryPort.save(any(Product.class))).thenReturn(expectedProduct);
+        when(productRepositoryPort.save(any(Product.class))).thenReturn(product);
 
         // Act
-        Product result = createProductService.createProduct(customId, name, description, price, stock);
+        Product result = createProductService.createProduct(product);
 
         // Assert
         assertNotNull(result);
-        assertEquals(customId, result.getId());
-        assertEquals(name, result.getName());
-        assertEquals(description, result.getDescription());
-        assertEquals(price, result.getPrice());
-        assertEquals(stock, result.getStock());
-
-        // Verify mock interactions
-        verify(productRepositoryPort, times(1)).save(any(Product.class));
-        verifyNoMoreInteractions(productRepositoryPort);
+        assertEquals(product.getName(), result.getName());
+        assertEquals(product.getDescription(), result.getDescription());
+        assertEquals(product.getPrice(), result.getPrice());
+        assertEquals(product.getStock(), result.getStock());
+        verify(productRepositoryPort).save(any(Product.class));
     }
 
     @Test
-    void shouldCreateProductWithGeneratedIdSuccessfully() {
-        // Arrange
-        String name = "Test Product";
-        String description = "Test Description";
-        BigDecimal price = new BigDecimal("99.99");
-        Integer stock = 100;
-
-        Product expectedProduct = Product.builder()
-                .id(UUID.randomUUID())
-                .name(name)
-                .description(description)
-                .price(price)
-                .stock(stock)
-                .build();
-
-        when(productRepositoryPort.save(any(Product.class))).thenReturn(expectedProduct);
-
-        // Act
-        Product result = createProductService.createProduct(name, description, price, stock);
-
-        // Assert
-        assertNotNull(result);
-        assertNotNull(result.getId());
-        assertEquals(name, result.getName());
-        assertEquals(description, result.getDescription());
-        assertEquals(price, result.getPrice());
-        assertEquals(stock, result.getStock());
-
-        // Verify mock interactions
-        verify(productRepositoryPort, times(1)).save(any(Product.class));
-        verifyNoMoreInteractions(productRepositoryPort);
-    }
-
-    @ParameterizedTest
-    @NullAndEmptySource
-    void shouldThrowExceptionWhenNameIsNullOrEmpty(String invalidName) {
-        // Arrange
-        String description = "Test Description";
-        BigDecimal price = new BigDecimal("99.99");
-        Integer stock = 100;
-
+    void shouldThrowExceptionWhenProductIsNull() {
         // Act & Assert
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            createProductService.createProduct(invalidName, description, price, stock);
+        BusinessException exception = assertThrows(BusinessException.class, () -> {
+            createProductService.createProduct(null);
         });
 
-        assertEquals("Product name cannot be null or empty", exception.getMessage());
-
-        // Verify no interactions with repository
+        assertEquals("El producto no puede ser nulo", exception.getMessage());
         verifyNoInteractions(productRepositoryPort);
     }
 
-    @ParameterizedTest
-    @NullAndEmptySource
-    void shouldThrowExceptionWhenDescriptionIsNullOrEmpty(String invalidDescription) {
-        // Arrange
-        String name = "Test Product";
-        BigDecimal price = new BigDecimal("99.99");
-        Integer stock = 100;
-
+    @Test
+    void shouldThrowExceptionWhenNameIsEmpty() {
         // Act & Assert
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            createProductService.createProduct(name, invalidDescription, price, stock);
+            Product.builder()
+                    .name("")
+                    .description("Test Description")
+                    .price(new BigDecimal("99.99"))
+                    .stock(100)
+                    .build();
         });
 
-        assertEquals("Product description cannot be null or empty", exception.getMessage());
+        assertEquals("El nombre del producto no puede estar vacío", exception.getMessage());
+        verifyNoInteractions(productRepositoryPort);
+    }
 
-        // Verify no interactions with repository
+    @Test
+    void shouldThrowExceptionWhenDescriptionIsEmpty() {
+        // Act & Assert
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            Product.builder()
+                    .name("Test Product")
+                    .description("")
+                    .price(new BigDecimal("99.99"))
+                    .stock(100)
+                    .build();
+        });
+
+        assertEquals("La descripción del producto no puede estar vacía", exception.getMessage());
         verifyNoInteractions(productRepositoryPort);
     }
 
     @Test
     void shouldThrowExceptionWhenPriceIsNull() {
-        // Arrange
-        String name = "Test Product";
-        String description = "Test Description";
-        Integer stock = 100;
-
         // Act & Assert
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            createProductService.createProduct(name, description, null, stock);
+            Product.builder()
+                    .name("Test Product")
+                    .description("Test Description")
+                    .price(null)
+                    .stock(100)
+                    .build();
         });
 
-        assertEquals("Product price cannot be null", exception.getMessage());
-
-        // Verify no interactions with repository
+        assertEquals("El precio no puede ser negativo", exception.getMessage());
         verifyNoInteractions(productRepositoryPort);
     }
 
     @Test
     void shouldThrowExceptionWhenPriceIsNegative() {
-        // Arrange
-        String name = "Test Product";
-        String description = "Test Description";
-        BigDecimal negativePrice = new BigDecimal("-99.99");
-        Integer stock = 100;
-
         // Act & Assert
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            createProductService.createProduct(name, description, negativePrice, stock);
+            Product.builder()
+                    .name("Test Product")
+                    .description("Test Description")
+                    .price(new BigDecimal("-1.00"))
+                    .stock(100)
+                    .build();
         });
 
-        assertEquals("Product price cannot be negative", exception.getMessage());
-
-        // Verify no interactions with repository
+        assertEquals("El precio no puede ser negativo", exception.getMessage());
         verifyNoInteractions(productRepositoryPort);
     }
 
     @Test
     void shouldThrowExceptionWhenStockIsNull() {
-        // Arrange
-        String name = "Test Product";
-        String description = "Test Description";
-        BigDecimal price = new BigDecimal("99.99");
-
         // Act & Assert
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            createProductService.createProduct(name, description, price, null);
+            Product.builder()
+                    .name("Test Product")
+                    .description("Test Description")
+                    .price(new BigDecimal("99.99"))
+                    .stock(null)
+                    .build();
         });
 
-        assertEquals("Product stock cannot be null", exception.getMessage());
-
-        // Verify no interactions with repository
+        assertEquals("El stock no puede ser negativo", exception.getMessage());
         verifyNoInteractions(productRepositoryPort);
     }
 
     @Test
     void shouldThrowExceptionWhenStockIsNegative() {
-        // Arrange
-        String name = "Test Product";
-        String description = "Test Description";
-        BigDecimal price = new BigDecimal("99.99");
-        Integer negativeStock = -100;
-
         // Act & Assert
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            createProductService.createProduct(name, description, price, negativeStock);
+            Product.builder()
+                    .name("Test Product")
+                    .description("Test Description")
+                    .price(new BigDecimal("99.99"))
+                    .stock(-1)
+                    .build();
         });
 
-        assertEquals("Product stock cannot be negative", exception.getMessage());
-
-        // Verify no interactions with repository
+        assertEquals("El stock no puede ser negativo", exception.getMessage());
         verifyNoInteractions(productRepositoryPort);
     }
 } 

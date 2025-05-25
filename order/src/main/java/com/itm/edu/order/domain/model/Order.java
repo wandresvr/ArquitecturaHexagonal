@@ -12,7 +12,6 @@ import com.itm.edu.order.domain.valueobjects.AddressShipping;
 import com.itm.edu.order.domain.valueobjects.OrderTotalValue;
 
 @Getter
-@Builder
 public class Order {
     private final UUID orderId;
     private final Client client;
@@ -20,8 +19,19 @@ public class Order {
     private final LocalDateTime orderDate;
     private final AddressShipping deliveryAddress;
     private final OrderTotalValue total;
-    @Builder.Default
-    private final List<OrderItem> products = new ArrayList<>();
+    private final List<OrderItem> products;
+
+    @Builder
+    private Order(UUID orderId, Client client, String orderStatus, LocalDateTime orderDate, 
+                AddressShipping deliveryAddress, OrderTotalValue total, List<OrderItem> products) {
+        this.orderId = orderId;
+        this.client = client;
+        this.orderStatus = orderStatus;
+        this.orderDate = orderDate;
+        this.deliveryAddress = deliveryAddress;
+        this.products = products != null ? products : new ArrayList<>();
+        this.total = total != null ? total : calculateTotalFromProducts(this.products);
+    }
 
     public void updateStatus(String newStatus) {
         if (newStatus == null || newStatus.trim().isEmpty()) {

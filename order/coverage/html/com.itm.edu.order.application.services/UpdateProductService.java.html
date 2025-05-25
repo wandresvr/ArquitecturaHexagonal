@@ -2,62 +2,55 @@
 
 import com.itm.edu.order.application.ports.inputs.UpdateProductUseCase;
 import com.itm.edu.order.application.ports.outputs.ProductRepositoryPort;
-import com.itm.edu.order.domain.exception.ProductNotFoundException;
 import com.itm.edu.order.domain.model.Product;
+import com.itm.edu.order.domain.exception.BusinessException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.UUID;
 
 @Service
+<span class="nc" id="L15">@RequiredArgsConstructor</span>
 public class UpdateProductService implements UpdateProductUseCase {
-
-    private final ProductRepositoryPort productRepositoryPort;
-
-<span class="nc" id="L18">    public UpdateProductService(ProductRepositoryPort productRepositoryPort) {</span>
-<span class="nc" id="L19">        this.productRepositoryPort = productRepositoryPort;</span>
-<span class="nc" id="L20">    }</span>
+    private final ProductRepositoryPort productRepository;
 
     @Override
-    public Product updateProduct(UUID id, String name, String description, BigDecimal price, Integer stock) {
-<span class="nc" id="L24">        validateProductParameters(name, description, price, stock);</span>
+    @Transactional
+    public Product updateProduct(UUID id, Product product) {
+<span class="nc" id="L22">        validateProductData(product);</span>
+        
+<span class="nc" id="L24">        Product existingProduct = productRepository.findById(id)</span>
+<span class="nc" id="L25">            .orElseThrow(() -&gt; new BusinessException(&quot;Producto no encontrado con ID: &quot; + id));</span>
 
-<span class="nc" id="L26">        Product existingProduct = productRepositoryPort.findById(id)</span>
-<span class="nc" id="L27">                .orElseThrow(() -&gt; new ProductNotFoundException(&quot;Product not found with id: &quot; + id));</span>
+<span class="nc" id="L27">        Product updatedProduct = Product.builder()</span>
+<span class="nc" id="L28">            .id(existingProduct.getId())</span>
+<span class="nc" id="L29">            .name(product.getName())</span>
+<span class="nc" id="L30">            .description(product.getDescription())</span>
+<span class="nc" id="L31">            .price(product.getPrice())</span>
+<span class="nc" id="L32">            .stock(product.getStock())</span>
+<span class="nc" id="L33">            .build();</span>
 
-<span class="nc" id="L29">        existingProduct.setName(name);</span>
-<span class="nc" id="L30">        existingProduct.setDescription(description);</span>
-<span class="nc" id="L31">        existingProduct.setPrice(price);</span>
-<span class="nc" id="L32">        existingProduct.setStock(stock);</span>
-
-<span class="nc" id="L34">        return productRepositoryPort.save(existingProduct);</span>
+<span class="nc" id="L35">        return productRepository.save(updatedProduct);</span>
     }
 
-    private void validateProductParameters(String name, String description, BigDecimal price, Integer stock) {
-<span class="nc bnc" id="L38" title="All 2 branches missed.">        if (!StringUtils.hasText(name)) {</span>
-<span class="nc" id="L39">            throw new IllegalArgumentException(&quot;Product name cannot be null or empty&quot;);</span>
+    private void validateProductData(Product product) {
+<span class="nc bnc" id="L39" title="All 2 branches missed.">        if (product == null) {</span>
+<span class="nc" id="L40">            throw new BusinessException(&quot;El producto no puede ser nulo&quot;);</span>
         }
-
-<span class="nc bnc" id="L42" title="All 2 branches missed.">        if (!StringUtils.hasText(description)) {</span>
-<span class="nc" id="L43">            throw new IllegalArgumentException(&quot;Product description cannot be null or empty&quot;);</span>
+<span class="nc bnc" id="L42" title="All 4 branches missed.">        if (product.getName() == null || product.getName().trim().isEmpty()) {</span>
+<span class="nc" id="L43">            throw new BusinessException(&quot;El nombre del producto no puede estar vacío&quot;);</span>
         }
-
-<span class="nc bnc" id="L46" title="All 2 branches missed.">        if (price == null) {</span>
-<span class="nc" id="L47">            throw new IllegalArgumentException(&quot;Product price cannot be null&quot;);</span>
+<span class="nc bnc" id="L45" title="All 4 branches missed.">        if (product.getDescription() == null || product.getDescription().trim().isEmpty()) {</span>
+<span class="nc" id="L46">            throw new BusinessException(&quot;La descripción del producto no puede estar vacía&quot;);</span>
         }
-
-<span class="nc bnc" id="L50" title="All 2 branches missed.">        if (price.compareTo(BigDecimal.ZERO) &lt; 0) {</span>
-<span class="nc" id="L51">            throw new IllegalArgumentException(&quot;Product price cannot be negative&quot;);</span>
+<span class="nc bnc" id="L48" title="All 4 branches missed.">        if (product.getPrice() == null || product.getPrice().compareTo(BigDecimal.ZERO) &lt; 0) {</span>
+<span class="nc" id="L49">            throw new BusinessException(&quot;El precio no puede ser negativo&quot;);</span>
         }
-
-<span class="nc bnc" id="L54" title="All 2 branches missed.">        if (stock == null) {</span>
-<span class="nc" id="L55">            throw new IllegalArgumentException(&quot;Product stock cannot be null&quot;);</span>
+<span class="nc bnc" id="L51" title="All 4 branches missed.">        if (product.getStock() == null || product.getStock() &lt; 0) {</span>
+<span class="nc" id="L52">            throw new BusinessException(&quot;El stock no puede ser negativo&quot;);</span>
         }
-
-<span class="nc bnc" id="L58" title="All 2 branches missed.">        if (stock &lt; 0) {</span>
-<span class="nc" id="L59">            throw new IllegalArgumentException(&quot;Product stock cannot be negative&quot;);</span>
-        }
-<span class="nc" id="L61">    }</span>
+<span class="nc" id="L54">    }</span>
 } 
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

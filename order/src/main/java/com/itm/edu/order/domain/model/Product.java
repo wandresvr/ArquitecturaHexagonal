@@ -107,7 +107,23 @@ public class Product {
         }
 
         public Product build() {
+            validate();
             return new Product(this);
+        }
+
+        private void validate() {
+            if (name == null || name.trim().isEmpty()) {
+                throw new IllegalArgumentException("El nombre del producto no puede estar vacío");
+            }
+            if (description == null || description.trim().isEmpty()) {
+                throw new IllegalArgumentException("La descripción del producto no puede estar vacía");
+            }
+            if (price == null || price.compareTo(BigDecimal.ZERO) < 0) {
+                throw new IllegalArgumentException("El precio no puede ser negativo");
+            }
+            if (stock == null || stock < 0) {
+                throw new IllegalArgumentException("El stock no puede ser negativo");
+            }
         }
     }
 } 

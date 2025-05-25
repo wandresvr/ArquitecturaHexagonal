@@ -2,28 +2,29 @@ package com.itm.edu.order.infrastructure.rest;
 
 import com.itm.edu.order.application.ports.inputs.CreateProductUseCase;
 import com.itm.edu.order.application.ports.inputs.GetProductUseCase;
+import com.itm.edu.order.application.ports.inputs.UpdateProductUseCase;
+import com.itm.edu.order.application.ports.inputs.DeleteProductUseCase;
 import com.itm.edu.order.domain.model.Product;
 import com.itm.edu.order.infrastructure.rest.dto.ProductDto;
-import com.itm.edu.order.infrastructure.rest.mapper.ProductMapper;
+import com.itm.edu.order.infrastructure.rest.mapper.ProductDtoMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 class ProductControllerTest {
 
@@ -34,7 +35,13 @@ class ProductControllerTest {
     private GetProductUseCase getProductUseCase;
 
     @Mock
-    private ProductMapper productMapper;
+    private UpdateProductUseCase updateProductUseCase;
+
+    @Mock
+    private DeleteProductUseCase deleteProductUseCase;
+
+    @Mock
+    private ProductDtoMapper productMapper;
 
     @InjectMocks
     private ProductController productController;
@@ -47,53 +54,42 @@ class ProductControllerTest {
     @Test
     void testCreateProductSuccess() {
         // Arrange
-        ProductDto request = ProductDto.builder()
+        ProductDto productDto = ProductDto.builder()
                 .name("Test Product")
                 .description("Test Description")
                 .price(new BigDecimal("99.99"))
                 .stock(100)
                 .build();
 
-        Product expectedProduct = Product.builder()
+        Product product = Product.builder()
                 .id(UUID.randomUUID())
-                .name(request.getName())
-                .description(request.getDescription())
-                .price(request.getPrice())
-                .stock(request.getStock())
+                .name(productDto.getName())
+                .description(productDto.getDescription())
+                .price(productDto.getPrice())
+                .stock(productDto.getStock())
                 .build();
 
-        ProductDto expectedDto = ProductDto.builder()
-                .id(expectedProduct.getId())
-                .name(expectedProduct.getName())
-                .description(expectedProduct.getDescription())
-                .price(expectedProduct.getPrice())
-                .stock(expectedProduct.getStock())
-                .build();
-
-        when(createProductUseCase.createProduct(any(), any(), any(), any()))
-                .thenReturn(expectedProduct);
-        when(productMapper.toDto(expectedProduct))
-                .thenReturn(expectedDto);
+        when(productMapper.toDomain(productDto)).thenReturn(product);
+        when(createProductUseCase.createProduct(product)).thenReturn(product);
+        when(productMapper.toDto(product)).thenReturn(productDto);
 
         // Act
-        ResponseEntity<ProductDto> response = productController.createProduct(request);
+        ResponseEntity<?> response = productController.createProduct(productDto);
 
         // Assert
         assertNotNull(response);
-        assertEquals(200, response.getStatusCode().value());
-        assertNotNull(response.getBody());
-        assertEquals(expectedProduct.getId(), response.getBody().getId());
-        assertEquals(expectedProduct.getName(), response.getBody().getName());
-        assertEquals(expectedProduct.getDescription(), response.getBody().getDescription());
-        assertEquals(expectedProduct.getPrice(), response.getBody().getPrice());
-        assertEquals(expectedProduct.getStock(), response.getBody().getStock());
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals(productDto, response.getBody());
+        verify(createProductUseCase).createProduct(product);
+        verify(productMapper).toDomain(productDto);
+        verify(productMapper).toDto(product);
     }
 
     @Test
-    void testGetProductSuccess() {
+    void testGetProductByIdSuccess() {
         // Arrange
         UUID productId = UUID.randomUUID();
-        Product expectedProduct = Product.builder()
+        Product product = Product.builder()
                 .id(productId)
                 .name("Test Product")
                 .description("Test Description")
@@ -101,174 +97,203 @@ class ProductControllerTest {
                 .stock(100)
                 .build();
 
-        ProductDto expectedDto = ProductDto.builder()
-                .id(expectedProduct.getId())
-                .name(expectedProduct.getName())
-                .description(expectedProduct.getDescription())
-                .price(expectedProduct.getPrice())
-                .stock(expectedProduct.getStock())
-                .build();
-
-        when(getProductUseCase.getProduct(productId))
-                .thenReturn(Optional.of(expectedProduct));
-        when(productMapper.toDto(expectedProduct))
-                .thenReturn(expectedDto);
-
-        // Act
-        ResponseEntity<ProductDto> response = productController.getProduct(productId);
-
-        // Assert
-        assertNotNull(response);
-        assertEquals(200, response.getStatusCode().value());
-        assertNotNull(response.getBody());
-        assertEquals(expectedProduct.getId(), response.getBody().getId());
-        assertEquals(expectedProduct.getName(), response.getBody().getName());
-        assertEquals(expectedProduct.getDescription(), response.getBody().getDescription());
-        assertEquals(expectedProduct.getPrice(), response.getBody().getPrice());
-        assertEquals(expectedProduct.getStock(), response.getBody().getStock());
-    }
-
-    @Test
-    void testGetProductNotFound() {
-        // Arrange
-        UUID productId = UUID.randomUUID();
-        when(getProductUseCase.getProduct(productId))
-                .thenReturn(Optional.empty());
-
-        // Act
-        ResponseEntity<ProductDto> response = productController.getProduct(productId);
-
-        // Assert
-        assertNotNull(response);
-        assertEquals(404, response.getStatusCode().value());
-        assertNull(response.getBody());
-    }
-
-    @Test
-    void testGetAllProductsSuccess() {
-        // Arrange
-        Product product1 = Product.builder()
-                .id(UUID.randomUUID())
-                .name("Product 1")
-                .description("Description 1")
-                .price(new BigDecimal("99.99"))
-                .stock(100)
-                .build();
-
-        Product product2 = Product.builder()
-                .id(UUID.randomUUID())
-                .name("Product 2")
-                .description("Description 2")
-                .price(new BigDecimal("199.99"))
-                .stock(50)
-                .build();
-
-        ProductDto dto1 = ProductDto.builder()
-                .id(product1.getId())
-                .name(product1.getName())
-                .description(product1.getDescription())
-                .price(product1.getPrice())
-                .stock(product1.getStock())
-                .build();
-
-        ProductDto dto2 = ProductDto.builder()
-                .id(product2.getId())
-                .name(product2.getName())
-                .description(product2.getDescription())
-                .price(product2.getPrice())
-                .stock(product2.getStock())
-                .build();
-
-        List<Product> expectedProducts = Arrays.asList(product1, product2);
-        when(getProductUseCase.getAllProducts())
-                .thenReturn(expectedProducts);
-        when(productMapper.toDto(product1))
-                .thenReturn(dto1);
-        when(productMapper.toDto(product2))
-                .thenReturn(dto2);
-
-        // Act
-        ResponseEntity<List<ProductDto>> response = productController.getAllProducts();
-
-        // Assert
-        assertNotNull(response);
-        assertEquals(200, response.getStatusCode().value());
-        assertNotNull(response.getBody());
-        assertEquals(2, response.getBody().size());
-
-        ProductDto resultDto1 = response.getBody().get(0);
-        assertEquals(product1.getId(), resultDto1.getId());
-        assertEquals(product1.getName(), resultDto1.getName());
-        assertEquals(product1.getDescription(), resultDto1.getDescription());
-        assertEquals(product1.getPrice(), resultDto1.getPrice());
-        assertEquals(product1.getStock(), resultDto1.getStock());
-
-        ProductDto resultDto2 = response.getBody().get(1);
-        assertEquals(product2.getId(), resultDto2.getId());
-        assertEquals(product2.getName(), resultDto2.getName());
-        assertEquals(product2.getDescription(), resultDto2.getDescription());
-        assertEquals(product2.getPrice(), resultDto2.getPrice());
-        assertEquals(product2.getStock(), resultDto2.getStock());
-    }
-
-    @Test
-    void testCreateProductWithCustomIdSuccess() {
-        // Arrange
-        UUID customId = UUID.randomUUID();
-        ProductDto request = ProductDto.builder()
-                .id(customId)
+        ProductDto productDto = ProductDto.builder()
+                .id(productId)
                 .name("Test Product")
                 .description("Test Description")
                 .price(new BigDecimal("99.99"))
                 .stock(100)
                 .build();
 
-        Product expectedProduct = Product.builder()
-                .id(customId)
-                .name(request.getName())
-                .description(request.getDescription())
-                .price(request.getPrice())
-                .stock(request.getStock())
-                .build();
-
-        ProductDto expectedDto = ProductDto.builder()
-                .id(expectedProduct.getId())
-                .name(expectedProduct.getName())
-                .description(expectedProduct.getDescription())
-                .price(expectedProduct.getPrice())
-                .stock(expectedProduct.getStock())
-                .build();
-
-        when(createProductUseCase.createProduct(
-                eq(customId),
-                eq(request.getName()),
-                eq(request.getDescription()),
-                eq(request.getPrice()),
-                eq(request.getStock())))
-                .thenReturn(expectedProduct);
-        when(productMapper.toDto(expectedProduct))
-                .thenReturn(expectedDto);
+        when(getProductUseCase.getProduct(productId)).thenReturn(Optional.of(product));
+        when(productMapper.toDto(product)).thenReturn(productDto);
 
         // Act
-        ResponseEntity<ProductDto> response = productController.createProduct(request);
+        ResponseEntity<?> response = productController.getProduct(productId);
 
         // Assert
         assertNotNull(response);
-        assertEquals(200, response.getStatusCode().value());
-        assertNotNull(response.getBody());
-        assertEquals(customId, response.getBody().getId());
-        assertEquals(expectedProduct.getName(), response.getBody().getName());
-        assertEquals(expectedProduct.getDescription(), response.getBody().getDescription());
-        assertEquals(expectedProduct.getPrice(), response.getBody().getPrice());
-        assertEquals(expectedProduct.getStock(), response.getBody().getStock());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(productDto, response.getBody());
+        verify(getProductUseCase).getProduct(productId);
+        verify(productMapper).toDto(product);
+    }
 
-        verify(createProductUseCase).createProduct(
-                eq(customId),
-                eq(request.getName()),
-                eq(request.getDescription()),
-                eq(request.getPrice()),
-                eq(request.getStock()));
-        verify(productMapper).toDto(expectedProduct);
-        verifyNoMoreInteractions(createProductUseCase, productMapper);
+    @Test
+    void testGetProductByIdNotFound() {
+        // Arrange
+        UUID productId = UUID.randomUUID();
+        when(getProductUseCase.getProduct(productId)).thenReturn(Optional.empty());
+
+        // Act
+        ResponseEntity<?> response = productController.getProduct(productId);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertNull(response.getBody());
+        verify(getProductUseCase).getProduct(productId);
+        verifyNoInteractions(productMapper);
+    }
+
+    @Test
+    void testGetAllProductsSuccess() {
+        // Arrange
+        List<Product> products = Arrays.asList(
+                Product.builder()
+                        .id(UUID.randomUUID())
+                        .name("Product 1")
+                        .description("Description 1")
+                        .price(new BigDecimal("99.99"))
+                        .stock(100)
+                        .build(),
+                Product.builder()
+                        .id(UUID.randomUUID())
+                        .name("Product 2")
+                        .description("Description 2")
+                        .price(new BigDecimal("149.99"))
+                        .stock(200)
+                        .build()
+        );
+
+        List<ProductDto> productDtos = Arrays.asList(
+                ProductDto.builder()
+                        .id(products.get(0).getId())
+                        .name("Product 1")
+                        .description("Description 1")
+                        .price(new BigDecimal("99.99"))
+                        .stock(100)
+                        .build(),
+                ProductDto.builder()
+                        .id(products.get(1).getId())
+                        .name("Product 2")
+                        .description("Description 2")
+                        .price(new BigDecimal("149.99"))
+                        .stock(200)
+                        .build()
+        );
+
+        when(getProductUseCase.getAllProducts()).thenReturn(products);
+        when(productMapper.toDto(products.get(0))).thenReturn(productDtos.get(0));
+        when(productMapper.toDto(products.get(1))).thenReturn(productDtos.get(1));
+
+        // Act
+        ResponseEntity<?> response = productController.getAllProducts();
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(productDtos, response.getBody());
+        verify(getProductUseCase).getAllProducts();
+        verify(productMapper).toDto(products.get(0));
+        verify(productMapper).toDto(products.get(1));
+    }
+
+    @Test
+    void testGetAllProductsEmpty() {
+        // Arrange
+        when(getProductUseCase.getAllProducts()).thenReturn(Collections.emptyList());
+
+        // Act
+        ResponseEntity<?> response = productController.getAllProducts();
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(Collections.emptyList(), response.getBody());
+        verify(getProductUseCase).getAllProducts();
+        verifyNoInteractions(productMapper);
+    }
+
+    @Test
+    void testUpdateProductSuccess() {
+        // Arrange
+        UUID productId = UUID.randomUUID();
+        ProductDto productDto = ProductDto.builder()
+                .name("Updated Product")
+                .description("Updated Description")
+                .price(new BigDecimal("199.99"))
+                .stock(150)
+                .build();
+
+        Product product = Product.builder()
+                .id(productId)
+                .name(productDto.getName())
+                .description(productDto.getDescription())
+                .price(productDto.getPrice())
+                .stock(productDto.getStock())
+                .build();
+
+        when(productMapper.toDomain(productDto)).thenReturn(product);
+        when(updateProductUseCase.updateProduct(eq(productId), any(Product.class))).thenReturn(product);
+        when(productMapper.toDto(product)).thenReturn(productDto);
+
+        // Act
+        ResponseEntity<?> response = productController.updateProduct(productId, productDto);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(productDto, response.getBody());
+        verify(updateProductUseCase).updateProduct(eq(productId), any(Product.class));
+        verify(productMapper).toDomain(productDto);
+        verify(productMapper).toDto(product);
+    }
+
+    @Test
+    void testDeleteProductSuccess() {
+        // Arrange
+        UUID productId = UUID.randomUUID();
+        doNothing().when(deleteProductUseCase).deleteProduct(productId);
+
+        // Act
+        ResponseEntity<?> response = productController.deleteProduct(productId);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        assertNull(response.getBody());
+        verify(deleteProductUseCase).deleteProduct(productId);
+    }
+
+    @Test
+    void testGetProductWithNullId() {
+        // Act
+        ResponseEntity<?> response = productController.getProduct(null);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        verifyNoInteractions(getProductUseCase);
+    }
+
+    @Test
+    void testUpdateProductWithNullId() {
+        // Arrange
+        ProductDto productDto = ProductDto.builder()
+                .name("Test Product")
+                .description("Test Description")
+                .price(new BigDecimal("99.99"))
+                .stock(100)
+                .build();
+
+        // Act
+        ResponseEntity<?> response = productController.updateProduct(null, productDto);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        verifyNoInteractions(updateProductUseCase);
+    }
+
+    @Test
+    void testDeleteProductWithNullId() {
+        // Act
+        ResponseEntity<?> response = productController.deleteProduct(null);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        verifyNoInteractions(deleteProductUseCase);
     }
 } 

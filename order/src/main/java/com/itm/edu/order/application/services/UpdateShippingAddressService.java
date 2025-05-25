@@ -19,6 +19,14 @@ public class UpdateShippingAddressService implements UpdateShippingAddressUseCas
     @Override
     @Transactional
     public Order updateShippingAddress(UUID orderId, AddressShipping addressShipping) {
+        if (orderId == null) {
+            throw new BusinessException("El ID de la orden no puede ser nulo");
+        }
+
+        if (addressShipping == null) {
+            throw new BusinessException("La dirección de envío no puede ser nula");
+        }
+
         Order order = orderRepository.findById(orderId)
             .orElseThrow(() -> new BusinessException("Orden no encontrada: " + orderId));
 

@@ -3,74 +3,41 @@
 import com.itm.edu.order.application.ports.inputs.CreateProductUseCase;
 import com.itm.edu.order.application.ports.outputs.ProductRepositoryPort;
 import com.itm.edu.order.domain.model.Product;
+import com.itm.edu.order.domain.exception.BusinessException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.UUID;
 
 @Service
+<span class="fc" id="L14">@RequiredArgsConstructor</span>
 public class CreateProductService implements CreateProductUseCase {
-
-    private final ProductRepositoryPort productRepositoryPort;
-
-<span class="fc" id="L17">    public CreateProductService(ProductRepositoryPort productRepositoryPort) {</span>
-<span class="fc" id="L18">        this.productRepositoryPort = productRepositoryPort;</span>
-<span class="fc" id="L19">    }</span>
+    private final ProductRepositoryPort productRepository;
 
     @Override
-    public Product createProduct(String name, String description, BigDecimal price, Integer stock) {
-<span class="fc" id="L23">        validateProductParameters(name, description, price, stock);</span>
-
-<span class="fc" id="L25">        Product product = Product.builder()</span>
-<span class="fc" id="L26">                .id(UUID.randomUUID())</span>
-<span class="fc" id="L27">                .name(name)</span>
-<span class="fc" id="L28">                .description(description)</span>
-<span class="fc" id="L29">                .price(price)</span>
-<span class="fc" id="L30">                .stock(stock)</span>
-<span class="fc" id="L31">                .build();</span>
-        
-<span class="fc" id="L33">        return productRepositoryPort.save(product);</span>
+    @Transactional
+    public Product createProduct(Product product) {
+<span class="fc" id="L21">        validateProductData(product);</span>
+<span class="fc" id="L22">        return productRepository.save(product);</span>
     }
 
-    public Product createProduct(UUID id, String name, String description, BigDecimal price, Integer stock) {
-<span class="fc" id="L37">        validateProductParameters(name, description, price, stock);</span>
-
-<span class="fc" id="L39">        Product product = Product.builder()</span>
-<span class="fc" id="L40">                .id(id)</span>
-<span class="fc" id="L41">                .name(name)</span>
-<span class="fc" id="L42">                .description(description)</span>
-<span class="fc" id="L43">                .price(price)</span>
-<span class="fc" id="L44">                .stock(stock)</span>
-<span class="fc" id="L45">                .build();</span>
-        
-<span class="fc" id="L47">        return productRepositoryPort.save(product);</span>
-    }
-
-    private void validateProductParameters(String name, String description, BigDecimal price, Integer stock) {
-<span class="fc bfc" id="L51" title="All 2 branches covered.">        if (!StringUtils.hasText(name)) {</span>
-<span class="fc" id="L52">            throw new IllegalArgumentException(&quot;Product name cannot be null or empty&quot;);</span>
+    private void validateProductData(Product product) {
+<span class="fc bfc" id="L26" title="All 2 branches covered.">        if (product == null) {</span>
+<span class="fc" id="L27">            throw new BusinessException(&quot;El producto no puede ser nulo&quot;);</span>
         }
-
-<span class="fc bfc" id="L55" title="All 2 branches covered.">        if (!StringUtils.hasText(description)) {</span>
-<span class="fc" id="L56">            throw new IllegalArgumentException(&quot;Product description cannot be null or empty&quot;);</span>
+<span class="pc bpc" id="L29" title="2 of 4 branches missed.">        if (product.getName() == null || product.getName().trim().isEmpty()) {</span>
+<span class="nc" id="L30">            throw new BusinessException(&quot;El nombre del producto no puede estar vacío&quot;);</span>
         }
-
-<span class="fc bfc" id="L59" title="All 2 branches covered.">        if (price == null) {</span>
-<span class="fc" id="L60">            throw new IllegalArgumentException(&quot;Product price cannot be null&quot;);</span>
+<span class="pc bpc" id="L32" title="2 of 4 branches missed.">        if (product.getDescription() == null || product.getDescription().trim().isEmpty()) {</span>
+<span class="nc" id="L33">            throw new BusinessException(&quot;La descripción del producto no puede estar vacía&quot;);</span>
         }
-
-<span class="fc bfc" id="L63" title="All 2 branches covered.">        if (price.compareTo(BigDecimal.ZERO) &lt; 0) {</span>
-<span class="fc" id="L64">            throw new IllegalArgumentException(&quot;Product price cannot be negative&quot;);</span>
+<span class="pc bpc" id="L35" title="2 of 4 branches missed.">        if (product.getPrice() == null || product.getPrice().compareTo(BigDecimal.ZERO) &lt; 0) {</span>
+<span class="nc" id="L36">            throw new BusinessException(&quot;El precio no puede ser negativo&quot;);</span>
         }
-
-<span class="fc bfc" id="L67" title="All 2 branches covered.">        if (stock == null) {</span>
-<span class="fc" id="L68">            throw new IllegalArgumentException(&quot;Product stock cannot be null&quot;);</span>
+<span class="pc bpc" id="L38" title="2 of 4 branches missed.">        if (product.getStock() == null || product.getStock() &lt; 0) {</span>
+<span class="nc" id="L39">            throw new BusinessException(&quot;El stock no puede ser negativo&quot;);</span>
         }
-
-<span class="fc bfc" id="L71" title="All 2 branches covered.">        if (stock &lt; 0) {</span>
-<span class="fc" id="L72">            throw new IllegalArgumentException(&quot;Product stock cannot be negative&quot;);</span>
-        }
-<span class="fc" id="L74">    }</span>
+<span class="fc" id="L41">    }</span>
 } 
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

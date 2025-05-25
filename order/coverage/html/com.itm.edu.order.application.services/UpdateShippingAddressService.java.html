@@ -2,39 +2,36 @@
 
 import com.itm.edu.order.application.ports.inputs.UpdateShippingAddressUseCase;
 import com.itm.edu.order.application.ports.outputs.OrderRepositoryPort;
-import com.itm.edu.order.domain.exception.OrderNotFoundException;
-import com.itm.edu.order.domain.valueobjects.AddressShipping;
 import com.itm.edu.order.domain.model.Order;
+import com.itm.edu.order.domain.valueobjects.AddressShipping;
+import com.itm.edu.order.domain.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
 @Service
-<span class="fc" id="L14">@RequiredArgsConstructor</span>
+<span class="fc" id="L15">@RequiredArgsConstructor</span>
 public class UpdateShippingAddressService implements UpdateShippingAddressUseCase {
-
-    private final OrderRepositoryPort orderRepositoryPort;
+    private final OrderRepositoryPort orderRepository;
 
     @Override
+    @Transactional
     public Order updateShippingAddress(UUID orderId, AddressShipping addressShipping) {
-<span class="fc" id="L21">        validateParameters(orderId, addressShipping);</span>
+<span class="fc bfc" id="L22" title="All 2 branches covered.">        if (orderId == null) {</span>
+<span class="fc" id="L23">            throw new BusinessException(&quot;El ID de la orden no puede ser nulo&quot;);</span>
+        }
 
-<span class="fc" id="L23">        Order order = orderRepositoryPort.findById(orderId)</span>
-<span class="fc" id="L24">                .orElseThrow(() -&gt; new OrderNotFoundException(&quot;Order not found&quot;));</span>
-        
-<span class="fc" id="L26">        order.setDeliveryAddress(addressShipping);</span>
-<span class="fc" id="L27">        return orderRepositoryPort.save(order);</span>
+<span class="fc bfc" id="L26" title="All 2 branches covered.">        if (addressShipping == null) {</span>
+<span class="fc" id="L27">            throw new BusinessException(&quot;La dirección de envío no puede ser nula&quot;);</span>
+        }
+
+<span class="fc" id="L30">        Order order = orderRepository.findById(orderId)</span>
+<span class="fc" id="L31">            .orElseThrow(() -&gt; new BusinessException(&quot;Orden no encontrada: &quot; + orderId));</span>
+
+<span class="fc" id="L33">        Order updatedOrder = order.withUpdatedDeliveryAddress(addressShipping);</span>
+<span class="fc" id="L34">        return orderRepository.save(updatedOrder);</span>
     }
-
-    private void validateParameters(UUID orderId, AddressShipping addressShipping) {
-<span class="fc bfc" id="L31" title="All 2 branches covered.">        if (orderId == null) {</span>
-<span class="fc" id="L32">            throw new IllegalArgumentException(&quot;Order ID cannot be null&quot;);</span>
-        }
-
-<span class="fc bfc" id="L35" title="All 2 branches covered.">        if (addressShipping == null) {</span>
-<span class="fc" id="L36">            throw new IllegalArgumentException(&quot;Shipping address cannot be null&quot;);</span>
-        }
-<span class="fc" id="L38">    }</span>
 } 
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

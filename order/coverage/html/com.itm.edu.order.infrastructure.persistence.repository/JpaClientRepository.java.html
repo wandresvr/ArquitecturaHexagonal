@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JpaClientRepository.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">order</a> &gt; <a href="index.source.html" class="el_package">com.itm.edu.order.infrastructure.persistence.repository</a> &gt; <span class="el_source">JpaClientRepository.java</span></div><h1>JpaClientRepository.java</h1><pre class="source lang-java linenums">package com.itm.edu.order.infrastructure.persistence.repository;
+
+import com.itm.edu.order.domain.model.Client;
+import com.itm.edu.order.domain.repository.ClientRepository;
+import com.itm.edu.order.infrastructure.persistence.entities.ClientEntity;
+import com.itm.edu.order.infrastructure.persistence.mapper.ClientMapper;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+@Repository
+public class JpaClientRepository implements ClientRepository {
+    private final SpringJpaClientRepository jpaRepository;
+    private final ClientMapper clientMapper;
+
+<span class="nc" id="L19">    public JpaClientRepository(SpringJpaClientRepository jpaRepository, ClientMapper clientMapper) {</span>
+<span class="nc" id="L20">        this.jpaRepository = jpaRepository;</span>
+<span class="nc" id="L21">        this.clientMapper = clientMapper;</span>
+<span class="nc" id="L22">    }</span>
+
+    @Override
+    public Client save(Client client) {
+<span class="nc" id="L26">        ClientEntity entity = clientMapper.toEntity(client);</span>
+<span class="nc" id="L27">        ClientEntity savedEntity = jpaRepository.save(entity);</span>
+<span class="nc" id="L28">        return clientMapper.toDomain(savedEntity);</span>
+    }
+
+    @Override
+    public Optional&lt;Client&gt; findById(UUID id) {
+<span class="nc" id="L33">        return jpaRepository.findById(id)</span>
+<span class="nc" id="L34">                .map(clientMapper::toDomain);</span>
+    }
+
+    @Override
+    public List&lt;Client&gt; findAll() {
+<span class="nc" id="L39">        return jpaRepository.findAll().stream()</span>
+<span class="nc" id="L40">                .map(clientMapper::toDomain)</span>
+<span class="nc" id="L41">                .collect(Collectors.toList());</span>
+    }
+
+    @Override
+    public void deleteById(UUID id) {
+<span class="nc" id="L46">        jpaRepository.deleteById(id);</span>
+<span class="nc" id="L47">    }</span>
+}
+
+interface SpringJpaClientRepository extends JpaRepository&lt;ClientEntity, UUID&gt; {} 
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

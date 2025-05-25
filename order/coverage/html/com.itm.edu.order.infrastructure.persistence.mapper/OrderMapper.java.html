@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OrderMapper.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">order</a> &gt; <a href="index.source.html" class="el_package">com.itm.edu.order.infrastructure.persistence.mapper</a> &gt; <span class="el_source">OrderMapper.java</span></div><h1>OrderMapper.java</h1><pre class="source lang-java linenums">package com.itm.edu.order.infrastructure.persistence.mapper;
+
+import com.itm.edu.order.application.mapper.DomainMapper;
+import com.itm.edu.order.domain.model.Order;
+import com.itm.edu.order.infrastructure.persistence.entities.OrderEntity;
+import org.springframework.stereotype.Component;
+
+import java.util.stream.Collectors;
+
+@Component
+public class OrderMapper implements DomainMapper&lt;Order, OrderEntity&gt; {
+    private final OrderItemMapper orderItemMapper;
+    private final ClientMapper clientMapper;
+
+<span class="nc" id="L15">    public OrderMapper(OrderItemMapper orderItemMapper, ClientMapper clientMapper) {</span>
+<span class="nc" id="L16">        this.orderItemMapper = orderItemMapper;</span>
+<span class="nc" id="L17">        this.clientMapper = clientMapper;</span>
+<span class="nc" id="L18">    }</span>
+
+    @Override
+    public Order toDomain(OrderEntity entity) {
+<span class="nc bnc" id="L22" title="All 2 branches missed.">        if (entity == null) return null;</span>
+        
+<span class="nc" id="L24">        return Order.builder()</span>
+<span class="nc" id="L25">                .orderId(entity.getOrderId())</span>
+<span class="nc" id="L26">                .products(entity.getProducts().stream()</span>
+<span class="nc" id="L27">                        .map(orderItemMapper::toDomain)</span>
+<span class="nc" id="L28">                        .collect(Collectors.toList()))</span>
+<span class="nc" id="L29">                .orderStatus(entity.getOrderStatus())</span>
+<span class="nc" id="L30">                .orderDate(entity.getOrderDate())</span>
+<span class="nc" id="L31">                .deliveryAddress(entity.getDeliveryAddress())</span>
+<span class="nc" id="L32">                .total(entity.getTotal())</span>
+<span class="nc" id="L33">                .client(clientMapper.toDomain(entity.getClient()))</span>
+<span class="nc" id="L34">                .build();</span>
+    }
+
+    @Override
+    public OrderEntity toEntity(Order domain) {
+<span class="nc bnc" id="L39" title="All 2 branches missed.">        if (domain == null) return null;</span>
+
+<span class="nc" id="L41">        OrderEntity orderEntity = OrderEntity.builder()</span>
+<span class="nc" id="L42">                .orderId(domain.getOrderId())</span>
+<span class="nc" id="L43">                .orderStatus(domain.getOrderStatus())</span>
+<span class="nc" id="L44">                .orderDate(domain.getOrderDate())</span>
+<span class="nc" id="L45">                .deliveryAddress(domain.getDeliveryAddress())</span>
+<span class="nc" id="L46">                .total(domain.getTotal())</span>
+<span class="nc" id="L47">                .client(clientMapper.toEntity(domain.getClient()))</span>
+<span class="nc" id="L48">                .build();</span>
+
+        // Establecer la relación bidireccional a nivel de infraestructura
+<span class="nc" id="L51">        orderEntity.setProducts(domain.getProducts().stream()</span>
+<span class="nc" id="L52">                .map(item -&gt; {</span>
+<span class="nc" id="L53">                    var itemEntity = orderItemMapper.toEntity(item);</span>
+<span class="nc" id="L54">                    itemEntity.setOrder(orderEntity);</span>
+<span class="nc" id="L55">                    return itemEntity;</span>
+                })
+<span class="nc" id="L57">                .collect(Collectors.toList()));</span>
+
+<span class="nc" id="L59">        return orderEntity;</span>
+    }
+} 
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

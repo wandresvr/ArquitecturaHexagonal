@@ -2,54 +2,54 @@
 
 import com.itm.edu.order.domain.model.Order;
 import com.itm.edu.order.application.ports.outputs.OrderRepositoryPort;
-import org.springframework.stereotype.Repository;
+import com.itm.edu.order.infrastructure.persistence.entities.OrderEntity;
+import com.itm.edu.order.infrastructure.persistence.mapper.OrderMapper;
+import com.itm.edu.order.infrastructure.persistence.repository.JpaOrderRepository;
+import org.springframework.stereotype.Component;
+import lombok.RequiredArgsConstructor;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
-@Repository
-@Transactional
-<span class="nc" id="L16">public class OrderRepositoryAdapter implements OrderRepositoryPort {</span>
+@Component
+<span class="nc" id="L17">@RequiredArgsConstructor</span>
+public class OrderRepositoryAdapter implements OrderRepositoryPort {
 
-    @PersistenceContext
-    private EntityManager entityManager;
+    private final JpaOrderRepository jpaOrderRepository;
+    private final OrderMapper orderMapper;
 
     @Override
     public Order save(Order order) {
-<span class="nc bnc" id="L23" title="All 2 branches missed.">        if (order.getOrderId() == null) {</span>
-<span class="nc" id="L24">            entityManager.persist(order);</span>
-        } else {
-<span class="nc" id="L26">            entityManager.merge(order);</span>
-        }
-<span class="nc" id="L28">        return order;</span>
+<span class="nc" id="L25">        OrderEntity entity = orderMapper.toEntity(order);</span>
+<span class="nc" id="L26">        OrderEntity savedEntity = jpaOrderRepository.save(entity);</span>
+<span class="nc" id="L27">        return orderMapper.toDomain(savedEntity);</span>
     }
 
     @Override
     public Optional&lt;Order&gt; findById(UUID orderId) {
-<span class="nc" id="L33">        return Optional.ofNullable(entityManager.find(Order.class, orderId));</span>
+<span class="nc" id="L32">        return jpaOrderRepository.findById(orderId)</span>
+<span class="nc" id="L33">                .map(orderMapper::toDomain);</span>
     }
 
     @Override
     public List&lt;Order&gt; findAll() {
-<span class="nc" id="L38">        return entityManager.createQuery(&quot;SELECT o FROM Order o&quot;, Order.class)</span>
-<span class="nc" id="L39">                .getResultList();</span>
+<span class="nc" id="L38">        return jpaOrderRepository.findAll().stream()</span>
+<span class="nc" id="L39">                .map(orderMapper::toDomain)</span>
+<span class="nc" id="L40">                .collect(Collectors.toList());</span>
     }
 
     @Override
     public void deleteById(UUID orderId) {
-<span class="nc" id="L44">        Order order = entityManager.find(Order.class, orderId);</span>
-<span class="nc bnc" id="L45" title="All 2 branches missed.">        if (order != null) {</span>
-<span class="nc" id="L46">            entityManager.remove(order);</span>
-        }
-<span class="nc" id="L48">    }</span>
+<span class="nc" id="L45">        jpaOrderRepository.deleteById(orderId);</span>
+<span class="nc" id="L46">    }</span>
 
     @Override
     public Order update(Order order) {
-<span class="nc" id="L52">        return entityManager.merge(order);</span>
+<span class="nc" id="L50">        OrderEntity entity = orderMapper.toEntity(order);</span>
+<span class="nc" id="L51">        OrderEntity updatedEntity = jpaOrderRepository.save(entity);</span>
+<span class="nc" id="L52">        return orderMapper.toDomain(updatedEntity);</span>
     }
 } 
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

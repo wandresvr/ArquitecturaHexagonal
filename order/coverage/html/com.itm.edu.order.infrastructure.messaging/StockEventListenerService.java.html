@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StockEventListenerService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">order</a> &gt; <a href="index.source.html" class="el_package">com.itm.edu.order.infrastructure.messaging</a> &gt; <span class="el_source">StockEventListenerService.java</span></div><h1>StockEventListenerService.java</h1><pre class="source lang-java linenums">package com.itm.edu.order.infrastructure.messaging;
 
+import com.itm.edu.order.domain.model.Order;
+import com.itm.edu.order.application.ports.outputs.OrderRepositoryPort;
 import com.itm.edu.order.application.dto.events.StockUpdateResponseEvent;
 import com.itm.edu.order.application.dto.events.StockValidationStatus;
-import com.itm.edu.order.domain.model.Order;
-import com.itm.edu.order.domain.model.OrderItem;
-import com.itm.edu.order.domain.repository.OrderRepository;
+import com.itm.edu.order.domain.exception.BusinessException;
 import com.itm.edu.order.infrastructure.config.RabbitMQConfig;
+import com.itm.edu.common.dto.ProductOrderDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -14,118 +15,77 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 <span class="nc" id="L20">@Slf4j</span>
 @Service
 <span class="nc" id="L22">@RequiredArgsConstructor</span>
 public class StockEventListenerService {
-
-    private final OrderRepository orderRepository;
+    private final OrderRepositoryPort orderRepository;
     private final RabbitTemplate rabbitTemplate;
 
-    @RabbitListener(queues = RabbitMQConfig.STOCK_RESPONSE_QUEUE)
+    @RabbitListener(queues = &quot;${rabbitmq.queues.stock-response}&quot;)
     @Transactional
-    public void handleStockUpdateResponse(StockUpdateResponseEvent event) {
-<span class="nc" id="L31">        log.info(&quot;Received stock update response event: {}&quot;, event);</span>
+    public void handleStockValidationResponse(StockUpdateResponseEvent event) {
+<span class="nc" id="L30">        log.info(&quot;Recibida respuesta de validación de stock para orden: {}&quot;, event);</span>
 
-<span class="nc bnc" id="L33" title="All 6 branches missed.">        if (event == null || event.getOrderId() == null || event.getStatus() == null) {</span>
-<span class="nc" id="L34">            log.error(&quot;Received invalid stock update event.&quot;);</span>
-<span class="nc" id="L35">            return;</span>
+<span class="nc bnc" id="L32" title="All 6 branches missed.">        if (event == null || event.getOrderId() == null || event.getStatus() == null) {</span>
+<span class="nc" id="L33">            log.error(&quot;Evento de stock inválido recibido&quot;);</span>
+<span class="nc" id="L34">            return;</span>
         }
 
-<span class="nc" id="L38">        orderRepository.findById(event.getOrderId()).ifPresentOrElse(order -&gt; {</span>
-            // Solo actualizamos si la orden está esperando validación
-<span class="nc bnc" id="L40" title="All 2 branches missed.">            if (&quot;PENDING_VALIDATION&quot;.equals(order.getOrderStatus())) {</span>
-                String newStatus;
-                
-<span class="nc bnc" id="L43" title="All 2 branches missed.">                if (event.getStatus() == StockValidationStatus.RESERVED) {</span>
-<span class="nc" id="L44">                    newStatus = &quot;APPROVED&quot;;</span>
-                    // Enviar mensaje para actualizar el inventario
-<span class="nc" id="L46">                    sendStockUpdateMessage(order);</span>
-                } else {
-<span class="nc" id="L48">                    newStatus = &quot;CANCELLED_NO_STOCK&quot;;</span>
-                }
+<span class="nc" id="L37">        Order order = orderRepository.findById(event.getOrderId())</span>
+<span class="nc" id="L38">                .orElseThrow(() -&gt; new BusinessException(&quot;Orden no encontrada: &quot; + event.getOrderId()));</span>
 
-<span class="nc" id="L51">                log.info(&quot;Updating order {} status from {} to {}&quot;, order.getOrderId(), order.getOrderStatus(), newStatus);</span>
-<span class="nc" id="L52">                order.setOrderStatus(newStatus);</span>
-<span class="nc" id="L53">                orderRepository.save(order);</span>
-<span class="nc" id="L54">                log.info(&quot;Order {} status updated successfully.&quot;, order.getOrderId());</span>
-<span class="nc" id="L55">            } else {</span>
-<span class="nc" id="L56">                log.warn(&quot;Received stock update for order {} which is not in PENDING_VALIDATION state (current state: {}). Ignoring event.&quot;,</span>
-<span class="nc" id="L57">                        order.getOrderId(), order.getOrderStatus());</span>
+<span class="nc bnc" id="L40" title="All 2 branches missed.">        if (!&quot;PENDING_VALIDATION&quot;.equals(order.getOrderStatus())) {</span>
+<span class="nc" id="L41">            log.warn(&quot;La orden {} no está en estado PENDING_VALIDATION (estado actual: {})&quot;, </span>
+<span class="nc" id="L42">                    order.getOrderId(), order.getOrderStatus());</span>
+<span class="nc" id="L43">            return;</span>
+        }
+
+        try {
+<span class="nc" id="L47">            String newStatus = determineOrderStatus(event.getStatus());</span>
+<span class="nc" id="L48">            Order updatedOrder = order.withUpdatedStatus(newStatus);</span>
+<span class="nc" id="L49">            orderRepository.save(updatedOrder);</span>
+<span class="nc" id="L50">            log.info(&quot;Estado de la orden {} actualizado a: {}&quot;, updatedOrder.getOrderId(), updatedOrder.getOrderStatus());</span>
+            
+<span class="nc bnc" id="L52" title="All 2 branches missed.">            if (event.getStatus() == StockValidationStatus.RESERVED) {</span>
+<span class="nc" id="L53">                sendStockUpdateMessage(updatedOrder);</span>
             }
-<span class="nc" id="L59">        }, () -&gt; {</span>
-<span class="nc" id="L60">            log.error(&quot;Received stock update for non-existent order ID: {}&quot;, event.getOrderId());</span>
-<span class="nc" id="L61">        });</span>
-<span class="nc" id="L62">    }</span>
+<span class="nc" id="L55">        } catch (Exception e) {</span>
+<span class="nc" id="L56">            log.error(&quot;Error al actualizar el estado de la orden {}: {}&quot;, order.getOrderId(), e.getMessage());</span>
+<span class="nc" id="L57">            throw new BusinessException(&quot;Error al procesar la respuesta de stock: &quot; + e.getMessage());</span>
+<span class="nc" id="L58">        }</span>
+<span class="nc" id="L59">    }</span>
+
+    private String determineOrderStatus(StockValidationStatus status) {
+<span class="nc bnc" id="L62" title="All 4 branches missed.">        return switch (status) {</span>
+<span class="nc" id="L63">            case RESERVED -&gt; &quot;STOCK_CONFIRMED&quot;;</span>
+<span class="nc" id="L64">            case CANCELLED_NO_STOCK -&gt; &quot;CANCELLED_NO_STOCK&quot;;</span>
+<span class="nc" id="L65">            case UNAVAILABLE -&gt; &quot;UNAVAILABLE&quot;;</span>
+        };
+    }
 
     private void sendStockUpdateMessage(Order order) {
         try {
-            // Convertir OrderItems a ProductUpdates
-<span class="nc" id="L67">            List&lt;ProductUpdate&gt; productUpdates = order.getProducts().stream()</span>
-<span class="nc" id="L68">                .map(item -&gt; new ProductUpdate(</span>
-<span class="nc" id="L69">                    item.getProduct().getId().toString(),</span>
-<span class="nc" id="L70">                    item.getQuantity().intValue()</span>
-                ))
-<span class="nc" id="L72">                .collect(Collectors.toList());</span>
+<span class="nc" id="L71">            List&lt;ProductOrderDTO&gt; products = order.getProducts().stream()</span>
+<span class="nc" id="L72">                .map(item -&gt; ProductOrderDTO.builder()</span>
+<span class="nc" id="L73">                    .productId(item.getProduct().getId())</span>
+<span class="nc" id="L74">                    .quantity(item.getQuantity())</span>
+<span class="nc" id="L75">                    .build())</span>
+<span class="nc" id="L76">                .collect(Collectors.toList());</span>
 
-            // Crear mensaje de actualización de inventario
-<span class="nc" id="L75">            StockUpdateMessage updateMessage = new StockUpdateMessage(</span>
-<span class="nc" id="L76">                order.getOrderId().toString(),</span>
-                productUpdates
-            );
-
-            // Enviar al exchange de actualización de inventario
-<span class="nc" id="L81">            rabbitTemplate.convertAndSend(</span>
+<span class="nc" id="L78">            rabbitTemplate.convertAndSend(</span>
                 RabbitMQConfig.STOCK_UPDATE_EXCHANGE,
                 RabbitMQConfig.STOCK_UPDATE_ROUTING_KEY,
-                updateMessage
+                products
             );
-
-<span class="nc" id="L87">            log.info(&quot;Stock update message sent for order: {}&quot;, order.getOrderId());</span>
-<span class="nc" id="L88">        } catch (Exception e) {</span>
-<span class="nc" id="L89">            log.error(&quot;Error sending stock update message for order {}: {}&quot;, order.getOrderId(), e.getMessage());</span>
-            // No lanzamos la excepción para no afectar el flujo principal
-<span class="nc" id="L91">        }</span>
-<span class="nc" id="L92">    }</span>
-
-    // Clase interna para el mensaje de actualización de inventario
-    private static class StockUpdateMessage {
-        private final String orderId;
-        private final List&lt;ProductUpdate&gt; products;
-
-<span class="nc" id="L99">        public StockUpdateMessage(String orderId, List&lt;ProductUpdate&gt; products) {</span>
-<span class="nc" id="L100">            this.orderId = orderId;</span>
-<span class="nc" id="L101">            this.products = products;</span>
-<span class="nc" id="L102">        }</span>
-
-        public String getOrderId() {
-<span class="nc" id="L105">            return orderId;</span>
-        }
-
-        public List&lt;ProductUpdate&gt; getProducts() {
-<span class="nc" id="L109">            return products;</span>
-        }
-    }
-
-    private static class ProductUpdate {
-        private final String productId;
-        private final int quantity;
-
-<span class="nc" id="L117">        public ProductUpdate(String productId, int quantity) {</span>
-<span class="nc" id="L118">            this.productId = productId;</span>
-<span class="nc" id="L119">            this.quantity = quantity;</span>
-<span class="nc" id="L120">        }</span>
-
-        public String getProductId() {
-<span class="nc" id="L123">            return productId;</span>
-        }
-
-        public int getQuantity() {
-<span class="nc" id="L127">            return quantity;</span>
-        }
-    }
+<span class="nc" id="L83">            log.info(&quot;Mensaje de actualización de stock enviado para orden: {}&quot;, order.getOrderId());</span>
+<span class="nc" id="L84">        } catch (Exception e) {</span>
+<span class="nc" id="L85">            log.error(&quot;Error enviando mensaje de actualización de stock para orden {}: {}&quot;, </span>
+<span class="nc" id="L86">                order.getOrderId(), e.getMessage());</span>
+<span class="nc" id="L87">            throw new BusinessException(&quot;Error al enviar actualización de stock: &quot; + e.getMessage());</span>
+<span class="nc" id="L88">        }</span>
+<span class="nc" id="L89">    }</span>
 } 
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

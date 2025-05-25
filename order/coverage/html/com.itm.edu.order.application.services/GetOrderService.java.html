@@ -14,21 +14,21 @@ public class GetOrderService implements GetOrderUseCase {
 
     private final OrderRepositoryPort orderRepositoryPort;
 
-<span class="nc" id="L17">    public GetOrderService(OrderRepositoryPort orderRepositoryPort) {</span>
-<span class="nc" id="L18">        this.orderRepositoryPort = orderRepositoryPort;</span>
-<span class="nc" id="L19">    }</span>
+<span class="fc" id="L17">    public GetOrderService(OrderRepositoryPort orderRepositoryPort) {</span>
+<span class="fc" id="L18">        this.orderRepositoryPort = orderRepositoryPort;</span>
+<span class="fc" id="L19">    }</span>
 
     @Override
     public Optional&lt;Order&gt; getOrder(UUID id) {
-<span class="nc bnc" id="L23" title="All 2 branches missed.">        if (id == null) {</span>
-<span class="nc" id="L24">            throw new IllegalArgumentException(&quot;Order ID cannot be null&quot;);</span>
+<span class="fc bfc" id="L23" title="All 2 branches covered.">        if (id == null) {</span>
+<span class="fc" id="L24">            throw new IllegalArgumentException(&quot;Order ID cannot be null&quot;);</span>
         }
-<span class="nc" id="L26">        return orderRepositoryPort.findById(id);</span>
+<span class="fc" id="L26">        return orderRepositoryPort.findById(id);</span>
     }
 
     @Override
     public List&lt;Order&gt; getAllOrders() {
-<span class="nc" id="L31">        return orderRepositoryPort.findAll();</span>
+<span class="fc" id="L31">        return orderRepositoryPort.findAll();</span>
     }
 } 
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

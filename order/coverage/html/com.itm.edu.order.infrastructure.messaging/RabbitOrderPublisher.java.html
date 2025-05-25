@@ -18,19 +18,18 @@ public class RabbitOrderPublisher implements OrderPublisherPort {
     @Override
     public void publish(OrderMessageDTO orderMessage) {
         try {
-            // Enviar al exchange de órdenes
-<span class="nc" id="L22">            rabbitTemplate.convertAndSend(</span>
+<span class="nc" id="L21">            rabbitTemplate.convertAndSend(</span>
                 RabbitMQConfig.ORDER_EXCHANGE,
                 RabbitMQConfig.ORDER_ROUTING_KEY,
                 orderMessage
             );
-<span class="nc" id="L27">            log.info(&quot;✅ Mensaje de orden enviado: {}&quot;, orderMessage);</span>
-<span class="nc" id="L28">        } catch (Exception e) {</span>
-<span class="nc" id="L29">            log.error(&quot;❌ Error enviando mensaje: {}&quot;, e.getMessage());</span>
-<span class="nc" id="L30">            e.printStackTrace();</span>
-<span class="nc" id="L31">            throw e;</span>
-<span class="nc" id="L32">        }</span>
-<span class="nc" id="L33">    }</span>
+<span class="nc" id="L26">            log.info(&quot;✅ Mensaje de orden enviado a {}: {}&quot;, RabbitMQConfig.ORDER_EXCHANGE, orderMessage);</span>
+<span class="nc" id="L27">        } catch (Exception e) {</span>
+<span class="nc" id="L28">            log.error(&quot;❌ Error enviando mensaje: {}&quot;, e.getMessage());</span>
+<span class="nc" id="L29">            e.printStackTrace();</span>
+<span class="nc" id="L30">            throw e;</span>
+<span class="nc" id="L31">        }</span>
+<span class="nc" id="L32">    }</span>
 }
 
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

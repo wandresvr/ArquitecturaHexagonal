@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ProductEntityMapper.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">order</a> &gt; <a href="index.source.html" class="el_package">com.itm.edu.order.infrastructure.persistence.mapper</a> &gt; <span class="el_source">ProductEntityMapper.java</span></div><h1>ProductEntityMapper.java</h1><pre class="source lang-java linenums">package com.itm.edu.order.infrastructure.persistence.mapper;
+
+import com.itm.edu.order.domain.model.Product;
+import com.itm.edu.order.infrastructure.persistence.entities.ProductEntity;
+import org.springframework.stereotype.Component;
+
+@Component
+<span class="nc" id="L8">public class ProductEntityMapper {</span>
+    
+    public Product toDomain(ProductEntity entity) {
+<span class="nc bnc" id="L11" title="All 2 branches missed.">        if (entity == null) return null;</span>
+<span class="nc" id="L12">        return Product.builder()</span>
+<span class="nc" id="L13">                .id(entity.getId())</span>
+<span class="nc" id="L14">                .name(entity.getName())</span>
+<span class="nc" id="L15">                .description(entity.getDescription())</span>
+<span class="nc" id="L16">                .price(entity.getPrice())</span>
+<span class="nc" id="L17">                .stock(entity.getStock())</span>
+<span class="nc" id="L18">                .build();</span>
+    }
+
+    public ProductEntity toEntity(Product domain) {
+<span class="nc bnc" id="L22" title="All 2 branches missed.">        if (domain == null) return null;</span>
+<span class="nc" id="L23">        return ProductEntity.builder()</span>
+<span class="nc" id="L24">                .id(domain.getId())</span>
+<span class="nc" id="L25">                .name(domain.getName())</span>
+<span class="nc" id="L26">                .description(domain.getDescription())</span>
+<span class="nc" id="L27">                .price(domain.getPrice())</span>
+<span class="nc" id="L28">                .stock(domain.getStock())</span>
+<span class="nc" id="L29">                .build();</span>
+    }
+} 
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>
