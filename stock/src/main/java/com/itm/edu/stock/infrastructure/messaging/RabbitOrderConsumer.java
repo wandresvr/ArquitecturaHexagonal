@@ -26,6 +26,10 @@ public class RabbitOrderConsumer {
         containerFactory = "rabbitListenerContainerFactory"
     )
     public void onOrderMessage(OrderMessageDTO msg) {
+        if (msg == null) {
+            throw new IllegalArgumentException("El mensaje de orden no puede ser nulo");
+        }
+
         try {
             // Procesar la orden
             processOrderUseCase.processOrder(msg);

@@ -26,58 +26,62 @@ public class RabbitOrderConsumer {
         containerFactory = &quot;rabbitListenerContainerFactory&quot;
     )
     public void onOrderMessage(OrderMessageDTO msg) {
+<span class="fc bfc" id="L29" title="All 2 branches covered.">        if (msg == null) {</span>
+<span class="fc" id="L30">            throw new IllegalArgumentException(&quot;El mensaje de orden no puede ser nulo&quot;);</span>
+        }
+
         try {
             // Procesar la orden
-<span class="nc" id="L31">            processOrderUseCase.processOrder(msg);</span>
+<span class="fc" id="L35">            processOrderUseCase.processOrder(msg);</span>
             
             // Crear el mensaje de respuesta
-<span class="nc" id="L34">            StockUpdateResponseEvent response = new StockUpdateResponseEvent(</span>
-<span class="nc" id="L35">                msg.getOrderId().toString(),</span>
+<span class="fc" id="L38">            StockUpdateResponseEvent response = new StockUpdateResponseEvent(</span>
+<span class="fc" id="L39">                msg.getOrderId().toString(),</span>
                 StockValidationStatus.RESERVED
             );
 
             // Enviar la respuesta al exchange de respuestas
-<span class="nc" id="L40">            rabbitTemplate.convertAndSend(</span>
+<span class="fc" id="L44">            rabbitTemplate.convertAndSend(</span>
                 RabbitMQConfig.STOCK_RESPONSE_EXCHANGE,
                 RabbitMQConfig.STOCK_RESPONSE_ROUTING_KEY,
                 response
             );
 
-<span class="nc" id="L46">            log.info(&quot;Orden {} procesada. Stock reservado.&quot;, msg.getOrderId());</span>
-<span class="nc" id="L47">        } catch (BusinessException e) {</span>
-<span class="nc" id="L48">            log.error(&quot;Error de negocio procesando la orden {}: {}&quot;, msg.getOrderId(), e.getMessage());</span>
+<span class="fc" id="L50">            log.info(&quot;Orden {} procesada. Stock reservado.&quot;, msg.getOrderId());</span>
+<span class="fc" id="L51">        } catch (BusinessException e) {</span>
+<span class="fc" id="L52">            log.error(&quot;Error de negocio procesando la orden {}: {}&quot;, msg.getOrderId(), e.getMessage());</span>
             
             // Enviar respuesta de error
-<span class="nc" id="L51">            StockUpdateResponseEvent response = new StockUpdateResponseEvent(</span>
-<span class="nc" id="L52">                msg.getOrderId().toString(),</span>
+<span class="fc" id="L55">            StockUpdateResponseEvent response = new StockUpdateResponseEvent(</span>
+<span class="fc" id="L56">                msg.getOrderId().toString(),</span>
                 StockValidationStatus.CANCELLED_NO_STOCK
             );
 
-<span class="nc" id="L56">            rabbitTemplate.convertAndSend(</span>
+<span class="fc" id="L60">            rabbitTemplate.convertAndSend(</span>
                 RabbitMQConfig.STOCK_RESPONSE_EXCHANGE,
                 RabbitMQConfig.STOCK_RESPONSE_ROUTING_KEY,
                 response
             );
 
             // No relanzamos la excepción para que el mensaje no se reintente
-<span class="nc" id="L63">            log.warn(&quot;Orden {} cancelada. Motivo: {}&quot;, msg.getOrderId(), e.getMessage());</span>
-<span class="nc" id="L64">        } catch (Exception e) {</span>
-<span class="nc" id="L65">            log.error(&quot;Error inesperado procesando la orden {}: {}&quot;, msg.getOrderId(), e.getMessage(), e);</span>
+<span class="fc" id="L67">            log.warn(&quot;Orden {} cancelada. Motivo: {}&quot;, msg.getOrderId(), e.getMessage());</span>
+<span class="fc" id="L68">        } catch (Exception e) {</span>
+<span class="fc" id="L69">            log.error(&quot;Error inesperado procesando la orden {}: {}&quot;, msg.getOrderId(), e.getMessage(), e);</span>
             
             // Para errores del sistema también usamos CANCELLED_NO_STOCK
-<span class="nc" id="L68">            StockUpdateResponseEvent response = new StockUpdateResponseEvent(</span>
-<span class="nc" id="L69">                msg.getOrderId().toString(),</span>
+<span class="fc" id="L72">            StockUpdateResponseEvent response = new StockUpdateResponseEvent(</span>
+<span class="fc" id="L73">                msg.getOrderId().toString(),</span>
                 StockValidationStatus.CANCELLED_NO_STOCK
             );
 
-<span class="nc" id="L73">            rabbitTemplate.convertAndSend(</span>
+<span class="fc" id="L77">            rabbitTemplate.convertAndSend(</span>
                 RabbitMQConfig.STOCK_RESPONSE_EXCHANGE,
                 RabbitMQConfig.STOCK_RESPONSE_ROUTING_KEY,
                 response
             );
 
-<span class="nc" id="L79">            throw new AmqpRejectAndDontRequeueException(&quot;Error inesperado: &quot; + e.getMessage(), e);</span>
-<span class="nc" id="L80">        }</span>
-<span class="nc" id="L81">    }</span>
+<span class="fc" id="L83">            throw new AmqpRejectAndDontRequeueException(&quot;Error inesperado: &quot; + e.getMessage(), e);</span>
+<span class="fc" id="L84">        }</span>
+<span class="fc" id="L85">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>
