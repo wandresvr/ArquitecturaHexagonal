@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import java.util.UUID;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Arrays;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.itm.edu.stock.domain.valueobjects.Quantity;
@@ -159,5 +160,157 @@ class RecipeTest {
         assertEquals("Easy", recipe.getDifficulty());
         assertTrue(recipe.getRecipeIngredients().isEmpty());
         assertEquals(BigDecimal.valueOf(10.00), recipe.getCost());
+    }
+
+    @Test
+    void testWithCost() {
+        // Arrange
+        UUID id = UUID.randomUUID();
+        BigDecimal cost = new BigDecimal("10.00");
+        BigDecimal newCost = new BigDecimal("20.00");
+
+        // Act
+        Recipe recipe = Recipe.builder()
+            .id(id)
+            .cost(cost)
+            .build();
+
+        Recipe updatedRecipe = recipe.withCost(newCost);
+
+        // Assert
+        assertEquals(id, updatedRecipe.getId());
+        assertEquals(newCost, updatedRecipe.getCost());
+        assertEquals(cost, recipe.getCost()); // Original should be unchanged
+    }
+
+    @Test
+    void testWithRecipeIngredients() {
+        // Arrange
+        UUID id = UUID.randomUUID();
+        List<RecipeIngredient> ingredients = Arrays.asList(
+            RecipeIngredient.builder()
+                .id(UUID.randomUUID())
+                .ingredientName("Harina")
+                .quantity(new BigDecimal("500"))
+                .unit("gramos")
+                .build()
+        );
+        List<RecipeIngredient> newIngredients = Arrays.asList(
+            RecipeIngredient.builder()
+                .id(UUID.randomUUID())
+                .ingredientName("Azúcar")
+                .quantity(new BigDecimal("200"))
+                .unit("gramos")
+                .build()
+        );
+
+        // Act
+        Recipe recipe = Recipe.builder()
+            .id(id)
+            .recipeIngredients(ingredients)
+            .build();
+
+        Recipe updatedRecipe = recipe.withRecipeIngredients(newIngredients);
+
+        // Assert
+        assertEquals(id, updatedRecipe.getId());
+        assertEquals(newIngredients, updatedRecipe.getRecipeIngredients());
+        assertEquals(ingredients, recipe.getRecipeIngredients()); // Original should be unchanged
+    }
+
+    @Test
+    void testWithRecipeIngredients_Null() {
+        // Arrange
+        UUID id = UUID.randomUUID();
+        List<RecipeIngredient> ingredients = Arrays.asList(
+            RecipeIngredient.builder()
+                .id(UUID.randomUUID())
+                .ingredientName("Harina")
+                .quantity(new BigDecimal("500"))
+                .unit("gramos")
+                .build()
+        );
+
+        // Act
+        Recipe recipe = Recipe.builder()
+            .id(id)
+            .recipeIngredients(ingredients)
+            .build();
+
+        Recipe updatedRecipe = recipe.withRecipeIngredients(null);
+
+        // Assert
+        assertEquals(id, updatedRecipe.getId());
+        assertTrue(updatedRecipe.getRecipeIngredients().isEmpty());
+        assertEquals(ingredients, recipe.getRecipeIngredients()); // Original should be unchanged
+    }
+
+    @Test
+    void testBuilderDefaults() {
+        // Act
+        Recipe recipe = Recipe.builder().build();
+
+        // Assert
+        assertNull(recipe.getId());
+        assertNull(recipe.getName());
+        assertNull(recipe.getDescription());
+        assertNull(recipe.getInstructions());
+        assertNull(recipe.getPreparationTime());
+        assertNull(recipe.getDifficulty());
+        assertNull(recipe.getCost());
+        assertNotNull(recipe.getRecipeIngredients());
+        assertTrue(recipe.getRecipeIngredients().isEmpty());
+    }
+
+    @Test
+    void testAllArgsConstructor() {
+        // Arrange
+        UUID id = UUID.randomUUID();
+        String name = "Test Recipe";
+        String description = "Test Description";
+        String instructions = "Test Instructions";
+        Integer preparationTime = 30;
+        String difficulty = "Easy";
+        BigDecimal cost = new BigDecimal("10.00");
+        List<RecipeIngredient> ingredients = Arrays.asList(
+            RecipeIngredient.builder()
+                .id(UUID.randomUUID())
+                .ingredientName("Harina")
+                .quantity(new BigDecimal("500"))
+                .unit("gramos")
+                .build()
+        );
+
+        // Act
+        Recipe recipe = new Recipe(
+            id, name, description, instructions,
+            preparationTime, difficulty, cost, ingredients);
+
+        // Assert
+        assertEquals(id, recipe.getId());
+        assertEquals(name, recipe.getName());
+        assertEquals(description, recipe.getDescription());
+        assertEquals(instructions, recipe.getInstructions());
+        assertEquals(preparationTime, recipe.getPreparationTime());
+        assertEquals(difficulty, recipe.getDifficulty());
+        assertEquals(cost, recipe.getCost());
+        assertEquals(ingredients, recipe.getRecipeIngredients());
+    }
+
+    @Test
+    void testNoArgsConstructor() {
+        // Act
+        Recipe recipe = new Recipe();
+
+        // Assert
+        assertNull(recipe.getId());
+        assertNull(recipe.getName());
+        assertNull(recipe.getDescription());
+        assertNull(recipe.getInstructions());
+        assertNull(recipe.getPreparationTime());
+        assertNull(recipe.getDifficulty());
+        assertNull(recipe.getCost());
+        assertNotNull(recipe.getRecipeIngredients());
+        assertTrue(recipe.getRecipeIngredients().isEmpty());
     }
 } 

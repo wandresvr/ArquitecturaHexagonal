@@ -26,6 +26,7 @@ import com.itm.edu.stock.application.dto.CreateRecipeCommand;
 import com.itm.edu.stock.application.dto.RecipeResponse;
 import com.itm.edu.stock.application.dto.RecipeIngredientCommand;
 import com.itm.edu.stock.application.dto.RecipeIngredientResponse;
+import com.itm.edu.stock.application.dto.IngredientResponse;
 import com.itm.edu.stock.domain.exception.BusinessException;
 
 @ExtendWith(MockitoExtension.class)
@@ -273,5 +274,160 @@ class RecipeServiceTest {
         assertEquals(testResponse.getIngredients().size(), result.getIngredients().size());
         
         verify(recipeRepository).findById(testId);
+    }
+
+    @Test
+    void testGetRecipeById_NotFound() {
+        // Arrange
+        when(recipeRepository.findById(testId)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(BusinessException.class, () -> recipeService.getRecipeById(testId));
+        verify(recipeRepository).findById(testId);
+    }
+
+    @Test
+    void testUpdateRecipe_Success() {
+        // Arrange
+        when(recipeRepository.findById(testId)).thenReturn(Optional.of(testResponse));
+        when(ingredientRepository.existsById(ingredientId)).thenReturn(true);
+        when(recipeRepository.save(any(RecipeDto.class))).thenReturn(testResponse);
+
+        // Act
+        RecipeResponse result = recipeService.updateRecipe(testId, testCommand);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(testResponse.getId(), result.getId());
+        assertEquals(testResponse.getName(), result.getName());
+        
+        verify(recipeRepository).findById(testId);
+        verify(ingredientRepository).existsById(ingredientId);
+        verify(recipeRepository).save(any(RecipeDto.class));
+    }
+
+    @Test
+    void testUpdateRecipe_NotFound() {
+        // Arrange
+        when(recipeRepository.findById(testId)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(BusinessException.class, () -> recipeService.updateRecipe(testId, testCommand));
+        verify(recipeRepository).findById(testId);
+        verify(ingredientRepository, never()).existsById(any());
+        verify(recipeMapper, never()).fromCommand(any(), any());
+        verify(recipeRepository, never()).save(any());
+    }
+
+    @Test
+    void testUpdateRecipe_WithNullCommand() {
+        // Act & Assert
+        assertThrows(BusinessException.class, () -> recipeService.updateRecipe(testId, null));
+        verify(recipeRepository, never()).findById(any());
+        verify(ingredientRepository, never()).existsById(any());
+        verify(recipeMapper, never()).fromCommand(any(), any());
+        verify(recipeRepository, never()).save(any());
+    }
+
+    @Test
+    void testUpdateRecipe_WithInvalidIngredients() {
+        // Arrange
+        when(recipeRepository.findById(testId)).thenReturn(Optional.of(testResponse));
+        when(ingredientRepository.existsById(ingredientId)).thenReturn(false);
+
+        // Act & Assert
+        assertThrows(BusinessException.class, () -> recipeService.updateRecipe(testId, testCommand));
+        verify(recipeRepository).findById(testId);
+        verify(ingredientRepository).existsById(ingredientId);
+        verify(recipeMapper, never()).fromCommand(any(), any());
+        verify(recipeRepository, never()).save(any());
+    }
+
+    @Test
+    void testGetRecipesByDifficulty() {
+        // Arrange
+        String difficulty = "Medio";
+        List<RecipeResponse> expectedRecipes = Arrays.asList(testResponse);
+        when(recipeRepository.findByDifficulty(difficulty)).thenReturn(expectedRecipes);
+
+        // Act
+        List<RecipeResponse> result = recipeService.getRecipesByDifficulty(difficulty);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(testResponse.getId(), result.get(0).getId());
+        assertEquals(testResponse.getName(), result.get(0).getName());
+        
+        verify(recipeRepository).findByDifficulty(difficulty);
+    }
+
+    @Test
+    void testDeleteRecipe_Success() {
+        // Arrange
+        when(recipeRepository.existsById(testId)).thenReturn(true);
+
+        // Act
+        recipeService.deleteRecipe(testId);
+
+        // Assert
+        verify(recipeRepository).existsById(testId);
+        verify(recipeRepository).deleteById(testId);
+    }
+
+    @Test
+    void testDeleteRecipe_NotFound() {
+        // Arrange
+        when(recipeRepository.existsById(testId)).thenReturn(false);
+
+        // Act & Assert
+        assertThrows(BusinessException.class, () -> recipeService.deleteRecipe(testId));
+        verify(recipeRepository).existsById(testId);
+        verify(recipeRepository, never()).deleteById(any());
+    }
+
+    @Test
+    void testCalculateRecipeCost_Success() {
+        // Arrange
+        when(recipeRepository.findById(testId)).thenReturn(Optional.of(testResponse));
+        when(ingredientRepository.findById(ingredientId))
+            .thenReturn(Optional.of(IngredientResponse.builder()
+                .id(ingredientId)
+                .name("Harina")
+                .price(new BigDecimal("2.50"))
+                .build()));
+
+        // Act
+        BigDecimal cost = recipeService.calculateRecipeCost(testId);
+
+        // Assert
+        assertNotNull(cost);
+        assertEquals(new BigDecimal("1250.00"), cost); // 500 * 2.50
+        
+        verify(recipeRepository).findById(testId);
+        verify(ingredientRepository).findById(ingredientId);
+    }
+
+    @Test
+    void testCalculateRecipeCost_RecipeNotFound() {
+        // Arrange
+        when(recipeRepository.findById(testId)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(RuntimeException.class, () -> recipeService.calculateRecipeCost(testId));
+        verify(recipeRepository).findById(testId);
+        verify(ingredientRepository, never()).findById(any());
+    }
+
+    @Test
+    void testCalculateRecipeCost_IngredientNotFound() {
+        // Arrange
+        when(recipeRepository.findById(testId)).thenReturn(Optional.of(testResponse));
+        when(ingredientRepository.findById(ingredientId)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(RuntimeException.class, () -> recipeService.calculateRecipeCost(testId));
+        verify(recipeRepository).findById(testId);
+        verify(ingredientRepository).findById(ingredientId);
     }
 } 

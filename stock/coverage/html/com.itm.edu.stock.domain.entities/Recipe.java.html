@@ -13,7 +13,7 @@ import java.util.UUID;
 @Getter
 <span class="pc bfc" id="L14" title="All 2 branches covered.">@Builder(toBuilder = true)</span>
 <span class="fc" id="L15">@AllArgsConstructor</span>
-<span class="nc" id="L16">@NoArgsConstructor</span>
+<span class="fc" id="L16">@NoArgsConstructor</span>
 @With
 public class Recipe {
 <span class="pc bnc" id="L19" title="All 2 branches missed.">    private UUID id;</span>
@@ -35,7 +35,7 @@ public class Recipe {
 
     public Recipe withRecipeIngredients(List&lt;RecipeIngredient&gt; newIngredients) {
 <span class="fc" id="L37">        return this.toBuilder()</span>
-<span class="pc bpc" id="L38" title="1 of 2 branches missed.">                .recipeIngredients(newIngredients != null ? newIngredients : new ArrayList&lt;&gt;())</span>
+<span class="fc bfc" id="L38" title="All 2 branches covered.">                .recipeIngredients(newIngredients != null ? newIngredients : new ArrayList&lt;&gt;())</span>
 <span class="fc" id="L39">                .build();</span>
     }
 }

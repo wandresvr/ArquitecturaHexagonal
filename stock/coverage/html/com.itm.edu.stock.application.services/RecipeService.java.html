@@ -64,54 +64,54 @@ public class RecipeService implements RecipeUseCase {
     @Transactional(readOnly = true)
     public RecipeResponse getRecipeById(UUID id) {
 <span class="fc" id="L66">        return recipeRepository.findById(id)</span>
-<span class="pc" id="L67">                .orElseThrow(() -&gt; new BusinessException(&quot;Receta no encontrada&quot;));</span>
+<span class="fc" id="L67">                .orElseThrow(() -&gt; new BusinessException(&quot;Receta no encontrada&quot;));</span>
     }
 
     @Override
     @Transactional
     public RecipeResponse updateRecipe(UUID id, CreateRecipeCommand command) {
-<span class="nc bnc" id="L73" title="All 2 branches missed.">        if (command == null) {</span>
-<span class="nc" id="L74">            throw new BusinessException(&quot;El comando de actualización no puede ser nulo&quot;);</span>
+<span class="fc bfc" id="L73" title="All 2 branches covered.">        if (command == null) {</span>
+<span class="fc" id="L74">            throw new BusinessException(&quot;El comando de actualización no puede ser nulo&quot;);</span>
         }
 
         // Verificar que la receta existe
-<span class="nc" id="L78">        RecipeResponse existingRecipe = recipeRepository.findById(id)</span>
-<span class="nc" id="L79">                .orElseThrow(() -&gt; new BusinessException(&quot;Receta no encontrada&quot;));</span>
+<span class="fc" id="L78">        RecipeResponse existingRecipe = recipeRepository.findById(id)</span>
+<span class="fc" id="L79">                .orElseThrow(() -&gt; new BusinessException(&quot;Receta no encontrada&quot;));</span>
         
         // Validar que todos los ingredientes existan si se proporcionan
-<span class="nc bnc" id="L82" title="All 4 branches missed.">        if (command.getIngredients() != null &amp;&amp; !command.getIngredients().isEmpty()) {</span>
-<span class="nc" id="L83">            List&lt;UUID&gt; nonExistentIngredients = command.getIngredients().stream()</span>
-<span class="nc" id="L84">                    .map(ingredient -&gt; ingredient.getIngredientId())</span>
-<span class="nc bnc" id="L85" title="All 2 branches missed.">                    .filter(ingredientId -&gt; !ingredientRepository.existsById(ingredientId))</span>
-<span class="nc" id="L86">                    .collect(Collectors.toList());</span>
+<span class="pc bpc" id="L82" title="2 of 4 branches missed.">        if (command.getIngredients() != null &amp;&amp; !command.getIngredients().isEmpty()) {</span>
+<span class="fc" id="L83">            List&lt;UUID&gt; nonExistentIngredients = command.getIngredients().stream()</span>
+<span class="fc" id="L84">                    .map(ingredient -&gt; ingredient.getIngredientId())</span>
+<span class="fc bfc" id="L85" title="All 2 branches covered.">                    .filter(ingredientId -&gt; !ingredientRepository.existsById(ingredientId))</span>
+<span class="fc" id="L86">                    .collect(Collectors.toList());</span>
 
-<span class="nc bnc" id="L88" title="All 2 branches missed.">            if (!nonExistentIngredients.isEmpty()) {</span>
-<span class="nc" id="L89">                throw new BusinessException(&quot;Los siguientes ingredientes no existen: &quot; + </span>
-<span class="nc" id="L90">                    nonExistentIngredients.stream()</span>
-<span class="nc" id="L91">                        .map(UUID::toString)</span>
-<span class="nc" id="L92">                        .collect(Collectors.joining(&quot;, &quot;)));</span>
+<span class="fc bfc" id="L88" title="All 2 branches covered.">            if (!nonExistentIngredients.isEmpty()) {</span>
+<span class="fc" id="L89">                throw new BusinessException(&quot;Los siguientes ingredientes no existen: &quot; + </span>
+<span class="fc" id="L90">                    nonExistentIngredients.stream()</span>
+<span class="fc" id="L91">                        .map(UUID::toString)</span>
+<span class="fc" id="L92">                        .collect(Collectors.joining(&quot;, &quot;)));</span>
             }
         }
         
         // Crear el DTO con los valores existentes y actualizar solo los campos proporcionados
-<span class="nc" id="L97">        RecipeDto dto = RecipeDto.builder()</span>
-<span class="nc" id="L98">                .id(id)</span>
-<span class="nc bnc" id="L99" title="All 2 branches missed.">                .name(command.getName() != null ? command.getName() : existingRecipe.getName())</span>
-<span class="nc bnc" id="L100" title="All 2 branches missed.">                .description(command.getDescription() != null ? command.getDescription() : existingRecipe.getDescription())</span>
-<span class="nc bnc" id="L101" title="All 2 branches missed.">                .instructions(command.getInstructions() != null ? command.getInstructions() : existingRecipe.getInstructions())</span>
-<span class="nc bnc" id="L102" title="All 2 branches missed.">                .preparationTime(command.getPreparationTime() != null ? command.getPreparationTime() : existingRecipe.getPreparationTime())</span>
-<span class="nc bnc" id="L103" title="All 2 branches missed.">                .difficulty(command.getDifficulty() != null ? command.getDifficulty() : existingRecipe.getDifficulty())</span>
-<span class="nc" id="L104">                .cost(existingRecipe.getCost())</span>
-<span class="nc bnc" id="L105" title="All 2 branches missed.">                .recipeIngredients(command.getIngredients() != null ? </span>
-<span class="nc" id="L106">                    command.getIngredients().stream()</span>
-<span class="nc" id="L107">                        .map(ingredient -&gt; RecipeIngredientDto.builder()</span>
-<span class="nc" id="L108">                            .id(UUID.randomUUID())</span>
-<span class="nc" id="L109">                            .recipeId(id)</span>
-<span class="nc" id="L110">                            .ingredientId(ingredient.getIngredientId())</span>
-<span class="nc" id="L111">                            .quantity(ingredient.getQuantity())</span>
-<span class="nc" id="L112">                            .unit(ingredient.getUnit())</span>
-<span class="nc" id="L113">                            .build())</span>
-<span class="nc" id="L114">                        .collect(Collectors.toList()) :</span>
+<span class="fc" id="L97">        RecipeDto dto = RecipeDto.builder()</span>
+<span class="fc" id="L98">                .id(id)</span>
+<span class="pc bpc" id="L99" title="1 of 2 branches missed.">                .name(command.getName() != null ? command.getName() : existingRecipe.getName())</span>
+<span class="pc bpc" id="L100" title="1 of 2 branches missed.">                .description(command.getDescription() != null ? command.getDescription() : existingRecipe.getDescription())</span>
+<span class="pc bpc" id="L101" title="1 of 2 branches missed.">                .instructions(command.getInstructions() != null ? command.getInstructions() : existingRecipe.getInstructions())</span>
+<span class="pc bpc" id="L102" title="1 of 2 branches missed.">                .preparationTime(command.getPreparationTime() != null ? command.getPreparationTime() : existingRecipe.getPreparationTime())</span>
+<span class="pc bpc" id="L103" title="1 of 2 branches missed.">                .difficulty(command.getDifficulty() != null ? command.getDifficulty() : existingRecipe.getDifficulty())</span>
+<span class="fc" id="L104">                .cost(existingRecipe.getCost())</span>
+<span class="pc bpc" id="L105" title="1 of 2 branches missed.">                .recipeIngredients(command.getIngredients() != null ? </span>
+<span class="fc" id="L106">                    command.getIngredients().stream()</span>
+<span class="fc" id="L107">                        .map(ingredient -&gt; RecipeIngredientDto.builder()</span>
+<span class="fc" id="L108">                            .id(UUID.randomUUID())</span>
+<span class="fc" id="L109">                            .recipeId(id)</span>
+<span class="fc" id="L110">                            .ingredientId(ingredient.getIngredientId())</span>
+<span class="fc" id="L111">                            .quantity(ingredient.getQuantity())</span>
+<span class="fc" id="L112">                            .unit(ingredient.getUnit())</span>
+<span class="fc" id="L113">                            .build())</span>
+<span class="fc" id="L114">                        .collect(Collectors.toList()) :</span>
 <span class="nc" id="L115">                    existingRecipe.getIngredients().stream()</span>
 <span class="nc" id="L116">                        .map(ingredient -&gt; RecipeIngredientDto.builder()</span>
 <span class="nc" id="L117">                            .id(UUID.randomUUID())</span>
@@ -121,48 +121,48 @@ public class RecipeService implements RecipeUseCase {
 <span class="nc" id="L121">                            .unit(ingredient.getUnit())</span>
 <span class="nc" id="L122">                            .build())</span>
 <span class="nc" id="L123">                        .collect(Collectors.toList()))</span>
-<span class="nc" id="L124">                .build();</span>
+<span class="fc" id="L124">                .build();</span>
                 
         // Guardar la receta actualizada
-<span class="nc" id="L127">        return recipeRepository.save(dto);</span>
+<span class="fc" id="L127">        return recipeRepository.save(dto);</span>
     }
 
     @Override
     @Transactional(readOnly = true)
     public List&lt;RecipeResponse&gt; getRecipesByDifficulty(String difficulty) {
-<span class="nc" id="L133">        return recipeRepository.findByDifficulty(difficulty);</span>
+<span class="fc" id="L133">        return recipeRepository.findByDifficulty(difficulty);</span>
     }
 
     @Override
     @Transactional
     public void deleteRecipe(UUID id) {
-<span class="nc bnc" id="L139" title="All 2 branches missed.">        if (!recipeRepository.existsById(id)) {</span>
-<span class="nc" id="L140">            throw new BusinessException(&quot;Receta no encontrada&quot;);</span>
+<span class="fc bfc" id="L139" title="All 2 branches covered.">        if (!recipeRepository.existsById(id)) {</span>
+<span class="fc" id="L140">            throw new BusinessException(&quot;Receta no encontrada&quot;);</span>
         }
-<span class="nc" id="L142">        recipeRepository.deleteById(id);</span>
-<span class="nc" id="L143">    }</span>
+<span class="fc" id="L142">        recipeRepository.deleteById(id);</span>
+<span class="fc" id="L143">    }</span>
 
     @Override
     @Transactional
     public BigDecimal calculateRecipeCost(UUID id) {
-<span class="nc" id="L148">        RecipeResponse recipe = recipeRepository.findById(id)</span>
-<span class="nc" id="L149">                .orElseThrow(() -&gt; new RuntimeException(&quot;Recipe not found&quot;));</span>
+<span class="fc" id="L148">        RecipeResponse recipe = recipeRepository.findById(id)</span>
+<span class="fc" id="L149">                .orElseThrow(() -&gt; new RuntimeException(&quot;Recipe not found&quot;));</span>
         
-<span class="nc" id="L151">        return calculateRecipeCost(recipe.getIngredients());</span>
+<span class="fc" id="L151">        return calculateRecipeCost(recipe.getIngredients());</span>
     }
 
     private BigDecimal calculateRecipeCost(List&lt;RecipeIngredientResponse&gt; ingredients) {
-<span class="nc bnc" id="L155" title="All 4 branches missed.">        if (ingredients == null || ingredients.isEmpty()) {</span>
+<span class="pc bpc" id="L155" title="2 of 4 branches missed.">        if (ingredients == null || ingredients.isEmpty()) {</span>
 <span class="nc" id="L156">            return BigDecimal.ZERO;</span>
         }
 
-<span class="nc" id="L159">        return ingredients.stream()</span>
-<span class="nc" id="L160">                .map(ingredient -&gt; {</span>
-<span class="nc" id="L161">                    var ingredientData = ingredientRepository.findById(ingredient.getIngredientId())</span>
-<span class="nc" id="L162">                            .orElseThrow(() -&gt; new RuntimeException(&quot;Ingredient not found&quot;));</span>
-<span class="nc" id="L163">                    return ingredientData.getPrice().multiply(ingredient.getQuantity());</span>
+<span class="fc" id="L159">        return ingredients.stream()</span>
+<span class="fc" id="L160">                .map(ingredient -&gt; {</span>
+<span class="fc" id="L161">                    var ingredientData = ingredientRepository.findById(ingredient.getIngredientId())</span>
+<span class="fc" id="L162">                            .orElseThrow(() -&gt; new RuntimeException(&quot;Ingredient not found&quot;));</span>
+<span class="fc" id="L163">                    return ingredientData.getPrice().multiply(ingredient.getQuantity());</span>
                 })
-<span class="nc" id="L165">                .reduce(BigDecimal.ZERO, BigDecimal::add);</span>
+<span class="fc" id="L165">                .reduce(BigDecimal.ZERO, BigDecimal::add);</span>
     }
 } 
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>
