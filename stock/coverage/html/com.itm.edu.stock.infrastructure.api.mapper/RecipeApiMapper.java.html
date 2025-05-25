@@ -19,8 +19,8 @@ import java.util.ArrayList;
 public class RecipeApiMapper {
     
     public CreateRecipeCommand toCommand(CreateRecipeRequestDto request) {
-<span class="pc bpc" id="L22" title="1 of 2 branches missed.">        if (request == null) {</span>
-<span class="nc" id="L23">            return null;</span>
+<span class="fc bfc" id="L22" title="All 2 branches covered.">        if (request == null) {</span>
+<span class="fc" id="L23">            return null;</span>
         }
 <span class="fc" id="L25">        return new CreateRecipeCommand(</span>
 <span class="fc" id="L26">            request.getName(),</span>
@@ -37,8 +37,8 @@ public class RecipeApiMapper {
     }
 
     public CreateRecipeCommand toCommand(UpdateRecipeRequestDto request) {
-<span class="pc bpc" id="L40" title="1 of 2 branches missed.">        if (request == null) {</span>
-<span class="nc" id="L41">            return null;</span>
+<span class="fc bfc" id="L40" title="All 2 branches covered.">        if (request == null) {</span>
+<span class="fc" id="L41">            return null;</span>
         }
 <span class="fc" id="L43">        return new CreateRecipeCommand(</span>
 <span class="fc" id="L44">            request.getName(),</span>
@@ -66,8 +66,8 @@ public class RecipeApiMapper {
     }
 
     public RecipeResponseDto toDto(RecipeResponse response) {
-<span class="pc bpc" id="L69" title="1 of 2 branches missed.">        if (response == null) {</span>
-<span class="nc" id="L70">            return null;</span>
+<span class="fc bfc" id="L69" title="All 2 branches covered.">        if (response == null) {</span>
+<span class="fc" id="L70">            return null;</span>
         }
 <span class="fc" id="L72">        var dto = new RecipeResponseDto();</span>
 <span class="fc" id="L73">        dto.setId(response.getId());</span>

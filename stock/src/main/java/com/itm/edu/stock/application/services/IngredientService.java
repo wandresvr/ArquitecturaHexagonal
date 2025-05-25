@@ -8,6 +8,7 @@ import com.itm.edu.stock.application.dto.CreateIngredientCommand;
 import com.itm.edu.stock.application.dto.IngredientResponse;
 import com.itm.edu.stock.infrastructure.persistence.dto.IngredientDto;
 import com.itm.edu.stock.infrastructure.persistence.mapper.IngredientPersistenceMapper;
+import com.itm.edu.stock.domain.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +26,12 @@ public class IngredientService implements CreateIngredientUseCase, GetIngredient
     @Override
     @Transactional
     public IngredientResponse createIngredient(CreateIngredientCommand command) {
+        if (command == null) {
+            throw new BusinessException("El comando de creación no puede ser nulo");
+        }
+        
+        validateIngredientCommand(command);
+        
         var dto = ingredientMapper.fromCommand(command);
         return ingredientRepository.save(dto);
     }
@@ -38,8 +45,11 @@ public class IngredientService implements CreateIngredientUseCase, GetIngredient
     @Override
     @Transactional(readOnly = true)
     public IngredientResponse getIngredientById(UUID id) {
+        if (id == null) {
+            throw new BusinessException("El ID del ingrediente no puede ser nulo");
+        }
         return ingredientRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Ingredient not found"));
+                .orElseThrow(() -> new BusinessException("Ingrediente no encontrado"));
     }
 
     @Override
@@ -93,5 +103,23 @@ public class IngredientService implements CreateIngredientUseCase, GetIngredient
                 .build();
                 
         ingredientRepository.save(dto);
+    }
+
+    private void validateIngredientCommand(CreateIngredientCommand command) {
+        if (command.getName() == null || command.getName().trim().isEmpty()) {
+            throw new BusinessException("El nombre del ingrediente es requerido");
+        }
+        if (command.getQuantity() == null || command.getQuantity().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new BusinessException("La cantidad debe ser mayor que cero");
+        }
+        if (command.getUnit() == null || command.getUnit().trim().isEmpty()) {
+            throw new BusinessException("La unidad de medida es requerida");
+        }
+        if (command.getPrice() == null || command.getPrice().compareTo(BigDecimal.ZERO) < 0) {
+            throw new BusinessException("El precio no puede ser negativo");
+        }
+        if (command.getSupplier() == null || command.getSupplier().trim().isEmpty()) {
+            throw new BusinessException("El proveedor es requerido");
+        }
     }
 }

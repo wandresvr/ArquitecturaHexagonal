@@ -124,4 +124,78 @@ class IngredientPersistenceMapperTest {
         // Assert
         assertNull(result, "El resultado debería ser null cuando el DTO es null");
     }
+
+    @Test
+    void fromCommand_Success() {
+        // Arrange
+        CreateIngredientCommand command = new CreateIngredientCommand(
+            "Harina",
+            "Harina de trigo",
+            new BigDecimal("1000"),
+            "gramos",
+            "Proveedor A",
+            BigDecimal.ZERO,
+            new BigDecimal("2.50")
+        );
+
+        // Act
+        IngredientDto result = mapper.fromCommand(command);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(command.getName(), result.getName());
+        assertEquals(command.getDescription(), result.getDescription());
+        assertEquals(command.getQuantity(), result.getQuantity());
+        assertEquals(command.getUnit(), result.getUnit());
+        assertEquals(command.getPrice(), result.getPrice());
+        assertEquals(command.getSupplier(), result.getSupplier());
+        assertEquals(command.getMinimumStock(), result.getMinimumStock());
+    }
+
+    @Test
+    void fromCommand_NullCommand() {
+        // Arrange & Act
+        IngredientDto result = mapper.fromCommand(null);
+
+        // Assert
+        assertNull(result, "El resultado debería ser null cuando el comando es null");
+    }
+
+    @Test
+    void fromResponse_Success() {
+        // Arrange
+        IngredientResponse response = IngredientResponse.builder()
+            .id(testId)
+            .name("Harina")
+            .description("Harina de trigo")
+            .quantity(new BigDecimal("1000"))
+            .unit("gramos")
+            .price(new BigDecimal("2.50"))
+            .supplier("Proveedor A")
+            .minimumStock(BigDecimal.ZERO)
+            .build();
+
+        // Act
+        IngredientJpaEntity result = mapper.fromResponse(response);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(response.getId(), result.getId());
+        assertEquals(response.getName(), result.getName());
+        assertEquals(response.getDescription(), result.getDescription());
+        assertEquals(response.getQuantity(), result.getQuantity());
+        assertEquals(response.getUnit(), result.getUnit());
+        assertEquals(response.getPrice(), result.getPrice());
+        assertEquals(response.getSupplier(), result.getSupplier());
+        assertEquals(response.getMinimumStock(), result.getMinimumStock());
+    }
+
+    @Test
+    void fromResponse_NullResponse() {
+        // Arrange & Act
+        IngredientJpaEntity result = mapper.fromResponse(null);
+
+        // Assert
+        assertNull(result, "El resultado debería ser null cuando la respuesta es null");
+    }
 } 

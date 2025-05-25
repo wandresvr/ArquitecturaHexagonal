@@ -181,4 +181,151 @@ class RecipeDomainMapperTest {
         assertNotNull(result.getRecipeIngredients());
         assertTrue(result.getRecipeIngredients().isEmpty());
     }
+
+    @Test
+    void testToEntity_WithEmptyFields() {
+        // Arrange
+        CreateRecipeCommand emptyCommand = new CreateRecipeCommand(
+            "",
+            "",
+            "",
+            null,
+            "",
+            new ArrayList<>()
+        );
+
+        // Act
+        Recipe result = mapper.toEntity(emptyCommand);
+
+        // Assert
+        assertNotNull(result);
+        assertNotNull(result.getId());
+        assertEquals("", result.getName());
+        assertEquals("", result.getDescription());
+        assertEquals("", result.getInstructions());
+        assertNull(result.getPreparationTime());
+        assertEquals("", result.getDifficulty());
+        assertEquals(BigDecimal.ZERO, result.getCost());
+        assertNotNull(result.getRecipeIngredients());
+        assertTrue(result.getRecipeIngredients().isEmpty());
+    }
+
+    @Test
+    void testToEntity_WithMaximumValues() {
+        // Arrange
+        CreateRecipeCommand maxCommand = new CreateRecipeCommand(
+            "Test Recipe With Very Long Name That Should Still Be Valid",
+            "Test Description With Maximum Length That Should Be Accepted By The System And Still Process Correctly",
+            "1. First instruction with maximum length\n2. Second instruction with maximum length\n3. Third instruction with maximum length",
+            Integer.MAX_VALUE,
+            "Very Difficult And Complex Recipe That Requires Expert Skills",
+            Arrays.asList(
+                new RecipeIngredientCommand(
+                    ingredientId,
+                    BigDecimal.valueOf(999999.99),
+                    "kilogramos"
+                ),
+                new RecipeIngredientCommand(
+                    UUID.randomUUID(),
+                    BigDecimal.valueOf(999999.99),
+                    "litros"
+                )
+            )
+        );
+
+        // Act
+        Recipe result = mapper.toEntity(maxCommand);
+
+        // Assert
+        assertNotNull(result);
+        assertNotNull(result.getId());
+        assertEquals(maxCommand.getName(), result.getName());
+        assertEquals(maxCommand.getDescription(), result.getDescription());
+        assertEquals(maxCommand.getInstructions(), result.getInstructions());
+        assertEquals(maxCommand.getPreparationTime(), result.getPreparationTime());
+        assertEquals(maxCommand.getDifficulty(), result.getDifficulty());
+        assertEquals(BigDecimal.ZERO, result.getCost());
+        assertNotNull(result.getRecipeIngredients());
+        assertTrue(result.getRecipeIngredients().isEmpty());
+    }
+
+    @Test
+    void testToResponse_WithNullRecipe() {
+        // Act
+        RecipeResponse result = mapper.toResponse(null);
+
+        // Assert
+        assertNull(result);
+    }
+
+    @Test
+    void testToResponse_WithNullFields() {
+        // Arrange
+        Recipe nullFieldsRecipe = Recipe.builder()
+            .id(recipeId)
+            .name(null)
+            .description(null)
+            .instructions(null)
+            .preparationTime(null)
+            .difficulty(null)
+            .cost(null)
+            .recipeIngredients(null)
+            .build();
+
+        // Act
+        RecipeResponse result = mapper.toResponse(nullFieldsRecipe);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(recipeId, result.getId());
+        assertNull(result.getName());
+        assertNull(result.getDescription());
+        assertNull(result.getInstructions());
+        assertNull(result.getPreparationTime());
+        assertNull(result.getDifficulty());
+        assertNull(result.getCost());
+        assertNotNull(result.getIngredients());
+        assertTrue(result.getIngredients().isEmpty());
+    }
+
+    @Test
+    void testToResponse_WithMultipleIngredients() {
+        // Arrange
+        RecipeIngredient secondIngredient = RecipeIngredient.builder()
+            .id(UUID.randomUUID())
+            .recipeId(recipeId)
+            .ingredientId(UUID.randomUUID())
+            .ingredientName("Azúcar")
+            .quantity(new BigDecimal("250"))
+            .unit("gramos")
+            .build();
+
+        Recipe recipeWithMultipleIngredients = recipe.toBuilder()
+            .recipeIngredients(Arrays.asList(recipeIngredient, secondIngredient))
+            .build();
+
+        // Act
+        RecipeResponse result = mapper.toResponse(recipeWithMultipleIngredients);
+
+        // Assert
+        assertNotNull(result);
+        assertNotNull(result.getIngredients());
+        assertEquals(2, result.getIngredients().size());
+        
+        // Verificar primer ingrediente
+        assertEquals(recipeIngredient.getId(), result.getIngredients().get(0).getId());
+        assertEquals(recipeIngredient.getRecipeId(), result.getIngredients().get(0).getRecipeId());
+        assertEquals(recipeIngredient.getIngredientId(), result.getIngredients().get(0).getIngredientId());
+        assertEquals(recipeIngredient.getIngredientName(), result.getIngredients().get(0).getIngredientName());
+        assertEquals(recipeIngredient.getQuantity(), result.getIngredients().get(0).getQuantity());
+        assertEquals(recipeIngredient.getUnit(), result.getIngredients().get(0).getUnit());
+        
+        // Verificar segundo ingrediente
+        assertEquals(secondIngredient.getId(), result.getIngredients().get(1).getId());
+        assertEquals(secondIngredient.getRecipeId(), result.getIngredients().get(1).getRecipeId());
+        assertEquals(secondIngredient.getIngredientId(), result.getIngredients().get(1).getIngredientId());
+        assertEquals(secondIngredient.getIngredientName(), result.getIngredients().get(1).getIngredientName());
+        assertEquals(secondIngredient.getQuantity(), result.getIngredients().get(1).getQuantity());
+        assertEquals(secondIngredient.getUnit(), result.getIngredients().get(1).getUnit());
+    }
 } 

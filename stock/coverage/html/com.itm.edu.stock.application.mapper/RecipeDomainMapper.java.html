@@ -35,8 +35,8 @@ public class RecipeDomainMapper {
     }
 
     public RecipeResponse toResponse(Recipe recipe) {
-<span class="pc bpc" id="L38" title="1 of 2 branches missed.">        if (recipe == null) {</span>
-<span class="nc" id="L39">            return null;</span>
+<span class="fc bfc" id="L38" title="All 2 branches covered.">        if (recipe == null) {</span>
+<span class="fc" id="L39">            return null;</span>
         }
 <span class="fc" id="L41">        return RecipeResponse.builder()</span>
 <span class="fc" id="L42">            .id(recipe.getId())</span>

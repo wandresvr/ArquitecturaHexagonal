@@ -3,57 +3,74 @@
 import com.itm.edu.stock.application.dto.CreateIngredientCommand;
 import com.itm.edu.stock.application.dto.IngredientResponse;
 import com.itm.edu.stock.domain.entities.Ingredient;
+import com.itm.edu.stock.domain.exception.BusinessException;
 import org.springframework.stereotype.Component;
+import java.util.UUID;
 
 @Component
-<span class="fc" id="L9">public class IngredientDomainMapper {</span>
+<span class="fc" id="L11">public class IngredientDomainMapper {</span>
     
     public Ingredient toEntity(CreateIngredientCommand command) {
-<span class="nc" id="L12">        return Ingredient.builder()</span>
-<span class="nc" id="L13">                .name(command.getName())</span>
-<span class="nc" id="L14">                .description(command.getDescription())</span>
-<span class="nc" id="L15">                .quantity(command.getQuantity())</span>
-<span class="nc" id="L16">                .unit(command.getUnit())</span>
-<span class="nc" id="L17">                .supplier(command.getSupplier())</span>
-<span class="nc" id="L18">                .minimumStock(command.getMinimumStock())</span>
-<span class="nc" id="L19">                .build();</span>
+<span class="fc bfc" id="L14" title="All 2 branches covered.">        if (command == null) {</span>
+<span class="fc" id="L15">            return null;</span>
+        }
+<span class="fc" id="L17">        return Ingredient.builder()</span>
+<span class="fc" id="L18">                .id(UUID.randomUUID())</span>
+<span class="fc" id="L19">                .name(command.getName())</span>
+<span class="fc" id="L20">                .description(command.getDescription())</span>
+<span class="fc" id="L21">                .quantity(command.getQuantity())</span>
+<span class="fc" id="L22">                .unit(command.getUnit())</span>
+<span class="fc" id="L23">                .price(command.getPrice())</span>
+<span class="fc" id="L24">                .supplier(command.getSupplier())</span>
+<span class="fc" id="L25">                .minimumStock(command.getMinimumStock())</span>
+<span class="fc" id="L26">                .build();</span>
     }
     
     public IngredientResponse toResponse(Ingredient ingredient) {
-<span class="nc" id="L23">        return IngredientResponse.builder()</span>
-<span class="nc" id="L24">            .id(ingredient.getId())</span>
-<span class="nc" id="L25">            .name(ingredient.getName())</span>
-<span class="nc" id="L26">            .description(ingredient.getDescription())</span>
-<span class="nc" id="L27">            .quantity(ingredient.getQuantity())</span>
-<span class="nc" id="L28">            .unit(ingredient.getUnit())</span>
-<span class="nc" id="L29">            .supplier(ingredient.getSupplier())</span>
-<span class="nc" id="L30">            .minimumStock(ingredient.getMinimumStock())</span>
-<span class="nc" id="L31">            .price(ingredient.getPrice())</span>
-<span class="nc" id="L32">            .build();</span>
+<span class="fc bfc" id="L30" title="All 2 branches covered.">        if (ingredient == null) {</span>
+<span class="fc" id="L31">            return null;</span>
+        }
+<span class="fc" id="L33">        return IngredientResponse.builder()</span>
+<span class="fc" id="L34">            .id(ingredient.getId())</span>
+<span class="fc" id="L35">            .name(ingredient.getName())</span>
+<span class="fc" id="L36">            .description(ingredient.getDescription())</span>
+<span class="fc" id="L37">            .quantity(ingredient.getQuantity())</span>
+<span class="fc" id="L38">            .unit(ingredient.getUnit())</span>
+<span class="fc" id="L39">            .supplier(ingredient.getSupplier())</span>
+<span class="fc" id="L40">            .minimumStock(ingredient.getMinimumStock())</span>
+<span class="fc" id="L41">            .price(ingredient.getPrice())</span>
+<span class="fc" id="L42">            .build();</span>
     }
     
     public Ingredient updateEntityFromCommand(Ingredient ingredient, CreateIngredientCommand command) {
-<span class="nc" id="L36">        return ingredient.toBuilder()</span>
-<span class="nc" id="L37">                .name(command.getName())</span>
-<span class="nc" id="L38">                .description(command.getDescription())</span>
-<span class="nc" id="L39">                .quantity(command.getQuantity())</span>
-<span class="nc" id="L40">                .unit(command.getUnit())</span>
-<span class="nc" id="L41">                .supplier(command.getSupplier())</span>
-<span class="nc" id="L42">                .minimumStock(command.getMinimumStock())</span>
-<span class="nc" id="L43">                .build();</span>
+<span class="fc bfc" id="L46" title="All 2 branches covered.">        if (ingredient == null) {</span>
+<span class="fc" id="L47">            throw new BusinessException(&quot;El ingrediente no puede ser nulo&quot;);</span>
+        }
+<span class="fc bfc" id="L49" title="All 2 branches covered.">        if (command == null) {</span>
+<span class="fc" id="L50">            throw new BusinessException(&quot;El comando de actualización no puede ser nulo&quot;);</span>
+        }
+<span class="fc" id="L52">        return ingredient.toBuilder()</span>
+<span class="fc" id="L53">                .name(command.getName())</span>
+<span class="fc" id="L54">                .description(command.getDescription())</span>
+<span class="fc" id="L55">                .quantity(command.getQuantity())</span>
+<span class="fc" id="L56">                .unit(command.getUnit())</span>
+<span class="fc" id="L57">                .price(command.getPrice())</span>
+<span class="fc" id="L58">                .supplier(command.getSupplier())</span>
+<span class="fc" id="L59">                .minimumStock(command.getMinimumStock())</span>
+<span class="fc" id="L60">                .build();</span>
     }
 
     public Ingredient toDomain(IngredientResponse response) {
-<span class="nc" id="L47">        return Ingredient.builder()</span>
-<span class="nc" id="L48">            .id(response.getId())</span>
-<span class="nc" id="L49">            .name(response.getName())</span>
-<span class="nc" id="L50">            .description(response.getDescription())</span>
-<span class="nc" id="L51">            .quantity(response.getQuantity())</span>
-<span class="nc" id="L52">            .unit(response.getUnit())</span>
-<span class="nc" id="L53">            .supplier(response.getSupplier())</span>
-<span class="nc" id="L54">            .minimumStock(response.getMinimumStock())</span>
-<span class="nc" id="L55">            .price(response.getPrice())</span>
-<span class="nc" id="L56">            .build();</span>
+<span class="nc" id="L64">        return Ingredient.builder()</span>
+<span class="nc" id="L65">            .id(response.getId())</span>
+<span class="nc" id="L66">            .name(response.getName())</span>
+<span class="nc" id="L67">            .description(response.getDescription())</span>
+<span class="nc" id="L68">            .quantity(response.getQuantity())</span>
+<span class="nc" id="L69">            .unit(response.getUnit())</span>
+<span class="nc" id="L70">            .supplier(response.getSupplier())</span>
+<span class="nc" id="L71">            .minimumStock(response.getMinimumStock())</span>
+<span class="nc" id="L72">            .price(response.getPrice())</span>
+<span class="nc" id="L73">            .build();</span>
     }
 } 
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

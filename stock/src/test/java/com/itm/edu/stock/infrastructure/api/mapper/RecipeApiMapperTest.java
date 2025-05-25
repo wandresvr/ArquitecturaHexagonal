@@ -186,4 +186,189 @@ class RecipeApiMapperTest {
         assertNotNull(result.getIngredients());
         assertTrue(result.getIngredients().isEmpty());
     }
+
+    @Test
+    void testToCommand_FromCreateRequest_WithNullRequest() {
+        // Act
+        CreateRecipeCommand result = mapper.toCommand((CreateRecipeRequestDto) null);
+
+        // Assert
+        assertNull(result);
+    }
+
+    @Test
+    void testToCommand_FromUpdateRequest_WithNullRequest() {
+        // Act
+        CreateRecipeCommand result = mapper.toCommand((UpdateRecipeRequestDto) null);
+
+        // Assert
+        assertNull(result);
+    }
+
+    @Test
+    void testToCommand_FromCreateRequest_WithEmptyFields() {
+        // Arrange
+        CreateRecipeRequestDto emptyRequest = new CreateRecipeRequestDto();
+        emptyRequest.setName("");
+        emptyRequest.setDescription("");
+        emptyRequest.setInstructions("");
+        emptyRequest.setPreparationTime(null);
+        emptyRequest.setDifficulty("");
+        emptyRequest.setIngredients(new ArrayList<>());
+
+        // Act
+        CreateRecipeCommand result = mapper.toCommand(emptyRequest);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals("", result.getName());
+        assertEquals("", result.getDescription());
+        assertEquals("", result.getInstructions());
+        assertNull(result.getPreparationTime());
+        assertEquals("", result.getDifficulty());
+        assertNotNull(result.getIngredients());
+        assertTrue(result.getIngredients().isEmpty());
+    }
+
+    @Test
+    void testToCommand_FromUpdateRequest_WithEmptyFields() {
+        // Arrange
+        UpdateRecipeRequestDto emptyRequest = new UpdateRecipeRequestDto();
+        emptyRequest.setName("");
+        emptyRequest.setDescription("");
+        emptyRequest.setInstructions("");
+        emptyRequest.setPreparationTime(null);
+        emptyRequest.setDifficulty("");
+        emptyRequest.setIngredients(new ArrayList<>());
+
+        // Act
+        CreateRecipeCommand result = mapper.toCommand(emptyRequest);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals("", result.getName());
+        assertEquals("", result.getDescription());
+        assertEquals("", result.getInstructions());
+        assertNull(result.getPreparationTime());
+        assertEquals("", result.getDifficulty());
+        assertNotNull(result.getIngredients());
+        assertTrue(result.getIngredients().isEmpty());
+    }
+
+    @Test
+    void testToCommand_FromCreateRequest_WithMaximumValues() {
+        // Arrange
+        CreateRecipeRequestDto maxRequest = new CreateRecipeRequestDto();
+        maxRequest.setName("Test Recipe With Very Long Name That Should Still Be Valid");
+        maxRequest.setDescription("Test Description With Maximum Length That Should Be Accepted By The System And Still Process Correctly");
+        maxRequest.setInstructions("1. First instruction with maximum length\n2. Second instruction with maximum length\n3. Third instruction with maximum length");
+        maxRequest.setPreparationTime(Integer.MAX_VALUE);
+        maxRequest.setDifficulty("Very Difficult And Complex Recipe That Requires Expert Skills");
+
+        CreateRecipeIngredientDto maxIngredient = new CreateRecipeIngredientDto();
+        maxIngredient.setIngredientId(ingredientId);
+        maxIngredient.setQuantity(BigDecimal.valueOf(999999.99));
+        maxIngredient.setUnit("kilogramos");
+        maxRequest.setIngredients(Arrays.asList(maxIngredient));
+
+        // Act
+        CreateRecipeCommand result = mapper.toCommand(maxRequest);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(maxRequest.getName(), result.getName());
+        assertEquals(maxRequest.getDescription(), result.getDescription());
+        assertEquals(maxRequest.getInstructions(), result.getInstructions());
+        assertEquals(maxRequest.getPreparationTime(), result.getPreparationTime());
+        assertEquals(maxRequest.getDifficulty(), result.getDifficulty());
+        assertNotNull(result.getIngredients());
+        assertEquals(1, result.getIngredients().size());
+        assertEquals(ingredientId, result.getIngredients().get(0).getIngredientId());
+        assertEquals(maxIngredient.getQuantity(), result.getIngredients().get(0).getQuantity());
+        assertEquals(maxIngredient.getUnit(), result.getIngredients().get(0).getUnit());
+    }
+
+    @Test
+    void testToDto_WithNullResponse() {
+        // Act
+        RecipeResponseDto result = mapper.toDto(null);
+
+        // Assert
+        assertNull(result);
+    }
+
+    @Test
+    void testToDto_WithNullFields() {
+        // Arrange
+        RecipeResponse nullFieldsResponse = RecipeResponse.builder()
+            .id(recipeId)
+            .name(null)
+            .description(null)
+            .instructions(null)
+            .preparationTime(null)
+            .difficulty(null)
+            .cost(null)
+            .ingredients(null)
+            .build();
+
+        // Act
+        RecipeResponseDto result = mapper.toDto(nullFieldsResponse);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(recipeId, result.getId());
+        assertNull(result.getName());
+        assertNull(result.getDescription());
+        assertNull(result.getInstructions());
+        assertNull(result.getPreparationTime());
+        assertNull(result.getDifficulty());
+        assertNull(result.getCost());
+        assertNotNull(result.getIngredients());
+        assertTrue(result.getIngredients().isEmpty());
+    }
+
+    @Test
+    void testToDto_WithMultipleIngredients() {
+        // Arrange
+        RecipeResponse responseWithMultipleIngredients = RecipeResponse.builder()
+            .id(recipeId)
+            .name("Test Recipe")
+            .ingredients(Arrays.asList(
+                RecipeIngredientResponse.builder()
+                    .id(UUID.randomUUID())
+                    .recipeId(recipeId)
+                    .ingredientId(ingredientId)
+                    .ingredientName("Harina")
+                    .quantity(new BigDecimal("500"))
+                    .unit("gramos")
+                    .build(),
+                RecipeIngredientResponse.builder()
+                    .id(UUID.randomUUID())
+                    .recipeId(recipeId)
+                    .ingredientId(UUID.randomUUID())
+                    .ingredientName("Azúcar")
+                    .quantity(new BigDecimal("250"))
+                    .unit("gramos")
+                    .build()
+            ))
+            .build();
+
+        // Act
+        RecipeResponseDto result = mapper.toDto(responseWithMultipleIngredients);
+
+        // Assert
+        assertNotNull(result);
+        assertNotNull(result.getIngredients());
+        assertEquals(2, result.getIngredients().size());
+        
+        // Verificar primer ingrediente
+        assertEquals("Harina", result.getIngredients().get(0).getName());
+        assertEquals(new BigDecimal("500"), result.getIngredients().get(0).getQuantity());
+        assertEquals("gramos", result.getIngredients().get(0).getUnit());
+        
+        // Verificar segundo ingrediente
+        assertEquals("Azúcar", result.getIngredients().get(1).getName());
+        assertEquals(new BigDecimal("250"), result.getIngredients().get(1).getQuantity());
+        assertEquals("gramos", result.getIngredients().get(1).getUnit());
+    }
 } 

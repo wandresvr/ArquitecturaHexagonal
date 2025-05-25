@@ -6,35 +6,38 @@ import com.itm.edu.stock.application.dto.CreateIngredientCommand;
 import com.itm.edu.stock.infrastructure.api.dto.CreateIngredientRequestDto;
 import com.itm.edu.stock.infrastructure.api.dto.IngredientResponseDto;
 import org.springframework.stereotype.Component;
-import lombok.RequiredArgsConstructor;
-
 import java.math.BigDecimal;
 
-@Component(&quot;ingredientApiMapper&quot;)
-<span class="fc" id="L14">@RequiredArgsConstructor</span>
-public class IngredientApiMapper {
+@Component
+<span class="fc" id="L12">public class IngredientApiMapper {</span>
     
-    public IngredientResponseDto toResponseDto(IngredientResponse response) {
-<span class="nc" id="L18">        return new IngredientResponseDto(</span>
-<span class="nc" id="L19">            response.getId(),</span>
-<span class="nc" id="L20">            response.getName(),</span>
-<span class="nc" id="L21">            response.getDescription(),</span>
-<span class="nc" id="L22">            response.getQuantity(),</span>
-<span class="nc" id="L23">            response.getUnit(),</span>
-<span class="nc" id="L24">            response.getSupplier(),</span>
-<span class="nc" id="L25">            response.getMinimumStock()</span>
+    public CreateIngredientCommand toCommand(CreateIngredientRequestDto request) {
+<span class="fc bfc" id="L15" title="All 2 branches covered.">        if (request == null) {</span>
+<span class="fc" id="L16">            return null;</span>
+        }
+<span class="fc" id="L18">        return new CreateIngredientCommand(</span>
+<span class="fc" id="L19">            request.getName(),</span>
+<span class="fc" id="L20">            request.getDescription(),</span>
+<span class="fc" id="L21">            request.getQuantity(),</span>
+<span class="fc" id="L22">            request.getUnit(),</span>
+<span class="fc" id="L23">            request.getSupplier(),</span>
+            BigDecimal.ZERO,
+<span class="fc" id="L25">            request.getPrice()</span>
         );
     }
-
-    public CreateIngredientCommand toCommand(CreateIngredientRequestDto dto) {
-<span class="nc" id="L30">        return new CreateIngredientCommand(</span>
-<span class="nc" id="L31">            dto.getName(),</span>
-<span class="nc" id="L32">            dto.getDescription(),</span>
-<span class="nc" id="L33">            dto.getQuantity(),</span>
-<span class="nc" id="L34">            dto.getUnit(),</span>
-<span class="nc" id="L35">            dto.getSupplier(),</span>
-            BigDecimal.ZERO,
-<span class="nc" id="L37">            dto.getPrice()</span>
+    
+    public IngredientResponseDto toResponseDto(IngredientResponse response) {
+<span class="fc bfc" id="L30" title="All 2 branches covered.">        if (response == null) {</span>
+<span class="fc" id="L31">            return null;</span>
+        }
+<span class="fc" id="L33">        return new IngredientResponseDto(</span>
+<span class="fc" id="L34">            response.getId(),</span>
+<span class="fc" id="L35">            response.getName(),</span>
+<span class="fc" id="L36">            response.getDescription(),</span>
+<span class="fc" id="L37">            response.getQuantity(),</span>
+<span class="fc" id="L38">            response.getUnit(),</span>
+<span class="fc" id="L39">            response.getSupplier(),</span>
+<span class="fc" id="L40">            response.getMinimumStock()</span>
         );
     }
 } 

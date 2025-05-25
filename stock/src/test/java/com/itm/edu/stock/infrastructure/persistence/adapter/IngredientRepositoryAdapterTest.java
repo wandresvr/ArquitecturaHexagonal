@@ -220,4 +220,85 @@ class IngredientRepositoryAdapterTest {
         verify(mapper).toDto(testEntity);
         verify(mapper).toResponse(testDto);
     }
+
+    @Test
+    void findBySupplier_NoResults() {
+        // Arrange
+        String supplier = "Proveedor Inexistente";
+        when(repository.findBySupplier(supplier)).thenReturn(Arrays.asList());
+
+        // Act
+        List<IngredientResponse> results = adapter.findBySupplier(supplier);
+
+        // Assert
+        assertNotNull(results);
+        assertTrue(results.isEmpty());
+        verify(repository).findBySupplier(supplier);
+        verify(mapper, never()).toDto(any());
+        verify(mapper, never()).toResponse(any());
+    }
+
+    @Test
+    void findBySupplier_MultipleResults() {
+        // Arrange
+        String supplier = "Proveedor A";
+        IngredientJpaEntity secondEntity = IngredientJpaEntity.builder()
+            .id(UUID.randomUUID())
+            .name("Azúcar")
+            .description("Azúcar refinada")
+            .quantity(new BigDecimal("500"))
+            .unit("gramos")
+            .price(new BigDecimal("3.00"))
+            .supplier(supplier)
+            .minimumStock(BigDecimal.ZERO)
+            .build();
+
+        IngredientDto secondDto = IngredientDto.builder()
+            .id(secondEntity.getId())
+            .name(secondEntity.getName())
+            .description(secondEntity.getDescription())
+            .quantity(secondEntity.getQuantity())
+            .unit(secondEntity.getUnit())
+            .price(secondEntity.getPrice())
+            .supplier(secondEntity.getSupplier())
+            .minimumStock(secondEntity.getMinimumStock())
+            .build();
+
+        IngredientResponse secondResponse = IngredientResponse.builder()
+            .id(secondEntity.getId())
+            .name(secondEntity.getName())
+            .description(secondEntity.getDescription())
+            .quantity(secondEntity.getQuantity())
+            .unit(secondEntity.getUnit())
+            .price(secondEntity.getPrice())
+            .supplier(secondEntity.getSupplier())
+            .minimumStock(secondEntity.getMinimumStock())
+            .build();
+
+        List<IngredientJpaEntity> entities = Arrays.asList(testEntity, secondEntity);
+        when(repository.findBySupplier(supplier)).thenReturn(entities);
+        when(mapper.toDto(testEntity)).thenReturn(testDto);
+        when(mapper.toDto(secondEntity)).thenReturn(secondDto);
+        when(mapper.toResponse(testDto)).thenReturn(testResponse);
+        when(mapper.toResponse(secondDto)).thenReturn(secondResponse);
+
+        // Act
+        List<IngredientResponse> results = adapter.findBySupplier(supplier);
+
+        // Assert
+        assertNotNull(results);
+        assertEquals(2, results.size());
+        assertEquals(testId, results.get(0).getId());
+        assertEquals(testDto.getName(), results.get(0).getName());
+        assertEquals(supplier, results.get(0).getSupplier());
+        assertEquals(secondEntity.getId(), results.get(1).getId());
+        assertEquals(secondDto.getName(), results.get(1).getName());
+        assertEquals(supplier, results.get(1).getSupplier());
+
+        verify(repository).findBySupplier(supplier);
+        verify(mapper).toDto(testEntity);
+        verify(mapper).toDto(secondEntity);
+        verify(mapper).toResponse(testDto);
+        verify(mapper).toResponse(secondDto);
+    }
 } 
