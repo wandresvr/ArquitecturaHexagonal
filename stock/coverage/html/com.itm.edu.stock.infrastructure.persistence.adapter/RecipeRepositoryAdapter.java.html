@@ -26,7 +26,7 @@ public class RecipeRepositoryAdapter implements RecipeRepository {
         // Si la entidad ya existe, cargar sus relaciones existentes
 <span class="fc bfc" id="L27" title="All 2 branches covered.">        if (jpaRepository.existsById(entity.getId())) {</span>
 <span class="fc" id="L28">            var existingEntity = jpaRepository.findById(entity.getId())</span>
-<span class="pc" id="L29">                    .orElseThrow(() -&gt; new RuntimeException(&quot;Recipe not found&quot;));</span>
+<span class="fc" id="L29">                    .orElseThrow(() -&gt; new RuntimeException(&quot;Recipe not found&quot;));</span>
 <span class="fc" id="L30">            entity.getRecipeIngredients().forEach(ri -&gt; ri.setRecipe(entity));</span>
         }
         

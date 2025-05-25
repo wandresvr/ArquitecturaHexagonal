@@ -10,36 +10,36 @@ import java.util.UUID;
 @Entity
 @Table(name = &quot;recipe_ingredients&quot;)
 @Getter
-<span class="pc" id="L13">@Setter</span>
+<span class="fc" id="L13">@Setter</span>
 <span class="fc" id="L14">@NoArgsConstructor</span>
 <span class="fc" id="L15">@AllArgsConstructor</span>
 <span class="pc" id="L16">@Builder</span>
 public class RecipeIngredientJpaEntity extends BaseJpaEntity&lt;RecipeIngredient&gt; {
     @Id
     @GeneratedValue
-<span class="nc" id="L20">    private UUID id;</span>
+<span class="fc" id="L20">    private UUID id;</span>
 
     @ManyToOne
     @JoinColumn(name = &quot;recipe_id&quot;)
-<span class="nc" id="L24">    private RecipeJpaEntity recipe;</span>
+<span class="fc" id="L24">    private RecipeJpaEntity recipe;</span>
 
     @ManyToOne
     @JoinColumn(name = &quot;ingredient_id&quot;)
-<span class="nc" id="L28">    private IngredientJpaEntity ingredient;</span>
+<span class="fc" id="L28">    private IngredientJpaEntity ingredient;</span>
 
-<span class="nc" id="L30">    private BigDecimal quantity;</span>
-<span class="nc" id="L31">    private String unit;</span>
+<span class="fc" id="L30">    private BigDecimal quantity;</span>
+<span class="fc" id="L31">    private String unit;</span>
 
     @Override
     public RecipeIngredient toDomain() {
-<span class="nc" id="L35">        return RecipeIngredient.builder()</span>
-<span class="nc" id="L36">            .id(this.id)</span>
-<span class="nc bnc" id="L37" title="All 2 branches missed.">            .recipeId(this.recipe != null ? this.recipe.getId() : null)</span>
-<span class="nc bnc" id="L38" title="All 2 branches missed.">            .ingredientId(this.ingredient != null ? this.ingredient.getId() : null)</span>
-<span class="nc bnc" id="L39" title="All 2 branches missed.">            .ingredientName(this.ingredient != null ? this.ingredient.getName() : null)</span>
-<span class="nc" id="L40">            .quantity(this.quantity)</span>
-<span class="nc" id="L41">            .unit(this.unit)</span>
-<span class="nc" id="L42">            .build();</span>
+<span class="fc" id="L35">        return RecipeIngredient.builder()</span>
+<span class="fc" id="L36">            .id(this.id)</span>
+<span class="fc bfc" id="L37" title="All 2 branches covered.">            .recipeId(this.recipe != null ? this.recipe.getId() : null)</span>
+<span class="fc bfc" id="L38" title="All 2 branches covered.">            .ingredientId(this.ingredient != null ? this.ingredient.getId() : null)</span>
+<span class="fc bfc" id="L39" title="All 2 branches covered.">            .ingredientName(this.ingredient != null ? this.ingredient.getName() : null)</span>
+<span class="fc" id="L40">            .quantity(this.quantity)</span>
+<span class="fc" id="L41">            .unit(this.unit)</span>
+<span class="fc" id="L42">            .build();</span>
     }
 } 
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

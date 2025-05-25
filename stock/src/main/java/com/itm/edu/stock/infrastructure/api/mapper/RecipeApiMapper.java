@@ -19,19 +19,27 @@ import java.util.ArrayList;
 public class RecipeApiMapper {
     
     public CreateRecipeCommand toCommand(CreateRecipeRequestDto request) {
+        if (request == null) {
+            return null;
+        }
         return new CreateRecipeCommand(
             request.getName(),
             request.getDescription(),
             request.getInstructions(),
             request.getPreparationTime(),
             request.getDifficulty(),
-            request.getIngredients().stream()
-                .map(this::toIngredientCommand)
-                .collect(Collectors.toList())
+            request.getIngredients() != null ?
+                request.getIngredients().stream()
+                    .map(this::toIngredientCommand)
+                    .collect(Collectors.toList()) :
+                new ArrayList<>()
         );
     }
 
     public CreateRecipeCommand toCommand(UpdateRecipeRequestDto request) {
+        if (request == null) {
+            return null;
+        }
         return new CreateRecipeCommand(
             request.getName(),
             request.getDescription(),
@@ -47,6 +55,9 @@ public class RecipeApiMapper {
     }
 
     private RecipeIngredientCommand toIngredientCommand(CreateRecipeIngredientDto dto) {
+        if (dto == null) {
+            return null;
+        }
         return new RecipeIngredientCommand(
             dto.getIngredientId(),
             dto.getQuantity(),
@@ -55,6 +66,9 @@ public class RecipeApiMapper {
     }
 
     public RecipeResponseDto toDto(RecipeResponse response) {
+        if (response == null) {
+            return null;
+        }
         var dto = new RecipeResponseDto();
         dto.setId(response.getId());
         dto.setName(response.getName());
@@ -63,17 +77,21 @@ public class RecipeApiMapper {
         dto.setPreparationTime(response.getPreparationTime());
         dto.setDifficulty(response.getDifficulty());
         dto.setCost(response.getCost());
-        dto.setIngredients(response.getIngredients().stream()
-            .map(ingredient -> new IngredientResponseDto(
-                ingredient.getIngredientId(),
-                ingredient.getIngredientName(),
-                "",  // description
-                ingredient.getQuantity(),
-                ingredient.getUnit(),
-                "",  // supplier
-                null  // minimumStock
-            ))
-            .collect(Collectors.toList()));
+        dto.setIngredients(
+            response.getIngredients() != null ?
+                response.getIngredients().stream()
+                    .map(ingredient -> new IngredientResponseDto(
+                        ingredient.getIngredientId(),
+                        ingredient.getIngredientName(),
+                        "",  // description
+                        ingredient.getQuantity(),
+                        ingredient.getUnit(),
+                        "",  // supplier
+                        null  // minimumStock
+                    ))
+                    .collect(Collectors.toList()) :
+                new ArrayList<>()
+        );
         return dto;
     }
 } 

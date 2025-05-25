@@ -78,42 +78,70 @@ class RecipeIngredientTest {
     void testWithQuantity() {
         // Arrange
         UUID id = UUID.randomUUID();
-        BigDecimal quantity = new BigDecimal("500");
-        BigDecimal newQuantity = new BigDecimal("1000");
-
-        // Act
+        BigDecimal originalQuantity = new BigDecimal("500");
+        BigDecimal newQuantity = new BigDecimal("750");
+        
         RecipeIngredient recipeIngredient = RecipeIngredient.builder()
             .id(id)
-            .quantity(quantity)
+            .quantity(originalQuantity)
             .build();
 
+        // Act
         RecipeIngredient updatedRecipeIngredient = recipeIngredient.withQuantity(newQuantity);
 
         // Assert
-        assertEquals(id, updatedRecipeIngredient.getId());
         assertEquals(newQuantity, updatedRecipeIngredient.getQuantity());
-        assertEquals(quantity, recipeIngredient.getQuantity()); // Original should be unchanged
+        assertEquals(originalQuantity, recipeIngredient.getQuantity()); // Original should be unchanged
+        assertEquals(id, updatedRecipeIngredient.getId()); // Other fields should remain the same
     }
 
     @Test
     void testWithUnit() {
         // Arrange
         UUID id = UUID.randomUUID();
-        String unit = "gramos";
+        String originalUnit = "gramos";
         String newUnit = "kilogramos";
-
-        // Act
+        
         RecipeIngredient recipeIngredient = RecipeIngredient.builder()
             .id(id)
-            .unit(unit)
+            .unit(originalUnit)
             .build();
 
+        // Act
         RecipeIngredient updatedRecipeIngredient = recipeIngredient.withUnit(newUnit);
 
         // Assert
-        assertEquals(id, updatedRecipeIngredient.getId());
         assertEquals(newUnit, updatedRecipeIngredient.getUnit());
-        assertEquals(unit, recipeIngredient.getUnit()); // Original should be unchanged
+        assertEquals(originalUnit, recipeIngredient.getUnit()); // Original should be unchanged
+        assertEquals(id, updatedRecipeIngredient.getId()); // Other fields should remain the same
+    }
+
+    @Test
+    void testWithQuantity_NullValue() {
+        // Arrange
+        RecipeIngredient recipeIngredient = RecipeIngredient.builder()
+            .quantity(new BigDecimal("500"))
+            .build();
+
+        // Act
+        RecipeIngredient updatedRecipeIngredient = recipeIngredient.withQuantity(null);
+
+        // Assert
+        assertNull(updatedRecipeIngredient.getQuantity());
+    }
+
+    @Test
+    void testWithUnit_NullValue() {
+        // Arrange
+        RecipeIngredient recipeIngredient = RecipeIngredient.builder()
+            .unit("gramos")
+            .build();
+
+        // Act
+        RecipeIngredient updatedRecipeIngredient = recipeIngredient.withUnit(null);
+
+        // Assert
+        assertNull(updatedRecipeIngredient.getUnit());
     }
 
     @Test

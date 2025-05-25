@@ -6,7 +6,7 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 @Value
-@Builder
+@Builder(toBuilder = true)
 public class RecipeIngredientDto {
     UUID id;
     UUID recipeId;

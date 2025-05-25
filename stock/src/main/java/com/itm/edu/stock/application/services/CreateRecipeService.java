@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.ArrayList;
 
 @Service
 @RequiredArgsConstructor
@@ -20,7 +22,35 @@ public class CreateRecipeService {
     private final RecipeMapper recipeMapper;
 
     public RecipeResponse createRecipe(RecipeDto recipe) {
-        recipe = recipe.toBuilder().id(UUID.randomUUID()).build();
-        return recipeRepository.save(recipe);
+        if (recipe == null) {
+            throw new NullPointerException("La receta no puede ser nula");
+        }
+        
+        // Generar un nuevo ID para la receta y sus ingredientes
+        final UUID newId = generateUniqueId(recipe.getId());
+        
+        var updatedRecipe = recipe.toBuilder()
+            .id(newId)
+            .recipeIngredients(
+                recipe.getRecipeIngredients() != null ?
+                    recipe.getRecipeIngredients().stream()
+                        .map(ri -> ri.toBuilder()
+                            .id(UUID.randomUUID())
+                            .recipeId(newId)
+                            .build())
+                        .collect(Collectors.toList()) :
+                    new ArrayList<>()
+            )
+            .build();
+            
+        return recipeRepository.save(updatedRecipe);
+    }
+    
+    private UUID generateUniqueId(UUID currentId) {
+        UUID newId;
+        do {
+            newId = UUID.randomUUID();
+        } while (currentId != null && currentId.equals(newId));
+        return newId;
     }
 }

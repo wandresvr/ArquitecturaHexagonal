@@ -19,62 +19,80 @@ import java.util.ArrayList;
 public class RecipeApiMapper {
     
     public CreateRecipeCommand toCommand(CreateRecipeRequestDto request) {
-<span class="nc" id="L22">        return new CreateRecipeCommand(</span>
-<span class="nc" id="L23">            request.getName(),</span>
-<span class="nc" id="L24">            request.getDescription(),</span>
-<span class="nc" id="L25">            request.getInstructions(),</span>
-<span class="nc" id="L26">            request.getPreparationTime(),</span>
-<span class="nc" id="L27">            request.getDifficulty(),</span>
-<span class="nc" id="L28">            request.getIngredients().stream()</span>
-<span class="nc" id="L29">                .map(this::toIngredientCommand)</span>
-<span class="nc" id="L30">                .collect(Collectors.toList())</span>
+<span class="pc bpc" id="L22" title="1 of 2 branches missed.">        if (request == null) {</span>
+<span class="nc" id="L23">            return null;</span>
+        }
+<span class="fc" id="L25">        return new CreateRecipeCommand(</span>
+<span class="fc" id="L26">            request.getName(),</span>
+<span class="fc" id="L27">            request.getDescription(),</span>
+<span class="fc" id="L28">            request.getInstructions(),</span>
+<span class="fc" id="L29">            request.getPreparationTime(),</span>
+<span class="fc" id="L30">            request.getDifficulty(),</span>
+<span class="pc bpc" id="L31" title="1 of 2 branches missed.">            request.getIngredients() != null ?</span>
+<span class="fc" id="L32">                request.getIngredients().stream()</span>
+<span class="fc" id="L33">                    .map(this::toIngredientCommand)</span>
+<span class="fc" id="L34">                    .collect(Collectors.toList()) :</span>
+<span class="pc" id="L35">                new ArrayList&lt;&gt;()</span>
         );
     }
 
     public CreateRecipeCommand toCommand(UpdateRecipeRequestDto request) {
-<span class="nc" id="L35">        return new CreateRecipeCommand(</span>
-<span class="nc" id="L36">            request.getName(),</span>
-<span class="nc" id="L37">            request.getDescription(),</span>
-<span class="nc" id="L38">            request.getInstructions(),</span>
-<span class="nc" id="L39">            request.getPreparationTime(),</span>
-<span class="nc" id="L40">            request.getDifficulty(),</span>
-<span class="nc bnc" id="L41" title="All 2 branches missed.">            request.getIngredients() != null ?</span>
-<span class="nc" id="L42">                request.getIngredients().stream()</span>
-<span class="nc" id="L43">                    .map(this::toIngredientCommand)</span>
-<span class="nc" id="L44">                    .collect(Collectors.toList()) :</span>
-<span class="nc" id="L45">                null</span>
+<span class="pc bpc" id="L40" title="1 of 2 branches missed.">        if (request == null) {</span>
+<span class="nc" id="L41">            return null;</span>
+        }
+<span class="fc" id="L43">        return new CreateRecipeCommand(</span>
+<span class="fc" id="L44">            request.getName(),</span>
+<span class="fc" id="L45">            request.getDescription(),</span>
+<span class="fc" id="L46">            request.getInstructions(),</span>
+<span class="fc" id="L47">            request.getPreparationTime(),</span>
+<span class="fc" id="L48">            request.getDifficulty(),</span>
+<span class="fc bfc" id="L49" title="All 2 branches covered.">            request.getIngredients() != null ?</span>
+<span class="fc" id="L50">                request.getIngredients().stream()</span>
+<span class="fc" id="L51">                    .map(this::toIngredientCommand)</span>
+<span class="fc" id="L52">                    .collect(Collectors.toList()) :</span>
+<span class="fc" id="L53">                null</span>
         );
     }
 
     private RecipeIngredientCommand toIngredientCommand(CreateRecipeIngredientDto dto) {
-<span class="nc" id="L50">        return new RecipeIngredientCommand(</span>
-<span class="nc" id="L51">            dto.getIngredientId(),</span>
-<span class="nc" id="L52">            dto.getQuantity(),</span>
-<span class="nc" id="L53">            dto.getUnit()</span>
+<span class="pc bpc" id="L58" title="1 of 2 branches missed.">        if (dto == null) {</span>
+<span class="nc" id="L59">            return null;</span>
+        }
+<span class="fc" id="L61">        return new RecipeIngredientCommand(</span>
+<span class="fc" id="L62">            dto.getIngredientId(),</span>
+<span class="fc" id="L63">            dto.getQuantity(),</span>
+<span class="fc" id="L64">            dto.getUnit()</span>
         );
     }
 
     public RecipeResponseDto toDto(RecipeResponse response) {
-<span class="nc" id="L58">        var dto = new RecipeResponseDto();</span>
-<span class="nc" id="L59">        dto.setId(response.getId());</span>
-<span class="nc" id="L60">        dto.setName(response.getName());</span>
-<span class="nc" id="L61">        dto.setDescription(response.getDescription());</span>
-<span class="nc" id="L62">        dto.setInstructions(response.getInstructions());</span>
-<span class="nc" id="L63">        dto.setPreparationTime(response.getPreparationTime());</span>
-<span class="nc" id="L64">        dto.setDifficulty(response.getDifficulty());</span>
-<span class="nc" id="L65">        dto.setCost(response.getCost());</span>
-<span class="nc" id="L66">        dto.setIngredients(response.getIngredients().stream()</span>
-<span class="nc" id="L67">            .map(ingredient -&gt; new IngredientResponseDto(</span>
-<span class="nc" id="L68">                ingredient.getIngredientId(),</span>
-<span class="nc" id="L69">                ingredient.getIngredientName(),</span>
-                &quot;&quot;,  // description
-<span class="nc" id="L71">                ingredient.getQuantity(),</span>
-<span class="nc" id="L72">                ingredient.getUnit(),</span>
-                &quot;&quot;,  // supplier
-                null  // minimumStock
-            ))
-<span class="nc" id="L76">            .collect(Collectors.toList()));</span>
-<span class="nc" id="L77">        return dto;</span>
+<span class="pc bpc" id="L69" title="1 of 2 branches missed.">        if (response == null) {</span>
+<span class="nc" id="L70">            return null;</span>
+        }
+<span class="fc" id="L72">        var dto = new RecipeResponseDto();</span>
+<span class="fc" id="L73">        dto.setId(response.getId());</span>
+<span class="fc" id="L74">        dto.setName(response.getName());</span>
+<span class="fc" id="L75">        dto.setDescription(response.getDescription());</span>
+<span class="fc" id="L76">        dto.setInstructions(response.getInstructions());</span>
+<span class="fc" id="L77">        dto.setPreparationTime(response.getPreparationTime());</span>
+<span class="fc" id="L78">        dto.setDifficulty(response.getDifficulty());</span>
+<span class="fc" id="L79">        dto.setCost(response.getCost());</span>
+<span class="fc" id="L80">        dto.setIngredients(</span>
+<span class="fc bfc" id="L81" title="All 2 branches covered.">            response.getIngredients() != null ?</span>
+<span class="fc" id="L82">                response.getIngredients().stream()</span>
+<span class="fc" id="L83">                    .map(ingredient -&gt; new IngredientResponseDto(</span>
+<span class="fc" id="L84">                        ingredient.getIngredientId(),</span>
+<span class="fc" id="L85">                        ingredient.getIngredientName(),</span>
+                        &quot;&quot;,  // description
+<span class="fc" id="L87">                        ingredient.getQuantity(),</span>
+<span class="fc" id="L88">                        ingredient.getUnit(),</span>
+                        &quot;&quot;,  // supplier
+                        null  // minimumStock
+                    ))
+<span class="fc" id="L92">                    .collect(Collectors.toList()) :</span>
+<span class="fc" id="L93">                new ArrayList&lt;&gt;()</span>
+        );
+<span class="fc" id="L95">        return dto;</span>
     }
 } 
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

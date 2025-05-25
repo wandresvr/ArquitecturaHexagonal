@@ -19,6 +19,9 @@ public class RecipeDomainMapper {
     private final IngredientRepository ingredientRepository;
     
     public Recipe toEntity(CreateRecipeCommand command) {
+        if (command == null) {
+            return null;
+        }
         return Recipe.builder()
                 .id(UUID.randomUUID())
                 .name(command.getName())
@@ -32,6 +35,9 @@ public class RecipeDomainMapper {
     }
 
     public RecipeResponse toResponse(Recipe recipe) {
+        if (recipe == null) {
+            return null;
+        }
         return RecipeResponse.builder()
             .id(recipe.getId())
             .name(recipe.getName())
@@ -41,14 +47,19 @@ public class RecipeDomainMapper {
             .difficulty(recipe.getDifficulty())
             .cost(recipe.getCost())
             .ingredients(
-                recipe.getRecipeIngredients().stream()
-                    .map(this::toIngredientResponse)
-                    .collect(Collectors.toList())
+                recipe.getRecipeIngredients() != null ?
+                    recipe.getRecipeIngredients().stream()
+                        .map(this::toIngredientResponse)
+                        .collect(Collectors.toList()) :
+                    new ArrayList<>()
             )
             .build();
     }
 
     private RecipeIngredientResponse toIngredientResponse(RecipeIngredient ri) {
+        if (ri == null) {
+            return null;
+        }
         return RecipeIngredientResponse.builder()
             .id(ri.getId())
             .recipeId(ri.getRecipeId())

@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -38,11 +39,11 @@ class RecipeRepositoryAdapterTest {
     @InjectMocks
     private RecipeRepositoryAdapter adapter;
 
-    private UUID testId;
+    private UUID recipeId;
     private UUID ingredientId;
-    private RecipeDto testDto;
-    private RecipeJpaEntity testEntity;
-    private RecipeResponse testResponse;
+    private RecipeDto recipeDto;
+    private RecipeJpaEntity recipeEntity;
+    private RecipeResponse recipeResponse;
     private RecipeIngredientDto testIngredientDto;
     private RecipeIngredientJpaEntity testIngredientEntity;
     private RecipeIngredientResponse testIngredientResponse;
@@ -50,27 +51,16 @@ class RecipeRepositoryAdapterTest {
 
     @BeforeEach
     void setUp() {
-        testId = UUID.randomUUID();
+        recipeId = UUID.randomUUID();
         ingredientId = UUID.randomUUID();
 
         testIngredientDto = RecipeIngredientDto.builder()
             .id(UUID.randomUUID())
-            .recipeId(testId)
+            .recipeId(recipeId)
             .ingredientId(ingredientId)
             .ingredientName("Harina")
             .quantity(new BigDecimal("500"))
             .unit("gramos")
-            .build();
-
-        testDto = RecipeDto.builder()
-            .id(testId)
-            .name("Torta de Chocolate")
-            .description("Torta esponjosa de chocolate")
-            .instructions("1. Mezclar ingredientes\n2. Hornear por 30 minutos")
-            .preparationTime(30)
-            .difficulty("Medio")
-            .cost(BigDecimal.valueOf(10.00))
-            .recipeIngredients(Arrays.asList(testIngredientDto))
             .build();
 
         testIngredientJpaEntity = IngredientJpaEntity.builder()
@@ -84,67 +74,80 @@ class RecipeRepositoryAdapterTest {
             .minimumStock(BigDecimal.ZERO)
             .build();
 
-        testEntity = RecipeJpaEntity.builder()
-            .id(testId)
-            .name(testDto.getName())
-            .description(testDto.getDescription())
-            .instructions(testDto.getInstructions())
-            .preparationTime(testDto.getPreparationTime())
-            .difficulty(testDto.getDifficulty())
-            .cost(testDto.getCost())
-            .build();
-
         testIngredientEntity = RecipeIngredientJpaEntity.builder()
             .id(testIngredientDto.getId())
-            .recipe(testEntity)
+            .recipe(recipeEntity)
             .ingredient(testIngredientJpaEntity)
             .quantity(testIngredientDto.getQuantity())
             .unit(testIngredientDto.getUnit())
             .build();
 
-        testEntity.setRecipeIngredients(Arrays.asList(testIngredientEntity));
+        recipeEntity = RecipeJpaEntity.builder()
+            .id(recipeId)
+            .name("Torta de Chocolate")
+            .description("Torta esponjosa de chocolate")
+            .instructions("1. Mezclar ingredientes\n2. Hornear por 30 minutos")
+            .preparationTime(30)
+            .difficulty("Medio")
+            .cost(BigDecimal.valueOf(10.00))
+            .recipeIngredients(Arrays.asList(testIngredientEntity))
+            .build();
+
+        testIngredientEntity.setRecipe(recipeEntity);
 
         testIngredientResponse = RecipeIngredientResponse.builder()
             .id(testIngredientDto.getId())
-            .recipeId(testId)
+            .recipeId(recipeId)
             .ingredientId(testIngredientDto.getIngredientId())
             .ingredientName(testIngredientDto.getIngredientName())
             .quantity(testIngredientDto.getQuantity())
             .unit(testIngredientDto.getUnit())
             .build();
 
-        testResponse = RecipeResponse.builder()
-            .id(testId)
-            .name(testDto.getName())
-            .description(testDto.getDescription())
-            .instructions(testDto.getInstructions())
-            .preparationTime(testDto.getPreparationTime())
-            .difficulty(testDto.getDifficulty())
-            .cost(testDto.getCost())
+        recipeDto = RecipeDto.builder()
+            .id(recipeId)
+            .name("Torta de Chocolate")
+            .description("Torta esponjosa de chocolate")
+            .instructions("1. Mezclar ingredientes\n2. Hornear por 30 minutos")
+            .preparationTime(30)
+            .difficulty("Medio")
+            .cost(BigDecimal.valueOf(10.00))
+            .recipeIngredients(Arrays.asList(testIngredientDto))
+            .build();
+
+        recipeResponse = RecipeResponse.builder()
+            .id(recipeId)
+            .name("Torta de Chocolate")
+            .description("Torta esponjosa de chocolate")
+            .instructions("1. Mezclar ingredientes\n2. Hornear por 30 minutos")
+            .preparationTime(30)
+            .difficulty("Medio")
+            .cost(BigDecimal.valueOf(10.00))
             .ingredients(Arrays.asList(testIngredientResponse))
             .build();
     }
 
     @Test
-    void save_Success() {
+    void testSave_NewRecipe_Success() {
         // Arrange
-        when(mapper.toEntity(testDto)).thenReturn(testEntity);
-        when(jpaRepository.save(testEntity)).thenReturn(testEntity);
-        when(mapper.toDto(testEntity)).thenReturn(testDto);
-        when(mapper.toResponse(testDto)).thenReturn(testResponse);
+        when(mapper.toEntity(recipeDto)).thenReturn(recipeEntity);
+        when(jpaRepository.existsById(recipeId)).thenReturn(false);
+        when(jpaRepository.save(recipeEntity)).thenReturn(recipeEntity);
+        when(mapper.toDto(recipeEntity)).thenReturn(recipeDto);
+        when(mapper.toResponse(recipeDto)).thenReturn(recipeResponse);
 
         // Act
-        RecipeResponse result = adapter.save(testDto);
+        RecipeResponse result = adapter.save(recipeDto);
 
         // Assert
         assertNotNull(result);
-        assertEquals(testId, result.getId());
-        assertEquals(testDto.getName(), result.getName());
-        assertEquals(testDto.getDescription(), result.getDescription());
-        assertEquals(testDto.getInstructions(), result.getInstructions());
-        assertEquals(testDto.getPreparationTime(), result.getPreparationTime());
-        assertEquals(testDto.getDifficulty(), result.getDifficulty());
-        assertEquals(testDto.getCost(), result.getCost());
+        assertEquals(recipeResponse.getId(), result.getId());
+        assertEquals(recipeResponse.getName(), result.getName());
+        assertEquals(recipeResponse.getDescription(), result.getDescription());
+        assertEquals(recipeResponse.getInstructions(), result.getInstructions());
+        assertEquals(recipeResponse.getPreparationTime(), result.getPreparationTime());
+        assertEquals(recipeResponse.getDifficulty(), result.getDifficulty());
+        assertEquals(recipeResponse.getCost(), result.getCost());
         assertEquals(1, result.getIngredients().size());
 
         RecipeIngredientResponse ingredient = result.getIngredients().get(0);
@@ -154,55 +157,126 @@ class RecipeRepositoryAdapterTest {
         assertEquals(testIngredientDto.getQuantity(), ingredient.getQuantity());
         assertEquals(testIngredientDto.getUnit(), ingredient.getUnit());
 
-        verify(mapper).toEntity(testDto);
-        verify(jpaRepository).save(testEntity);
-        verify(mapper).toDto(testEntity);
-        verify(mapper).toResponse(testDto);
+        verify(mapper).toEntity(recipeDto);
+        verify(jpaRepository).existsById(recipeId);
+        verify(jpaRepository).save(recipeEntity);
+        verify(mapper).toDto(recipeEntity);
+        verify(mapper).toResponse(recipeDto);
+        verify(jpaRepository, never()).findById(any());
     }
 
     @Test
-    void findById_Success() {
+    void testSave_ExistingRecipe_Success() {
         // Arrange
-        when(jpaRepository.findById(testId)).thenReturn(Optional.of(testEntity));
-        when(mapper.toDto(testEntity)).thenReturn(testDto);
-        when(mapper.toResponse(testDto)).thenReturn(testResponse);
+        when(mapper.toEntity(recipeDto)).thenReturn(recipeEntity);
+        when(jpaRepository.existsById(recipeId)).thenReturn(true);
+        when(jpaRepository.findById(recipeId)).thenReturn(Optional.of(recipeEntity));
+        when(jpaRepository.save(recipeEntity)).thenReturn(recipeEntity);
+        when(mapper.toDto(recipeEntity)).thenReturn(recipeDto);
+        when(mapper.toResponse(recipeDto)).thenReturn(recipeResponse);
 
         // Act
-        Optional<RecipeResponse> result = adapter.findById(testId);
+        RecipeResponse result = adapter.save(recipeDto);
 
         // Assert
-        assertTrue(result.isPresent());
-        assertEquals(testId, result.get().getId());
-        assertEquals(testDto.getName(), result.get().getName());
-        assertEquals(1, result.get().getIngredients().size());
+        assertNotNull(result);
+        assertEquals(recipeResponse.getId(), result.getId());
+        assertEquals(recipeResponse.getName(), result.getName());
+        assertEquals(recipeResponse.getDescription(), result.getDescription());
+        assertEquals(recipeResponse.getInstructions(), result.getInstructions());
+        assertEquals(recipeResponse.getPreparationTime(), result.getPreparationTime());
+        assertEquals(recipeResponse.getDifficulty(), result.getDifficulty());
+        assertEquals(recipeResponse.getCost(), result.getCost());
+        assertEquals(1, result.getIngredients().size());
 
-        verify(jpaRepository).findById(testId);
-        verify(mapper).toDto(testEntity);
-        verify(mapper).toResponse(testDto);
+        RecipeIngredientResponse ingredient = result.getIngredients().get(0);
+        assertEquals(testIngredientDto.getId(), ingredient.getId());
+        assertEquals(testIngredientDto.getIngredientId(), ingredient.getIngredientId());
+        assertEquals(testIngredientDto.getIngredientName(), ingredient.getIngredientName());
+        assertEquals(testIngredientDto.getQuantity(), ingredient.getQuantity());
+        assertEquals(testIngredientDto.getUnit(), ingredient.getUnit());
+
+        verify(mapper).toEntity(recipeDto);
+        verify(jpaRepository).existsById(recipeId);
+        verify(jpaRepository).findById(recipeId);
+        verify(jpaRepository).save(recipeEntity);
+        verify(mapper).toDto(recipeEntity);
+        verify(mapper).toResponse(recipeDto);
     }
 
     @Test
-    void findById_NotFound() {
+    void testSave_ExistingRecipe_NotFound() {
         // Arrange
-        when(jpaRepository.findById(testId)).thenReturn(Optional.empty());
+        when(mapper.toEntity(recipeDto)).thenReturn(recipeEntity);
+        when(jpaRepository.existsById(recipeId)).thenReturn(true);
+        when(jpaRepository.findById(recipeId)).thenReturn(Optional.empty());
 
-        // Act
-        Optional<RecipeResponse> result = adapter.findById(testId);
-
-        // Assert
-        assertFalse(result.isPresent());
-        verify(jpaRepository).findById(testId);
+        // Act & Assert
+        assertThrows(RuntimeException.class, () -> adapter.save(recipeDto));
+        
+        verify(mapper).toEntity(recipeDto);
+        verify(jpaRepository).existsById(recipeId);
+        verify(jpaRepository).findById(recipeId);
+        verify(jpaRepository, never()).save(any());
         verify(mapper, never()).toDto(any());
         verify(mapper, never()).toResponse(any());
     }
 
     @Test
-    void findAll_Success() {
+    void testFindById_Success() {
         // Arrange
-        List<RecipeJpaEntity> entities = Arrays.asList(testEntity);
+        when(jpaRepository.findById(recipeId)).thenReturn(Optional.of(recipeEntity));
+        when(mapper.toDto(recipeEntity)).thenReturn(recipeDto);
+        when(mapper.toResponse(recipeDto)).thenReturn(recipeResponse);
+
+        // Act
+        Optional<RecipeResponse> result = adapter.findById(recipeId);
+
+        // Assert
+        assertTrue(result.isPresent());
+        assertEquals(recipeResponse.getId(), result.get().getId());
+        assertEquals(recipeResponse.getName(), result.get().getName());
+        assertEquals(recipeResponse.getDescription(), result.get().getDescription());
+        assertEquals(recipeResponse.getInstructions(), result.get().getInstructions());
+        assertEquals(recipeResponse.getPreparationTime(), result.get().getPreparationTime());
+        assertEquals(recipeResponse.getDifficulty(), result.get().getDifficulty());
+        assertEquals(recipeResponse.getCost(), result.get().getCost());
+        assertEquals(1, result.get().getIngredients().size());
+
+        RecipeIngredientResponse ingredient = result.get().getIngredients().get(0);
+        assertEquals(testIngredientDto.getId(), ingredient.getId());
+        assertEquals(testIngredientDto.getIngredientId(), ingredient.getIngredientId());
+        assertEquals(testIngredientDto.getIngredientName(), ingredient.getIngredientName());
+        assertEquals(testIngredientDto.getQuantity(), ingredient.getQuantity());
+        assertEquals(testIngredientDto.getUnit(), ingredient.getUnit());
+
+        verify(jpaRepository).findById(recipeId);
+        verify(mapper).toDto(recipeEntity);
+        verify(mapper).toResponse(recipeDto);
+    }
+
+    @Test
+    void testFindById_NotFound() {
+        // Arrange
+        when(jpaRepository.findById(recipeId)).thenReturn(Optional.empty());
+
+        // Act
+        Optional<RecipeResponse> result = adapter.findById(recipeId);
+
+        // Assert
+        assertFalse(result.isPresent());
+        verify(jpaRepository).findById(recipeId);
+        verify(mapper, never()).toDto(any());
+        verify(mapper, never()).toResponse(any());
+    }
+
+    @Test
+    void testFindAll_Success() {
+        // Arrange
+        List<RecipeJpaEntity> entities = Arrays.asList(recipeEntity);
         when(jpaRepository.findAll()).thenReturn(entities);
-        when(mapper.toDto(testEntity)).thenReturn(testDto);
-        when(mapper.toResponse(testDto)).thenReturn(testResponse);
+        when(mapper.toDto(recipeEntity)).thenReturn(recipeDto);
+        when(mapper.toResponse(recipeDto)).thenReturn(recipeResponse);
 
         // Act
         List<RecipeResponse> results = adapter.findAll();
@@ -210,48 +284,50 @@ class RecipeRepositoryAdapterTest {
         // Assert
         assertNotNull(results);
         assertEquals(1, results.size());
-        assertEquals(testId, results.get(0).getId());
-        assertEquals(testDto.getName(), results.get(0).getName());
+        assertEquals(recipeResponse.getId(), results.get(0).getId());
+        assertEquals(recipeResponse.getName(), results.get(0).getName());
+        assertEquals(recipeResponse.getDescription(), results.get(0).getDescription());
+        assertEquals(recipeResponse.getInstructions(), results.get(0).getInstructions());
+        assertEquals(recipeResponse.getPreparationTime(), results.get(0).getPreparationTime());
+        assertEquals(recipeResponse.getDifficulty(), results.get(0).getDifficulty());
+        assertEquals(recipeResponse.getCost(), results.get(0).getCost());
         assertEquals(1, results.get(0).getIngredients().size());
 
+        RecipeIngredientResponse ingredient = results.get(0).getIngredients().get(0);
+        assertEquals(testIngredientDto.getId(), ingredient.getId());
+        assertEquals(testIngredientDto.getIngredientId(), ingredient.getIngredientId());
+        assertEquals(testIngredientDto.getIngredientName(), ingredient.getIngredientName());
+        assertEquals(testIngredientDto.getQuantity(), ingredient.getQuantity());
+        assertEquals(testIngredientDto.getUnit(), ingredient.getUnit());
+
         verify(jpaRepository).findAll();
-        verify(mapper).toDto(testEntity);
-        verify(mapper).toResponse(testDto);
+        verify(mapper).toDto(recipeEntity);
+        verify(mapper).toResponse(recipeDto);
     }
 
     @Test
-    void deleteById_Success() {
-        // Act
-        adapter.deleteById(testId);
-
-        // Assert
-        verify(jpaRepository).deleteById(testId);
-    }
-
-    @Test
-    void save_WithExistingRecipe() {
+    void testFindAll_EmptyList() {
         // Arrange
-        when(jpaRepository.existsById(testId)).thenReturn(true);
-        when(jpaRepository.findById(testId)).thenReturn(Optional.of(testEntity));
-        when(mapper.toEntity(testDto)).thenReturn(testEntity);
-        when(jpaRepository.save(testEntity)).thenReturn(testEntity);
-        when(mapper.toDto(testEntity)).thenReturn(testDto);
-        when(mapper.toResponse(testDto)).thenReturn(testResponse);
+        when(jpaRepository.findAll()).thenReturn(new ArrayList<>());
 
         // Act
-        RecipeResponse result = adapter.save(testDto);
+        List<RecipeResponse> results = adapter.findAll();
 
         // Assert
-        assertNotNull(result);
-        assertEquals(testId, result.getId());
-        assertEquals(testDto.getName(), result.getName());
-        assertEquals(1, result.getIngredients().size());
+        assertNotNull(results);
+        assertTrue(results.isEmpty());
+        
+        verify(jpaRepository).findAll();
+        verify(mapper, never()).toDto(any());
+        verify(mapper, never()).toResponse(any());
+    }
 
-        verify(jpaRepository).existsById(testId);
-        verify(jpaRepository).findById(testId);
-        verify(mapper).toEntity(testDto);
-        verify(jpaRepository).save(testEntity);
-        verify(mapper).toDto(testEntity);
-        verify(mapper).toResponse(testDto);
+    @Test
+    void testDeleteById() {
+        // Act
+        adapter.deleteById(recipeId);
+
+        // Assert
+        verify(jpaRepository).deleteById(recipeId);
     }
 } 
