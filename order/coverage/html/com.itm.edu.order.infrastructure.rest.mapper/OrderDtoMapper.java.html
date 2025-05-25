@@ -18,77 +18,78 @@ public class OrderDtoMapper {
     
     private final ProductDtoMapper productDtoMapper;
 
-<span class="nc" id="L21">    public OrderDtoMapper(ProductDtoMapper productDtoMapper) {</span>
-<span class="nc" id="L22">        this.productDtoMapper = productDtoMapper;</span>
-<span class="nc" id="L23">    }</span>
+<span class="fc" id="L21">    public OrderDtoMapper(ProductDtoMapper productDtoMapper) {</span>
+<span class="fc" id="L22">        this.productDtoMapper = productDtoMapper;</span>
+<span class="fc" id="L23">    }</span>
     
     public OrderDto toDto(Order domain) {
-<span class="nc bnc" id="L26" title="All 2 branches missed.">        if (domain == null) return null;</span>
+<span class="fc bfc" id="L26" title="All 2 branches covered.">        if (domain == null) return null;</span>
         
-<span class="nc" id="L28">        return OrderDto.builder()</span>
-<span class="nc" id="L29">                .orderId(domain.getOrderId())</span>
-<span class="nc" id="L30">                .client(toClientDto(domain.getClient()))</span>
-<span class="nc" id="L31">                .items(domain.getProducts().stream()</span>
-<span class="nc" id="L32">                        .map(this::toOrderItemDto)</span>
-<span class="nc" id="L33">                        .collect(Collectors.toList()))</span>
-<span class="nc" id="L34">                .shippingAddress(toAddressDto(domain.getDeliveryAddress()))</span>
-<span class="nc" id="L35">                .total(toMoneyDto(domain.getTotal()))</span>
-<span class="nc" id="L36">                .orderDate(domain.getOrderDate())</span>
-<span class="nc" id="L37">                .orderStatus(domain.getOrderStatus())</span>
-<span class="nc" id="L38">                .build();</span>
+<span class="fc" id="L28">        return OrderDto.builder()</span>
+<span class="fc" id="L29">                .orderId(domain.getOrderId())</span>
+<span class="fc" id="L30">                .client(toClientDto(domain.getClient()))</span>
+<span class="pc bpc" id="L31" title="1 of 2 branches missed.">                .items(domain.getProducts() != null ? domain.getProducts().stream()</span>
+<span class="fc" id="L32">                        .map(this::toOrderItemDto)</span>
+<span class="pc" id="L33">                        .collect(Collectors.toList()) : null)</span>
+<span class="fc" id="L34">                .shippingAddress(toAddressDto(domain.getDeliveryAddress()))</span>
+<span class="fc" id="L35">                .total(toMoneyDto(domain.getTotal()))</span>
+<span class="fc" id="L36">                .orderDate(domain.getOrderDate())</span>
+<span class="fc" id="L37">                .orderStatus(domain.getOrderStatus())</span>
+<span class="fc" id="L38">                .build();</span>
     }
 
     private OrderDto.ClientDto toClientDto(Client domain) {
-<span class="nc bnc" id="L42" title="All 2 branches missed.">        if (domain == null) return null;</span>
+<span class="fc bfc" id="L42" title="All 2 branches covered.">        if (domain == null) return null;</span>
         
-<span class="nc" id="L44">        return OrderDto.ClientDto.builder()</span>
-<span class="nc" id="L45">                .id(domain.getId())</span>
-<span class="nc" id="L46">                .name(domain.getName())</span>
-<span class="nc" id="L47">                .email(domain.getEmail())</span>
-<span class="nc" id="L48">                .phone(domain.getPhone())</span>
-<span class="nc" id="L49">                .build();</span>
+<span class="fc" id="L44">        return OrderDto.ClientDto.builder()</span>
+<span class="fc" id="L45">                .id(domain.getId())</span>
+<span class="fc" id="L46">                .name(domain.getName())</span>
+<span class="fc" id="L47">                .email(domain.getEmail())</span>
+<span class="fc" id="L48">                .phone(domain.getPhone())</span>
+<span class="fc" id="L49">                .build();</span>
     }
 
     private OrderDto.OrderItemDto toOrderItemDto(OrderItem domain) {
-<span class="nc bnc" id="L53" title="All 2 branches missed.">        if (domain == null) return null;</span>
+<span class="pc bpc" id="L53" title="1 of 2 branches missed.">        if (domain == null) return null;</span>
         
-<span class="nc" id="L55">        return OrderDto.OrderItemDto.builder()</span>
-<span class="nc" id="L56">                .product(toProductDto(domain.getProduct()))</span>
-<span class="nc" id="L57">                .quantity(domain.getQuantity())</span>
-<span class="nc" id="L58">                .build();</span>
+<span class="fc" id="L55">        return OrderDto.OrderItemDto.builder()</span>
+<span class="fc" id="L56">                .product(toProductDto(domain.getProduct()))</span>
+<span class="fc" id="L57">                .quantity(domain.getQuantity())</span>
+<span class="fc" id="L58">                .build();</span>
     }
 
     private OrderDto.ProductDto toProductDto(Product domain) {
-<span class="nc bnc" id="L62" title="All 2 branches missed.">        if (domain == null) return null;</span>
+<span class="pc bpc" id="L62" title="1 of 2 branches missed.">        if (domain == null) return null;</span>
         
-<span class="nc" id="L64">        return OrderDto.ProductDto.builder()</span>
-<span class="nc" id="L65">                .id(domain.getId())</span>
-<span class="nc" id="L66">                .name(domain.getName())</span>
-<span class="nc" id="L67">                .description(domain.getDescription())</span>
-<span class="nc" id="L68">                .price(domain.getPrice())</span>
-<span class="nc" id="L69">                .stock(domain.getStock())</span>
-<span class="nc" id="L70">                .build();</span>
+<span class="fc" id="L64">        ProductDto productDto = productDtoMapper.toDto(domain);</span>
+<span class="fc" id="L65">        return OrderDto.ProductDto.builder()</span>
+<span class="fc" id="L66">                .id(productDto.getId())</span>
+<span class="fc" id="L67">                .name(productDto.getName())</span>
+<span class="fc" id="L68">                .description(productDto.getDescription())</span>
+<span class="fc" id="L69">                .price(productDto.getPrice())</span>
+<span class="fc" id="L70">                .stock(productDto.getStock())</span>
+<span class="fc" id="L71">                .build();</span>
     }
 
     private OrderDto.AddressDto toAddressDto(AddressShipping domain) {
-<span class="nc bnc" id="L74" title="All 2 branches missed.">        if (domain == null) return null;</span>
+<span class="fc bfc" id="L75" title="All 2 branches covered.">        if (domain == null) return null;</span>
         
-<span class="nc" id="L76">        return OrderDto.AddressDto.builder()</span>
-<span class="nc" id="L77">                .street(domain.getStreet())</span>
-<span class="nc" id="L78">                .city(domain.getCity())</span>
-<span class="nc" id="L79">                .state(domain.getState())</span>
-<span class="nc" id="L80">                .zipCode(domain.getZipCode())</span>
-<span class="nc" id="L81">                .country(domain.getCountry())</span>
-<span class="nc" id="L82">                .build();</span>
+<span class="fc" id="L77">        return OrderDto.AddressDto.builder()</span>
+<span class="fc" id="L78">                .street(domain.getStreet())</span>
+<span class="fc" id="L79">                .city(domain.getCity())</span>
+<span class="fc" id="L80">                .state(domain.getState())</span>
+<span class="fc" id="L81">                .zipCode(domain.getZipCode())</span>
+<span class="fc" id="L82">                .country(domain.getCountry())</span>
+<span class="fc" id="L83">                .build();</span>
     }
 
     private OrderDto.MoneyDto toMoneyDto(OrderTotalValue domain) {
-<span class="nc bnc" id="L86" title="All 2 branches missed.">        if (domain == null) return null;</span>
+<span class="pc bpc" id="L87" title="1 of 2 branches missed.">        if (domain == null) return null;</span>
         
-<span class="nc" id="L88">        return OrderDto.MoneyDto.builder()</span>
-<span class="nc" id="L89">                .amount(domain.getAmount())</span>
-<span class="nc" id="L90">                .currency(domain.getCurrency())</span>
-<span class="nc" id="L91">                .build();</span>
+<span class="fc" id="L89">        return OrderDto.MoneyDto.builder()</span>
+<span class="fc" id="L90">                .amount(domain.getAmount())</span>
+<span class="fc" id="L91">                .currency(domain.getCurrency())</span>
+<span class="fc" id="L92">                .build();</span>
     }
 } 
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

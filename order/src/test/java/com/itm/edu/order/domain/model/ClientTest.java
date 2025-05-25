@@ -35,13 +35,15 @@ class ClientTest {
         assertEquals(phone, client.getPhone());
     }
 
-    @Test
-    void shouldThrowExceptionWhenNameIsEmpty() {
-        // Act & Assert
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = {" ", "  "})
+    void shouldThrowExceptionWhenNameIsInvalid(String name) {
+        // Arrange & Act & Assert
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
             Client.builder()
                     .id(UUID.randomUUID())
-                    .name("")
+                    .name(name)
                     .email("john@example.com")
                     .phone("1234567890")
                     .build();
@@ -50,14 +52,16 @@ class ClientTest {
         assertEquals("El nombre del cliente no puede estar vacío", exception.getMessage());
     }
 
-    @Test
-    void shouldThrowExceptionWhenEmailIsEmpty() {
-        // Act & Assert
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = {" ", "  "})
+    void shouldThrowExceptionWhenEmailIsInvalid(String email) {
+        // Arrange & Act & Assert
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
             Client.builder()
                     .id(UUID.randomUUID())
                     .name("John Doe")
-                    .email("")
+                    .email(email)
                     .phone("1234567890")
                     .build();
         });
@@ -65,81 +69,40 @@ class ClientTest {
         assertEquals("El email del cliente no puede estar vacío", exception.getMessage());
     }
 
-    @Test
-    void shouldThrowExceptionWhenPhoneIsEmpty() {
-        // Act & Assert
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = {" ", "  "})
+    void shouldThrowExceptionWhenPhoneIsInvalid(String phone) {
+        // Arrange & Act & Assert
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
             Client.builder()
                     .id(UUID.randomUUID())
                     .name("John Doe")
                     .email("john@example.com")
-                    .phone("")
+                    .phone(phone)
                     .build();
         });
 
         assertEquals("El teléfono del cliente no puede estar vacío", exception.getMessage());
     }
 
-    @ParameterizedTest
-    @NullAndEmptySource
-    @ValueSource(strings = {" ", "  "})
-    void testClientWithInvalidName(String invalidName) {
-        // Act & Assert
-        assertThrows(IllegalArgumentException.class, () -> {
-            Client.builder()
-                    .name(invalidName)
-                    .email("john.doe@example.com")
-                    .phone("1234567890")
-                    .build();
-        });
-    }
-
-    @ParameterizedTest
-    @NullAndEmptySource
-    @ValueSource(strings = {" ", "  "})
-    void testClientWithInvalidEmail(String invalidEmail) {
-        // Act & Assert
-        assertThrows(IllegalArgumentException.class, () -> {
-            Client.builder()
-                    .name("John Doe")
-                    .email(invalidEmail)
-                    .phone("1234567890")
-                    .build();
-        });
-    }
-
-    @ParameterizedTest
-    @NullAndEmptySource
-    @ValueSource(strings = {" ", "  "})
-    void testClientWithInvalidPhone(String invalidPhone) {
-        // Act & Assert
-        assertThrows(IllegalArgumentException.class, () -> {
-            Client.builder()
-                    .name("John Doe")
-                    .email("john.doe@example.com")
-                    .phone(invalidPhone)
-                    .build();
-        });
-    }
-
     @Test
-    void testClientBuilder() {
+    void shouldCreateClientWithoutId() {
         // Arrange
-        UUID id = UUID.randomUUID();
         String name = "John Doe";
-        String email = "john.doe@example.com";
+        String email = "john@example.com";
         String phone = "1234567890";
-        
+
         // Act
         Client client = Client.builder()
-                .id(id)
                 .name(name)
                 .email(email)
                 .phone(phone)
                 .build();
-        
+
         // Assert
-        assertEquals(id, client.getId());
+        assertNotNull(client);
+        assertNull(client.getId());
         assertEquals(name, client.getName());
         assertEquals(email, client.getEmail());
         assertEquals(phone, client.getPhone());

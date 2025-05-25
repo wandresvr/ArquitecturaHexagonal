@@ -10,18 +10,18 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Component
-<span class="nc" id="L13">@RequiredArgsConstructor</span>
+<span class="fc" id="L13">@RequiredArgsConstructor</span>
 public class ClientRepositoryAdapter implements ClientRepositoryPort {
     private final JpaClientRepository clientRepository;
 
     @Override
     public Client save(Client client) {
-<span class="nc" id="L19">        return clientRepository.save(client);</span>
+<span class="fc" id="L19">        return clientRepository.save(client);</span>
     }
 
     @Override
     public Optional&lt;Client&gt; findById(UUID id) {
-<span class="nc" id="L24">        return clientRepository.findById(id);</span>
+<span class="fc" id="L24">        return clientRepository.findById(id);</span>
     }
 } 
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

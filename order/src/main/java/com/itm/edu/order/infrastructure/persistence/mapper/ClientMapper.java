@@ -10,6 +10,7 @@ public class ClientMapper {
         if (client == null) return null;
         
         return ClientEntity.builder()
+                .id(client.getId())
                 .name(client.getName())
                 .email(client.getEmail())
                 .phone(client.getPhone())
@@ -19,15 +20,10 @@ public class ClientMapper {
     public Client toDomain(ClientEntity entity) {
         if (entity == null) return null;
         
-        // Aseguramos que los campos no sean nulos
+        // Aseguramos que los campos no sean nulos y limpiamos espacios
         String name = entity.getName() != null ? entity.getName().trim() : "";
         String email = entity.getEmail() != null ? entity.getEmail().trim() : "";
         String phone = entity.getPhone() != null ? entity.getPhone().trim() : "";
-        
-        // Si todos los campos están vacíos, probablemente es un registro inválido
-        if (name.isEmpty() && email.isEmpty() && phone.isEmpty()) {
-            return null;
-        }
         
         // Asignamos valores por defecto si están vacíos
         name = name.isEmpty() ? "Cliente sin nombre" : name;
