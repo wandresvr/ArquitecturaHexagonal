@@ -14,12 +14,12 @@ import java.util.UUID;
 @Getter
 <span class="nc" id="L15">@Setter</span>
 <span class="fc" id="L16">@NoArgsConstructor</span>
-<span class="nc" id="L17">@AllArgsConstructor</span>
-<span class="pc bnc" id="L18" title="All 2 branches missed.">@Builder</span>
+<span class="fc" id="L17">@AllArgsConstructor</span>
+<span class="pc bpc" id="L18" title="1 of 2 branches missed.">@Builder</span>
 public class RecipeJpaEntity extends BaseJpaEntity&lt;Recipe&gt; {
     @Id
     @Column(updatable = false)
-<span class="nc" id="L22">    private UUID id;</span>
+<span class="fc" id="L22">    private UUID id;</span>
 
     @Column(nullable = false)
 <span class="nc" id="L25">    private String name;</span>
@@ -41,15 +41,15 @@ public class RecipeJpaEntity extends BaseJpaEntity&lt;Recipe&gt; {
 
     @OneToMany(mappedBy = &quot;recipe&quot;, cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-<span class="nc" id="L44">    private List&lt;RecipeIngredientJpaEntity&gt; recipeIngredients = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L44">    private List&lt;RecipeIngredientJpaEntity&gt; recipeIngredients = new ArrayList&lt;&gt;();</span>
 
     public void setRecipeIngredients(List&lt;RecipeIngredientJpaEntity&gt; recipeIngredients) {
-<span class="nc" id="L47">        this.recipeIngredients.clear();</span>
-<span class="nc bnc" id="L48" title="All 2 branches missed.">        if (recipeIngredients != null) {</span>
-<span class="nc" id="L49">            recipeIngredients.forEach(ri -&gt; ri.setRecipe(this));</span>
-<span class="nc" id="L50">            this.recipeIngredients.addAll(recipeIngredients);</span>
+<span class="fc" id="L47">        this.recipeIngredients.clear();</span>
+<span class="pc bpc" id="L48" title="1 of 2 branches missed.">        if (recipeIngredients != null) {</span>
+<span class="fc" id="L49">            recipeIngredients.forEach(ri -&gt; ri.setRecipe(this));</span>
+<span class="fc" id="L50">            this.recipeIngredients.addAll(recipeIngredients);</span>
         }
-<span class="nc" id="L52">    }</span>
+<span class="fc" id="L52">    }</span>
 
     @Override
     public Recipe toDomain() {

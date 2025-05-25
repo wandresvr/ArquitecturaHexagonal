@@ -12,6 +12,9 @@ import lombok.RequiredArgsConstructor;
 public class IngredientPersistenceMapper {
     
     public IngredientDto toDto(IngredientJpaEntity entity) {
+        if (entity == null) {
+            return null;
+        }
         return IngredientDto.builder()
                 .id(entity.getId())
                 .name(entity.getName())
@@ -25,6 +28,9 @@ public class IngredientPersistenceMapper {
     }
 
     public IngredientJpaEntity toEntity(IngredientDto dto) {
+        if (dto == null) {
+            return null;
+        }
         return IngredientJpaEntity.builder()
                 .id(dto.getId())
                 .name(dto.getName())
@@ -38,6 +44,9 @@ public class IngredientPersistenceMapper {
     }
 
     public IngredientResponse toResponse(IngredientDto dto) {
+        if (dto == null) {
+            return null;
+        }
         return IngredientResponse.builder()
             .id(dto.getId())
             .name(dto.getName())
@@ -51,6 +60,9 @@ public class IngredientPersistenceMapper {
     }
 
     public IngredientDto fromCommand(CreateIngredientCommand command) {
+        if (command == null) {
+            return null;
+        }
         return IngredientDto.builder()
                 .name(command.getName())
                 .description(command.getDescription())
@@ -63,6 +75,9 @@ public class IngredientPersistenceMapper {
     }
 
     public IngredientJpaEntity fromResponse(IngredientResponse response) {
+        if (response == null) {
+            return null;
+        }
         return IngredientJpaEntity.builder()
             .id(response.getId())
             .name(response.getName())

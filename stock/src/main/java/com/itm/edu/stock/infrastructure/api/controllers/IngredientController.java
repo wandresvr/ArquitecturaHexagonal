@@ -43,7 +43,7 @@ public class IngredientController {
             content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping
-    public ResponseEntity<IngredientResponseDto> createIngredient(@RequestBody CreateIngredientRequestDto request) {
+    public ResponseEntity<IngredientResponseDto> createIngredient(@Valid @RequestBody CreateIngredientRequestDto request) {
         var command = ingredientMapper.toCommand(request);
         var response = createIngredientUseCase.createIngredient(command);
         return ResponseEntity.ok(ingredientMapper.toResponseDto(response));
