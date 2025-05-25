@@ -5,6 +5,7 @@ import com.itm.edu.stock.application.ports.input.RecipeUseCase;
 import com.itm.edu.stock.infrastructure.api.dto.CreateRecipeRequestDto;
 import com.itm.edu.stock.infrastructure.api.dto.RecipeResponseDto;
 import com.itm.edu.stock.infrastructure.api.dto.CreateRecipeIngredientDto;
+import com.itm.edu.stock.infrastructure.api.dto.UpdateRecipeRequestDto;
 import com.itm.edu.stock.infrastructure.api.mapper.RecipeApiMapper;
 import com.itm.edu.stock.application.dto.CreateRecipeCommand;
 import com.itm.edu.stock.application.dto.RecipeResponse;
@@ -194,11 +195,113 @@ class RecipeControllerTest {
     }
 
     @Test
+    void updateRecipe_NotFound() throws Exception {
+        when(recipeUseCase.updateRecipe(eq(testId), any()))
+                .thenThrow(new BusinessException("Recipe not found"));
+
+        mockMvc.perform(put("/api/v1/recipes/{id}", testId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(validRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Recipe not found"));
+    }
+
+    @Test
+    void updateRecipe_InvalidRequest() throws Exception {
+        // Arrange
+        UpdateRecipeRequestDto invalidRequest = new UpdateRecipeRequestDto();
+        // No establecemos ningún campo para que sea inválido
+
+        // Act & Assert
+        mockMvc.perform(put("/api/v1/recipes/{id}", testId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(invalidRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.message").exists());
+
+        verify(recipeUseCase, never()).updateRecipe(any(), any());
+    }
+
+    @Test
+    void updateRecipe_WithInvalidPreparationTime() throws Exception {
+        // Arrange
+        UpdateRecipeRequestDto requestWithInvalidTime = new UpdateRecipeRequestDto();
+        requestWithInvalidTime.setName("Torta de Chocolate");
+        requestWithInvalidTime.setDescription("Torta esponjosa de chocolate");
+        requestWithInvalidTime.setInstructions("1. Mezclar ingredientes\n2. Hornear por 30 minutos");
+        requestWithInvalidTime.setPreparationTime(0); // Tiempo inválido
+        requestWithInvalidTime.setDifficulty("Medio");
+        requestWithInvalidTime.setIngredients(validRequest.getIngredients());
+
+        // Act & Assert
+        mockMvc.perform(put("/api/v1/recipes/{id}", testId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(requestWithInvalidTime)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").exists());
+
+        verify(recipeUseCase, never()).updateRecipe(any(), any());
+    }
+
+    @Test
+    void updateRecipe_WithEmptyName() throws Exception {
+        // Arrange
+        UpdateRecipeRequestDto requestWithEmptyName = new UpdateRecipeRequestDto();
+        requestWithEmptyName.setName(""); // Nombre vacío
+        requestWithEmptyName.setDescription("Torta esponjosa de chocolate");
+        requestWithEmptyName.setInstructions("1. Mezclar ingredientes\n2. Hornear por 30 minutos");
+        requestWithEmptyName.setPreparationTime(30);
+        requestWithEmptyName.setDifficulty("Medio");
+        requestWithEmptyName.setIngredients(validRequest.getIngredients());
+
+        // Act & Assert
+        mockMvc.perform(put("/api/v1/recipes/{id}", testId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(requestWithEmptyName)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").exists());
+
+        verify(recipeUseCase, never()).updateRecipe(any(), any());
+    }
+
+    @Test
+    void updateRecipe_WithEmptyInstructions() throws Exception {
+        // Arrange
+        UpdateRecipeRequestDto requestWithEmptyInstructions = new UpdateRecipeRequestDto();
+        requestWithEmptyInstructions.setName("Torta de Chocolate");
+        requestWithEmptyInstructions.setDescription("Torta esponjosa de chocolate");
+        requestWithEmptyInstructions.setInstructions(""); // Instrucciones vacías
+        requestWithEmptyInstructions.setPreparationTime(30);
+        requestWithEmptyInstructions.setDifficulty("Medio");
+        requestWithEmptyInstructions.setIngredients(validRequest.getIngredients());
+
+        // Act & Assert
+        mockMvc.perform(put("/api/v1/recipes/{id}", testId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(requestWithEmptyInstructions)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").exists());
+
+        verify(recipeUseCase, never()).updateRecipe(any(), any());
+    }
+
+    @Test
     void deleteRecipe_Success() throws Exception {
         mockMvc.perform(delete("/api/v1/recipes/{id}", testId))
                 .andExpect(status().isNoContent());
 
         verify(recipeUseCase).deleteRecipe(testId);
+    }
+
+    @Test
+    void deleteRecipe_NotFound() throws Exception {
+        doThrow(new BusinessException("Recipe not found"))
+            .when(recipeUseCase).deleteRecipe(testId);
+
+        mockMvc.perform(delete("/api/v1/recipes/{id}", testId))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Recipe not found"));
     }
 
     @Test
@@ -212,5 +315,77 @@ class RecipeControllerTest {
                 .andExpect(jsonPath("$[0].name").value(validRequest.getName()));
 
         verify(recipeUseCase).getRecipesByDifficulty("Medio");
+    }
+
+    @Test
+    void getRecipesByDifficulty_EmptyList() throws Exception {
+        when(recipeUseCase.getRecipesByDifficulty("Difícil"))
+                .thenReturn(Arrays.asList());
+
+        mockMvc.perform(get("/api/v1/recipes/difficulty/{difficulty}", "Difícil"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$").isEmpty());
+
+        verify(recipeUseCase).getRecipesByDifficulty("Difícil");
+    }
+
+    @Test
+    void createRecipe_WithInvalidIngredient() throws Exception {
+        // Arrange
+        when(recipeUseCase.createRecipe(any()))
+            .thenThrow(new BusinessException("Los ingredientes especificados no existen"));
+
+        // Act & Assert
+        mockMvc.perform(post("/api/v1/recipes")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(validRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Los ingredientes especificados no existen"));
+    }
+
+    @Test
+    void createRecipe_WithEmptyIngredientsList() throws Exception {
+        // Arrange
+        CreateRecipeRequestDto requestWithNoIngredients = new CreateRecipeRequestDto();
+        requestWithNoIngredients.setName("Torta de Chocolate");
+        requestWithNoIngredients.setDescription("Torta esponjosa de chocolate");
+        requestWithNoIngredients.setInstructions("1. Mezclar ingredientes\n2. Hornear por 30 minutos");
+        requestWithNoIngredients.setPreparationTime(30);
+        requestWithNoIngredients.setDifficulty("Medio");
+        requestWithNoIngredients.setIngredients(new ArrayList<>());
+
+        // Act & Assert
+        mockMvc.perform(post("/api/v1/recipes")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(requestWithNoIngredients)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").exists());
+    }
+
+    @Test
+    void updateRecipe_WithInvalidIngredient() throws Exception {
+        // Arrange
+        when(recipeUseCase.updateRecipe(eq(testId), any()))
+            .thenThrow(new BusinessException("Los ingredientes especificados no existen"));
+
+        // Act & Assert
+        mockMvc.perform(put("/api/v1/recipes/{id}", testId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(validRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Los ingredientes especificados no existen"));
+    }
+
+    @Test
+    void getRecipesByDifficulty_InvalidDifficulty() throws Exception {
+        // Arrange
+        when(recipeUseCase.getRecipesByDifficulty("Imposible"))
+            .thenThrow(new BusinessException("Dificultad no válida"));
+
+        // Act & Assert
+        mockMvc.perform(get("/api/v1/recipes/difficulty/{difficulty}", "Imposible"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Dificultad no válida"));
     }
 } 

@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -180,11 +181,46 @@ class IngredientControllerTest {
     }
 
     @Test
+    void updateIngredient_NotFound() throws Exception {
+        when(createIngredientUseCase.updateIngredient(eq(testId), any()))
+                .thenThrow(new BusinessException("Ingredient not found"));
+
+        mockMvc.perform(put("/api/v1/ingredients/{id}", testId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(validRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Ingredient not found"));
+    }
+
+    @Test
+    void updateIngredient_InvalidRequest() throws Exception {
+        CreateIngredientRequestDto invalidRequest = new CreateIngredientRequestDto();
+
+        mockMvc.perform(put("/api/v1/ingredients/{id}", testId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(invalidRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").exists());
+
+        verify(createIngredientUseCase, never()).updateIngredient(any(), any());
+    }
+
+    @Test
     void deleteIngredient_Success() throws Exception {
         mockMvc.perform(delete("/api/v1/ingredients/{id}", testId))
                 .andExpect(status().isNoContent());
 
         verify(createIngredientUseCase).deleteIngredient(testId);
+    }
+
+    @Test
+    void deleteIngredient_NotFound() throws Exception {
+        doThrow(new BusinessException("Ingredient not found"))
+            .when(createIngredientUseCase).deleteIngredient(testId);
+
+        mockMvc.perform(delete("/api/v1/ingredients/{id}", testId))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Ingredient not found"));
     }
 
     @Test
@@ -198,5 +234,87 @@ class IngredientControllerTest {
                 .andExpect(jsonPath("$[0].name").value(validRequest.getName()));
 
         verify(getIngredientUseCase).getIngredientsBySupplier("Proveedor A");
+    }
+
+    @Test
+    void getIngredientsBySupplier_EmptyList() throws Exception {
+        when(getIngredientUseCase.getIngredientsBySupplier("Proveedor Inexistente"))
+                .thenReturn(Arrays.asList());
+
+        mockMvc.perform(get("/api/v1/ingredients/supplier/{supplier}", "Proveedor Inexistente"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$").isEmpty());
+
+        verify(getIngredientUseCase).getIngredientsBySupplier("Proveedor Inexistente");
+    }
+
+    @Test
+    void createIngredient_WithInvalidPrice() throws Exception {
+        // Arrange
+        CreateIngredientRequestDto requestWithInvalidPrice = new CreateIngredientRequestDto();
+        requestWithInvalidPrice.setName("Harina");
+        requestWithInvalidPrice.setDescription("Harina de trigo");
+        requestWithInvalidPrice.setQuantity(new BigDecimal("1000"));
+        requestWithInvalidPrice.setUnit("gramos");
+        requestWithInvalidPrice.setPrice(new BigDecimal("-1.00")); // Precio negativo
+        requestWithInvalidPrice.setSupplier("Proveedor A");
+
+        // Act & Assert
+        mockMvc.perform(post("/api/v1/ingredients")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(requestWithInvalidPrice)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").exists());
+    }
+
+    @Test
+    void createIngredient_WithInvalidQuantity() throws Exception {
+        // Arrange
+        CreateIngredientRequestDto requestWithInvalidQuantity = new CreateIngredientRequestDto();
+        requestWithInvalidQuantity.setName("Harina");
+        requestWithInvalidQuantity.setDescription("Harina de trigo");
+        requestWithInvalidQuantity.setQuantity(new BigDecimal("-1000")); // Cantidad negativa
+        requestWithInvalidQuantity.setUnit("gramos");
+        requestWithInvalidQuantity.setPrice(new BigDecimal("2.50"));
+        requestWithInvalidQuantity.setSupplier("Proveedor A");
+
+        // Act & Assert
+        mockMvc.perform(post("/api/v1/ingredients")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(requestWithInvalidQuantity)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").exists());
+    }
+
+    @Test
+    void updateIngredient_WithInvalidPrice() throws Exception {
+        // Arrange
+        CreateIngredientRequestDto requestWithInvalidPrice = new CreateIngredientRequestDto();
+        requestWithInvalidPrice.setName("Harina");
+        requestWithInvalidPrice.setDescription("Harina de trigo");
+        requestWithInvalidPrice.setQuantity(new BigDecimal("1000"));
+        requestWithInvalidPrice.setUnit("gramos");
+        requestWithInvalidPrice.setPrice(new BigDecimal("-1.00")); // Precio negativo
+        requestWithInvalidPrice.setSupplier("Proveedor A");
+
+        // Act & Assert
+        mockMvc.perform(put("/api/v1/ingredients/{id}", testId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(requestWithInvalidPrice)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").exists());
+    }
+
+    @Test
+    void getIngredientsBySupplier_WithInvalidSupplier() throws Exception {
+        // Arrange
+        when(getIngredientUseCase.getIngredientsBySupplier("Proveedor Inválido"))
+            .thenThrow(new BusinessException("Proveedor no válido"));
+
+        // Act & Assert
+        mockMvc.perform(get("/api/v1/ingredients/supplier/{supplier}", "Proveedor Inválido"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Proveedor no válido"));
     }
 } 
