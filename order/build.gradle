@@ -59,7 +59,7 @@ dependencies {
 	testImplementation 'org.mockito:mockito-core:5.3.1'
 	testImplementation 'org.mockito:mockito-junit-jupiter:5.3.1'
 
-	implementation('com.github.wandresvr:ArquitecturaHexagonal:main-SNAPSHOT') {
+	implementation('com.github.wandresvr:ArquitecturaHexagonal:v1.0.4') {
 		changing = true
 	}
 

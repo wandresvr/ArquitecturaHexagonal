@@ -11,31 +11,31 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.UUID;
 
 @Service
-<span class="nc" id="L14">@RequiredArgsConstructor</span>
+<span class="fc" id="L14">@RequiredArgsConstructor</span>
 public class UpdateOrderService implements UpdateOrderUseCase {
     private final OrderRepositoryPort orderRepository;
 
     @Override
     @Transactional
     public Order updateOrder(UUID orderId, Order orderDetails) {
-<span class="nc" id="L21">        Order existingOrder = orderRepository.findById(orderId)</span>
-<span class="nc" id="L22">                .orElseThrow(() -&gt; new BusinessException(&quot;Orden no encontrada con ID: &quot; + orderId));</span>
+<span class="fc" id="L21">        Order existingOrder = orderRepository.findById(orderId)</span>
+<span class="fc" id="L22">                .orElseThrow(() -&gt; new BusinessException(&quot;Orden no encontrada con ID: &quot; + orderId));</span>
 
-<span class="nc" id="L24">        Order updatedOrder = existingOrder;</span>
+<span class="fc" id="L24">        Order updatedOrder = existingOrder;</span>
         
-<span class="nc bnc" id="L26" title="All 2 branches missed.">        if (orderDetails.getOrderStatus() != null) {</span>
-<span class="nc" id="L27">            updatedOrder = updatedOrder.withUpdatedStatus(orderDetails.getOrderStatus());</span>
+<span class="fc bfc" id="L26" title="All 2 branches covered.">        if (orderDetails.getOrderStatus() != null) {</span>
+<span class="fc" id="L27">            updatedOrder = updatedOrder.withUpdatedStatus(orderDetails.getOrderStatus());</span>
         }
         
-<span class="nc bnc" id="L30" title="All 2 branches missed.">        if (orderDetails.getClient() != null) {</span>
-<span class="nc" id="L31">            updatedOrder = updatedOrder.withUpdatedClient(orderDetails.getClient());</span>
+<span class="fc bfc" id="L30" title="All 2 branches covered.">        if (orderDetails.getClient() != null) {</span>
+<span class="fc" id="L31">            updatedOrder = updatedOrder.withUpdatedClient(orderDetails.getClient());</span>
         }
 
-<span class="nc bnc" id="L34" title="All 2 branches missed.">        if (orderDetails.getDeliveryAddress() != null) {</span>
-<span class="nc" id="L35">            updatedOrder = updatedOrder.withUpdatedDeliveryAddress(orderDetails.getDeliveryAddress());</span>
+<span class="fc bfc" id="L34" title="All 2 branches covered.">        if (orderDetails.getDeliveryAddress() != null) {</span>
+<span class="fc" id="L35">            updatedOrder = updatedOrder.withUpdatedDeliveryAddress(orderDetails.getDeliveryAddress());</span>
         }
 
-<span class="nc" id="L38">        return orderRepository.save(updatedOrder);</span>
+<span class="fc" id="L38">        return orderRepository.save(updatedOrder);</span>
     }
 } 
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

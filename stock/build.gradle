@@ -62,7 +62,7 @@ dependencies {
 	testImplementation 'org.springframework.amqp:spring-rabbit-test'
 
 	// Dto para sincronizar microservicios
-	implementation('com.github.wandresvr:ArquitecturaHexagonal:main-SNAPSHOT') {
+	implementation('com.github.wandresvr:ArquitecturaHexagonal:v1.0.4') {
 		changing = true
 	}
 

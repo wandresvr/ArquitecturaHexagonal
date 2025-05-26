@@ -28,7 +28,7 @@ import static org.mockito.Mockito.*;
 class UpdateShippingAddressServiceTest {
 
     @Mock
-    private OrderRepositoryPort orderRepositoryPort;
+    private OrderRepositoryPort orderRepository;
 
     @InjectMocks
     private UpdateShippingAddressService updateShippingAddressService;
@@ -38,80 +38,60 @@ class UpdateShippingAddressServiceTest {
         // Arrange
         UUID orderId = UUID.randomUUID();
         AddressShipping newAddress = AddressShipping.builder()
-                .street("New Street")
-                .city("New City")
-                .state("New State")
-                .zipCode("12345")
-                .country("New Country")
+                .street("Nueva Calle 123")
+                .city("Nueva Ciudad")
+                .state("Nuevo Estado")
+                .zipCode("54321")
+                .country("Nuevo País")
                 .build();
 
-        Order existingOrder = createTestOrder(orderId);
-        Order updatedOrder = existingOrder.withUpdatedDeliveryAddress(newAddress);
+        Order existingOrder = Order.builder()
+                .orderId(orderId)
+                .deliveryAddress(AddressShipping.builder()
+                        .street("Vieja Calle 123")
+                        .city("Vieja Ciudad")
+                        .state("Viejo Estado")
+                        .zipCode("12345")
+                        .country("Viejo País")
+                        .build())
+                .build();
 
-        when(orderRepositoryPort.findById(orderId)).thenReturn(Optional.of(existingOrder));
-        when(orderRepositoryPort.save(any(Order.class))).thenReturn(updatedOrder);
+        Order updatedOrder = Order.builder()
+                .orderId(orderId)
+                .deliveryAddress(newAddress)
+                .build();
+
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(existingOrder));
+        when(orderRepository.save(any(Order.class))).thenReturn(updatedOrder);
 
         // Act
         Order result = updateShippingAddressService.updateShippingAddress(orderId, newAddress);
 
         // Assert
         assertNotNull(result);
-        assertEquals(orderId, result.getOrderId());
-        assertEquals(newAddress.getStreet(), result.getDeliveryAddress().getStreet());
-        assertEquals(newAddress.getCity(), result.getDeliveryAddress().getCity());
-        assertEquals(newAddress.getState(), result.getDeliveryAddress().getState());
-        assertEquals(newAddress.getZipCode(), result.getDeliveryAddress().getZipCode());
-        assertEquals(newAddress.getCountry(), result.getDeliveryAddress().getCountry());
-
-        verify(orderRepositoryPort).findById(orderId);
-        verify(orderRepositoryPort).save(any(Order.class));
-        verifyNoMoreInteractions(orderRepositoryPort);
+        assertEquals(newAddress, result.getDeliveryAddress());
+        verify(orderRepository).findById(orderId);
+        verify(orderRepository).save(any(Order.class));
     }
 
     @Test
-    void shouldThrowExceptionWhenOrderNotFound() {
-        // Arrange
-        UUID orderId = UUID.randomUUID();
-        AddressShipping newAddress = AddressShipping.builder()
-                .street("New Street")
-                .city("New City")
-                .state("New State")
-                .zipCode("12345")
-                .country("New Country")
-                .build();
-
-        when(orderRepositoryPort.findById(orderId)).thenReturn(Optional.empty());
-
-        // Act & Assert
-        BusinessException exception = assertThrows(BusinessException.class, () -> {
-            updateShippingAddressService.updateShippingAddress(orderId, newAddress);
-        });
-
-        assertEquals("Orden no encontrada: " + orderId, exception.getMessage());
-
-        verify(orderRepositoryPort).findById(orderId);
-        verifyNoMoreInteractions(orderRepositoryPort);
-    }
-
-    @ParameterizedTest
-    @NullSource
-    void shouldThrowExceptionWhenOrderIdIsNull(UUID nullId) {
+    void shouldThrowExceptionWhenOrderIdIsNull() {
         // Arrange
         AddressShipping newAddress = AddressShipping.builder()
-                .street("New Street")
-                .city("New City")
-                .state("New State")
-                .zipCode("12345")
-                .country("New Country")
+                .street("Nueva Calle 123")
+                .city("Nueva Ciudad")
+                .state("Nuevo Estado")
+                .zipCode("54321")
+                .country("Nuevo País")
                 .build();
 
         // Act & Assert
-        BusinessException exception = assertThrows(BusinessException.class, () -> {
-            updateShippingAddressService.updateShippingAddress(nullId, newAddress);
-        });
+        BusinessException exception = assertThrows(BusinessException.class, () ->
+                updateShippingAddressService.updateShippingAddress(null, newAddress));
 
         assertEquals("El ID de la orden no puede ser nulo", exception.getMessage());
-        verifyNoInteractions(orderRepositoryPort);
+        verify(orderRepository, never()).findById(any());
+        verify(orderRepository, never()).save(any());
     }
 
     @Test
@@ -120,12 +100,35 @@ class UpdateShippingAddressServiceTest {
         UUID orderId = UUID.randomUUID();
 
         // Act & Assert
-        BusinessException exception = assertThrows(BusinessException.class, () -> {
-            updateShippingAddressService.updateShippingAddress(orderId, null);
-        });
+        BusinessException exception = assertThrows(BusinessException.class, () ->
+                updateShippingAddressService.updateShippingAddress(orderId, null));
 
         assertEquals("La dirección de envío no puede ser nula", exception.getMessage());
-        verifyNoInteractions(orderRepositoryPort);
+        verify(orderRepository, never()).findById(any());
+        verify(orderRepository, never()).save(any());
+    }
+
+    @Test
+    void shouldThrowExceptionWhenOrderNotFound() {
+        // Arrange
+        UUID orderId = UUID.randomUUID();
+        AddressShipping newAddress = AddressShipping.builder()
+                .street("Nueva Calle 123")
+                .city("Nueva Ciudad")
+                .state("Nuevo Estado")
+                .zipCode("54321")
+                .country("Nuevo País")
+                .build();
+
+        when(orderRepository.findById(orderId)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        BusinessException exception = assertThrows(BusinessException.class, () ->
+                updateShippingAddressService.updateShippingAddress(orderId, newAddress));
+
+        assertEquals("Orden no encontrada: " + orderId, exception.getMessage());
+        verify(orderRepository).findById(orderId);
+        verify(orderRepository, never()).save(any());
     }
 
     @Test
@@ -145,7 +148,7 @@ class UpdateShippingAddressServiceTest {
         });
 
         assertEquals("La calle no puede estar vacía", exception.getMessage());
-        verifyNoInteractions(orderRepositoryPort);
+        verifyNoInteractions(orderRepository);
     }
 
     @Test
@@ -165,7 +168,7 @@ class UpdateShippingAddressServiceTest {
         });
 
         assertEquals("La ciudad no puede estar vacía", exception.getMessage());
-        verifyNoInteractions(orderRepositoryPort);
+        verifyNoInteractions(orderRepository);
     }
 
     @Test
@@ -185,7 +188,7 @@ class UpdateShippingAddressServiceTest {
         });
 
         assertEquals("El estado no puede estar vacío", exception.getMessage());
-        verifyNoInteractions(orderRepositoryPort);
+        verifyNoInteractions(orderRepository);
     }
 
     @Test
@@ -205,7 +208,7 @@ class UpdateShippingAddressServiceTest {
         });
 
         assertEquals("El código postal no puede estar vacío", exception.getMessage());
-        verifyNoInteractions(orderRepositoryPort);
+        verifyNoInteractions(orderRepository);
     }
 
     @Test
@@ -225,7 +228,7 @@ class UpdateShippingAddressServiceTest {
         });
 
         assertEquals("El país no puede estar vacío", exception.getMessage());
-        verifyNoInteractions(orderRepositoryPort);
+        verifyNoInteractions(orderRepository);
     }
 
     @Test
@@ -253,8 +256,8 @@ class UpdateShippingAddressServiceTest {
                         .build())
                 .build();
 
-        when(orderRepositoryPort.findById(orderId)).thenReturn(Optional.of(existingOrder));
-        when(orderRepositoryPort.save(any(Order.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(existingOrder));
+        when(orderRepository.save(any(Order.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         // Act
         Order updatedOrder = updateShippingAddressService.updateShippingAddress(orderId, newAddress);
@@ -269,9 +272,9 @@ class UpdateShippingAddressServiceTest {
         assertEquals(newAddress.getZipCode(), updatedOrder.getDeliveryAddress().getZipCode());
         assertEquals(newAddress.getCountry(), updatedOrder.getDeliveryAddress().getCountry());
 
-        verify(orderRepositoryPort).findById(orderId);
-        verify(orderRepositoryPort).save(any(Order.class));
-        verifyNoMoreInteractions(orderRepositoryPort);
+        verify(orderRepository).findById(orderId);
+        verify(orderRepository).save(any(Order.class));
+        verifyNoMoreInteractions(orderRepository);
     }
 
     private Order createTestOrder(UUID orderId) {

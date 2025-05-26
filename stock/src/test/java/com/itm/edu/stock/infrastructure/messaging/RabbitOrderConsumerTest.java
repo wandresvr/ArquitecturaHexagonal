@@ -63,7 +63,7 @@ class RabbitOrderConsumerTest {
         );
 
         StockUpdateResponseEvent response = responseCaptor.getValue();
-        assertEquals(orderId.toString(), response.getOrderId());
+        assertEquals(orderId, response.getOrderId());
         assertEquals(StockValidationStatus.RESERVED, response.getStatus());
     }
 
@@ -85,7 +85,7 @@ class RabbitOrderConsumerTest {
         );
 
         StockUpdateResponseEvent response = responseCaptor.getValue();
-        assertEquals(orderId.toString(), response.getOrderId());
+        assertEquals(orderId, response.getOrderId());
         assertEquals(StockValidationStatus.CANCELLED_NO_STOCK, response.getStatus());
     }
 
@@ -110,7 +110,7 @@ class RabbitOrderConsumerTest {
         );
 
         StockUpdateResponseEvent response = responseCaptor.getValue();
-        assertEquals(orderId.toString(), response.getOrderId());
+        assertEquals(orderId, response.getOrderId());
         assertEquals(StockValidationStatus.CANCELLED_NO_STOCK, response.getStatus());
         assertEquals("Error inesperado: Error inesperado", exception.getMessage());
         assertEquals(unexpectedException, exception.getCause());

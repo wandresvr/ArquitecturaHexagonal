@@ -35,10 +35,9 @@ public class RabbitOrderConsumer {
             processOrderUseCase.processOrder(msg);
             
             // Crear el mensaje de respuesta
-            StockUpdateResponseEvent response = new StockUpdateResponseEvent(
-                msg.getOrderId().toString(),
-                StockValidationStatus.RESERVED
-            );
+            StockUpdateResponseEvent response = new StockUpdateResponseEvent();
+            response.setOrderId(msg.getOrderId());
+            response.setStatus(StockValidationStatus.RESERVED);
 
             // Enviar la respuesta al exchange de respuestas
             rabbitTemplate.convertAndSend(
@@ -52,10 +51,9 @@ public class RabbitOrderConsumer {
             log.error("Error de negocio procesando la orden {}: {}", msg.getOrderId(), e.getMessage());
             
             // Enviar respuesta de error
-            StockUpdateResponseEvent response = new StockUpdateResponseEvent(
-                msg.getOrderId().toString(),
-                StockValidationStatus.CANCELLED_NO_STOCK
-            );
+            StockUpdateResponseEvent response = new StockUpdateResponseEvent();
+            response.setOrderId(msg.getOrderId());
+            response.setStatus(StockValidationStatus.CANCELLED_NO_STOCK);
 
             rabbitTemplate.convertAndSend(
                 RabbitMQConfig.STOCK_RESPONSE_EXCHANGE,
@@ -69,10 +67,9 @@ public class RabbitOrderConsumer {
             log.error("Error inesperado procesando la orden {}: {}", msg.getOrderId(), e.getMessage(), e);
             
             // Para errores del sistema también usamos CANCELLED_NO_STOCK
-            StockUpdateResponseEvent response = new StockUpdateResponseEvent(
-                msg.getOrderId().toString(),
-                StockValidationStatus.CANCELLED_NO_STOCK
-            );
+            StockUpdateResponseEvent response = new StockUpdateResponseEvent();
+            response.setOrderId(msg.getOrderId());
+            response.setStatus(StockValidationStatus.CANCELLED_NO_STOCK);
 
             rabbitTemplate.convertAndSend(
                 RabbitMQConfig.STOCK_RESPONSE_EXCHANGE,
