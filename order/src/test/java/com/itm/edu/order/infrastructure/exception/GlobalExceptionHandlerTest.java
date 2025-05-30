@@ -1,8 +1,9 @@
 package com.itm.edu.order.infrastructure.exception;
 
-import com.itm.edu.order.domain.exception.ApiError;
 import com.itm.edu.order.domain.exception.BusinessException;
 import com.itm.edu.order.domain.exception.HttpStatusException;
+import com.itm.edu.order.domain.exception.OrderNotFoundException;
+import com.itm.edu.order.domain.exception.ProductNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
@@ -36,12 +37,14 @@ class GlobalExceptionHandlerTest {
         BusinessException exception = new BusinessException(errorMessage);
 
         // Act
-        ResponseEntity<ApiError> response = exceptionHandler.handleBusinessException(exception);
+        ResponseEntity<ErrorResponse> response = exceptionHandler.handleBusinessException(exception);
 
         // Assert
         assertNotNull(response);
-        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertNotNull(response.getBody());
         assertEquals(errorMessage, response.getBody().getMessage());
+        assertEquals(HttpStatus.BAD_REQUEST.value(), response.getBody().getStatus());
     }
 
     @Test
@@ -51,7 +54,7 @@ class GlobalExceptionHandlerTest {
         HttpStatusException exception = HttpStatusException.badRequest(errorMessage);
 
         // Act
-        ResponseEntity<ApiError> response = exceptionHandler.handleHttpStatusException(exception);
+        ResponseEntity<ErrorResponse> response = exceptionHandler.handleHttpStatusException(exception);
 
         // Assert
         assertNotNull(response);
@@ -70,7 +73,7 @@ class GlobalExceptionHandlerTest {
         when(bindingResult.getFieldErrors()).thenReturn(java.util.Collections.singletonList(fieldError));
 
         // Act
-        ResponseEntity<ApiError> response = exceptionHandler.handleValidationExceptions(exception);
+        ResponseEntity<ErrorResponse> response = exceptionHandler.handleValidationExceptions(exception);
 
         // Assert
         assertNotNull(response);
@@ -91,7 +94,7 @@ class GlobalExceptionHandlerTest {
         ConstraintViolationException exception = new ConstraintViolationException("Error de validación", violations);
 
         // Act
-        ResponseEntity<ApiError> response = exceptionHandler.handleConstraintViolationException(exception);
+        ResponseEntity<ErrorResponse> response = exceptionHandler.handleConstraintViolationException(exception);
 
         // Assert
         assertNotNull(response);
@@ -107,7 +110,7 @@ class GlobalExceptionHandlerTest {
         when(exception.getValue()).thenReturn("invalidValue");
 
         // Act
-        ResponseEntity<ApiError> response = exceptionHandler.handleTypeMismatch(exception);
+        ResponseEntity<ErrorResponse> response = exceptionHandler.handleTypeMismatch(exception);
 
         // Assert
         assertNotNull(response);
@@ -117,16 +120,53 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
-    void shouldHandleGenericException() {
+    void handleProductNotFoundException() {
         // Arrange
-        Exception exception = new RuntimeException("Error inesperado");
+        String errorMessage = "Producto no encontrado";
+        ProductNotFoundException exception = new ProductNotFoundException(errorMessage);
 
         // Act
-        ResponseEntity<ApiError> response = exceptionHandler.handleGenericException(exception);
+        ResponseEntity<ErrorResponse> response = exceptionHandler.handleProductNotFoundException(exception);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(errorMessage, response.getBody().getMessage());
+        assertEquals(HttpStatus.NOT_FOUND.value(), response.getBody().getStatus());
+    }
+
+    @Test
+    void handleOrderNotFoundException() {
+        // Arrange
+        String errorMessage = "Orden no encontrada";
+        OrderNotFoundException exception = new OrderNotFoundException(errorMessage);
+
+        // Act
+        ResponseEntity<ErrorResponse> response = exceptionHandler.handleOrderNotFoundException(exception);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(errorMessage, response.getBody().getMessage());
+        assertEquals(HttpStatus.NOT_FOUND.value(), response.getBody().getStatus());
+    }
+
+    @Test
+    void handleGenericException() {
+        // Arrange
+        String errorMessage = "Error interno del servidor";
+        Exception exception = new Exception(errorMessage);
+
+        // Act
+        ResponseEntity<ErrorResponse> response = exceptionHandler.handleGenericException(exception);
 
         // Assert
         assertNotNull(response);
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        assertNotNull(response.getBody());
         assertEquals("Error interno del servidor", response.getBody().getMessage());
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), response.getBody().getStatus());
     }
 } 

@@ -18,6 +18,14 @@ public class Product {
         this.stock = builder.stock;
     }
 
+    private Product(UUID id, String name, String description, BigDecimal price, Integer stock) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.price = price;
+        this.stock = stock;
+    }
+
     public static Product create(String name, String description, BigDecimal price, Integer stock) {
         return builder()
                 .id(UUID.randomUUID())
@@ -46,6 +54,11 @@ public class Product {
                 .price(price)
                 .stock(stock)
                 .build();
+    }
+
+    // Método especial para pruebas que no realiza validaciones
+    public static Product createForTesting(UUID id, String name, String description, BigDecimal price, Integer stock) {
+        return new Product(id, name, description, price, stock);
     }
 
     public static Builder builder() {
