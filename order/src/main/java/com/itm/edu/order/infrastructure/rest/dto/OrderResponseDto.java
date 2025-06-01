@@ -3,6 +3,7 @@ package com.itm.edu.order.infrastructure.rest.dto;
 import com.itm.edu.order.domain.model.Order;
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -10,7 +11,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-@Data
+@Getter
 @Builder
 public class OrderResponseDto {
     private UUID orderId;
@@ -21,7 +22,7 @@ public class OrderResponseDto {
     private LocalDateTime orderDate;
     private String orderStatus;
 
-    @Data
+    @Getter
     @Builder
     public static class ClientResponseDto {
         private UUID id;
@@ -30,14 +31,14 @@ public class OrderResponseDto {
         private String phone;
     }
 
-    @Data
+    @Getter
     @Builder
     public static class OrderItemResponseDto {
         private ProductResponseDto product;
         private int quantity;
     }
 
-    @Data
+    @Getter
     @Builder
     public static class ProductResponseDto {
         private UUID id;
@@ -47,7 +48,7 @@ public class OrderResponseDto {
         private int stock;
     }
 
-    @Data
+    @Getter
     @Builder
     public static class AddressResponseDto {
         private String street;
@@ -57,7 +58,7 @@ public class OrderResponseDto {
         private String country;
     }
 
-    @Data
+    @Getter
     @Builder
     public static class MoneyResponseDto {
         private BigDecimal amount;
@@ -65,15 +66,17 @@ public class OrderResponseDto {
     }
 
     public static OrderResponseDto fromDomain(Order order) {
+        if (order == null) return null;
+
         return OrderResponseDto.builder()
                 .orderId(order.getOrderId())
-                .client(ClientResponseDto.builder()
+                .client(order.getClient() != null ? ClientResponseDto.builder()
                         .id(order.getClient().getId())
                         .name(order.getClient().getName())
                         .email(order.getClient().getEmail())
                         .phone(order.getClient().getPhone())
-                        .build())
-                .products(order.getProducts().stream()
+                        .build() : null)
+                .products(order.getProducts() != null ? order.getProducts().stream()
                         .map(item -> OrderItemResponseDto.builder()
                                 .quantity(item.getQuantity())
                                 .product(item.getProduct() != null ? ProductResponseDto.builder()
@@ -84,18 +87,18 @@ public class OrderResponseDto {
                                         .stock(item.getProduct().getStock())
                                         .build() : null)
                                 .build())
-                        .collect(Collectors.toList()))
-                .deliveryAddress(AddressResponseDto.builder()
+                        .collect(Collectors.toList()) : null)
+                .deliveryAddress(order.getDeliveryAddress() != null ? AddressResponseDto.builder()
                         .street(order.getDeliveryAddress().getStreet())
                         .city(order.getDeliveryAddress().getCity())
                         .state(order.getDeliveryAddress().getState())
                         .zipCode(order.getDeliveryAddress().getZipCode())
                         .country(order.getDeliveryAddress().getCountry())
-                        .build())
-                .total(MoneyResponseDto.builder()
+                        .build() : null)
+                .total(order.getTotal() != null ? MoneyResponseDto.builder()
                         .amount(order.getTotal().getAmount())
                         .currency(order.getTotal().getCurrency())
-                        .build())
+                        .build() : null)
                 .orderDate(order.getOrderDate())
                 .orderStatus(order.getOrderStatus())
                 .build();

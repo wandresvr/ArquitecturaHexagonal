@@ -4,7 +4,6 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.math.BigDecimal;
-import java.util.UUID;
 
 @Getter
 @Builder
@@ -13,9 +12,6 @@ public class OrderItem {
     private final int quantity;
 
     public OrderItem(Product product, int quantity) {
-        if (product == null) {
-            throw new IllegalArgumentException("El producto no puede ser nulo");
-        }
         if (quantity <= 0) {
             throw new IllegalArgumentException("La cantidad debe ser mayor a 0");
         }
@@ -25,6 +21,9 @@ public class OrderItem {
     }
 
     public BigDecimal calculateValue() {
+        if (product == null) {
+            return BigDecimal.ZERO;
+        }
         return product.getPrice().multiply(BigDecimal.valueOf(quantity));
     }
 

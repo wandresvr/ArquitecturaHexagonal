@@ -1,13 +1,13 @@
 package com.itm.edu.order.infrastructure.rest.dto;
 
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
-@Data
+@Getter
 @Builder
 public class OrderDto {
     private UUID orderId;
@@ -18,7 +18,7 @@ public class OrderDto {
     private LocalDateTime orderDate;
     private String orderStatus;
 
-    @Data
+    @Getter
     @Builder
     public static class ClientDto {
         private UUID id;
@@ -27,7 +27,7 @@ public class OrderDto {
         private String phone;
     }
 
-    @Data
+    @Getter
     @Builder
     public static class OrderItemDto {
         private UUID id;
@@ -35,7 +35,7 @@ public class OrderDto {
         private int quantity;
     }
 
-    @Data
+    @Getter
     @Builder
     public static class ProductDto {
         private UUID id;
@@ -45,7 +45,7 @@ public class OrderDto {
         private Integer stock;
     }
 
-    @Data
+    @Getter
     @Builder
     public static class AddressDto {
         private String street;
@@ -55,7 +55,7 @@ public class OrderDto {
         private String country;
     }
 
-    @Data
+    @Getter
     @Builder
     public static class MoneyDto {
         private BigDecimal amount;

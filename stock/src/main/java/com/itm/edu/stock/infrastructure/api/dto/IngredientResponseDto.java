@@ -1,10 +1,12 @@
 package com.itm.edu.stock.infrastructure.api.dto;
 
-import lombok.Value;
+import lombok.Getter;
+import lombok.AllArgsConstructor;
 import java.math.BigDecimal;
 import java.util.UUID;
 
-@Value
+@AllArgsConstructor
+@Getter
 public class IngredientResponseDto {
     UUID id;
     String name;

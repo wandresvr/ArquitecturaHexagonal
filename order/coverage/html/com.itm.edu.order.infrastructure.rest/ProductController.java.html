@@ -59,10 +59,10 @@ public class ProductController {
 <span class="fc" id="L59">            log.error(&quot;Error de negocio al crear el producto: {}&quot;, e.getMessage());</span>
 <span class="fc" id="L60">            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)</span>
 <span class="fc" id="L61">                .body(ApiError.of(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage(), &quot;/api/v1/products&quot;));</span>
-<span class="nc" id="L62">        } catch (Exception e) {</span>
-<span class="nc" id="L63">            log.error(&quot;Error inesperado al crear el producto: {}&quot;, e.getMessage());</span>
-<span class="nc" id="L64">            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)</span>
-<span class="nc" id="L65">                .body(ApiError.of(HttpStatus.INTERNAL_SERVER_ERROR, &quot;Error interno del servidor&quot;, &quot;/api/v1/products&quot;));</span>
+<span class="fc" id="L62">        } catch (Exception e) {</span>
+<span class="fc" id="L63">            log.error(&quot;Error inesperado al crear el producto: {}&quot;, e.getMessage());</span>
+<span class="fc" id="L64">            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)</span>
+<span class="fc" id="L65">                .body(ApiError.of(HttpStatus.INTERNAL_SERVER_ERROR, &quot;Error interno del servidor&quot;, &quot;/api/v1/products&quot;));</span>
         }
     }
 
@@ -88,10 +88,10 @@ public class ProductController {
 <span class="fc" id="L88">            return getProductUseCase.getProduct(id)</span>
 <span class="fc" id="L89">                .map(product -&gt; ResponseEntity.ok(productMapper.toDto(product)))</span>
 <span class="fc" id="L90">                .orElse(ResponseEntity.notFound().build());</span>
-<span class="nc" id="L91">        } catch (Exception e) {</span>
-<span class="nc" id="L92">            log.error(&quot;Error al obtener el producto: {}&quot;, e.getMessage());</span>
-<span class="nc" id="L93">            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)</span>
-<span class="nc" id="L94">                .body(ApiError.of(HttpStatus.INTERNAL_SERVER_ERROR, &quot;Error interno del servidor&quot;, &quot;/api/v1/products&quot;));</span>
+<span class="fc" id="L91">        } catch (Exception e) {</span>
+<span class="fc" id="L92">            log.error(&quot;Error al obtener el producto: {}&quot;, e.getMessage());</span>
+<span class="fc" id="L93">            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)</span>
+<span class="fc" id="L94">                .body(ApiError.of(HttpStatus.INTERNAL_SERVER_ERROR, &quot;Error interno del servidor&quot;, &quot;/api/v1/products&quot;));</span>
         }
     }
 
@@ -110,10 +110,10 @@ public class ProductController {
 <span class="fc" id="L110">                .map(productMapper::toDto)</span>
 <span class="fc" id="L111">                .collect(Collectors.toList());</span>
 <span class="fc" id="L112">            return ResponseEntity.ok(productDtos);</span>
-<span class="nc" id="L113">        } catch (Exception e) {</span>
-<span class="nc" id="L114">            log.error(&quot;Error al obtener los productos: {}&quot;, e.getMessage());</span>
-<span class="nc" id="L115">            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)</span>
-<span class="nc" id="L116">                .body(ApiError.of(HttpStatus.INTERNAL_SERVER_ERROR, &quot;Error interno del servidor&quot;, &quot;/api/v1/products&quot;));</span>
+<span class="fc" id="L113">        } catch (Exception e) {</span>
+<span class="fc" id="L114">            log.error(&quot;Error al obtener los productos: {}&quot;, e.getMessage());</span>
+<span class="fc" id="L115">            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)</span>
+<span class="fc" id="L116">                .body(ApiError.of(HttpStatus.INTERNAL_SERVER_ERROR, &quot;Error interno del servidor&quot;, &quot;/api/v1/products&quot;));</span>
         }
     }
 
@@ -149,10 +149,10 @@ public class ProductController {
 <span class="fc" id="L149">            log.error(&quot;Error de negocio al actualizar el producto: {}&quot;, e.getMessage());</span>
 <span class="fc" id="L150">            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)</span>
 <span class="fc" id="L151">                .body(ApiError.of(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage(), &quot;/api/v1/products&quot;));</span>
-<span class="nc" id="L152">        } catch (Exception e) {</span>
-<span class="nc" id="L153">            log.error(&quot;Error inesperado al actualizar el producto: {}&quot;, e.getMessage());</span>
-<span class="nc" id="L154">            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)</span>
-<span class="nc" id="L155">                .body(ApiError.of(HttpStatus.INTERNAL_SERVER_ERROR, &quot;Error interno del servidor&quot;, &quot;/api/v1/products&quot;));</span>
+<span class="fc" id="L152">        } catch (Exception e) {</span>
+<span class="fc" id="L153">            log.error(&quot;Error inesperado al actualizar el producto: {}&quot;, e.getMessage());</span>
+<span class="fc" id="L154">            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)</span>
+<span class="fc" id="L155">                .body(ApiError.of(HttpStatus.INTERNAL_SERVER_ERROR, &quot;Error interno del servidor&quot;, &quot;/api/v1/products&quot;));</span>
         }
     }
 
@@ -180,10 +180,10 @@ public class ProductController {
 <span class="fc" id="L180">            log.error(&quot;Error de negocio al eliminar el producto: {}&quot;, e.getMessage());</span>
 <span class="fc" id="L181">            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)</span>
 <span class="fc" id="L182">                .body(ApiError.of(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage(), &quot;/api/v1/products&quot;));</span>
-<span class="nc" id="L183">        } catch (Exception e) {</span>
-<span class="nc" id="L184">            log.error(&quot;Error inesperado al eliminar el producto: {}&quot;, e.getMessage());</span>
-<span class="nc" id="L185">            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)</span>
-<span class="nc" id="L186">                .body(ApiError.of(HttpStatus.INTERNAL_SERVER_ERROR, &quot;Error interno del servidor&quot;, &quot;/api/v1/products&quot;));</span>
+<span class="fc" id="L183">        } catch (Exception e) {</span>
+<span class="fc" id="L184">            log.error(&quot;Error inesperado al eliminar el producto: {}&quot;, e.getMessage());</span>
+<span class="fc" id="L185">            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)</span>
+<span class="fc" id="L186">                .body(ApiError.of(HttpStatus.INTERNAL_SERVER_ERROR, &quot;Error interno del servidor&quot;, &quot;/api/v1/products&quot;));</span>
         }
     }
 } 

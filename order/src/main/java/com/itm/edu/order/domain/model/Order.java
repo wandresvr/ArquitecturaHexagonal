@@ -139,13 +139,13 @@ public class Order {
 
     private static OrderTotalValue calculateTotalFromProducts(List<OrderItem> products) {
         if (products == null || products.isEmpty()) {
-            return new OrderTotalValue(BigDecimal.ZERO, "USD");
+            return new OrderTotalValue(BigDecimal.ZERO, "COP");
         }
         
         BigDecimal totalAmount = products.stream()
             .map(OrderItem::calculateValue)
             .reduce(BigDecimal.ZERO, BigDecimal::add);
         
-        return new OrderTotalValue(totalAmount, "USD");
+        return new OrderTotalValue(totalAmount, "COP");
     }
 }

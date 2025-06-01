@@ -4,27 +4,29 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import java.util.List;
 
-<span class="pc bnc" id="L10" title="All 54 branches missed.">@Data</span>
-public class CreateRecipeRequestDto {
+@Getter
+<span class="fc" id="L12">@Setter</span>
+<span class="fc" id="L13">public class CreateRecipeRequestDto {</span>
     @NotBlank(message = &quot;El nombre es requerido&quot;)
-<span class="fc" id="L13">    private String name;</span>
+<span class="fc" id="L15">    private String name;</span>
     
-<span class="fc" id="L15">    private String description;</span>
+<span class="fc" id="L17">    private String description;</span>
     
     @NotBlank(message = &quot;Las instrucciones son requeridas&quot;)
-<span class="fc" id="L18">    private String instructions;</span>
+<span class="fc" id="L20">    private String instructions;</span>
     
     @NotNull(message = &quot;El tiempo de preparación es requerido&quot;)
     @Min(value = 1, message = &quot;El tiempo de preparación debe ser mayor a 0&quot;)
-<span class="fc" id="L22">    private Integer preparationTime;</span>
+<span class="fc" id="L24">    private Integer preparationTime;</span>
     
     @NotBlank(message = &quot;La dificultad es requerida&quot;)
-<span class="fc" id="L25">    private String difficulty;</span>
+<span class="fc" id="L27">    private String difficulty;</span>
     
     @NotEmpty(message = &quot;La lista de ingredientes no puede estar vacía&quot;)
-<span class="nc" id="L28">    private List&lt;CreateRecipeIngredientDto&gt; ingredients;</span>
+<span class="fc" id="L30">    private List&lt;CreateRecipeIngredientDto&gt; ingredients;</span>
 } 
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

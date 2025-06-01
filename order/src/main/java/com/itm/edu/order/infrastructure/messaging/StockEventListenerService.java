@@ -11,13 +11,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.amqp.core.MessagePostProcessor;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.amqp.core.Message;
-import org.springframework.amqp.core.MessageBuilder;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,7 +24,6 @@ import java.util.stream.Collectors;
 public class StockEventListenerService {
     private final OrderRepositoryPort orderRepository;
     private final RabbitTemplate rabbitTemplate;
-    private final ObjectMapper objectMapper;
 
     @RabbitListener(queues = "${rabbitmq.queues.stock-response}")
     @Transactional

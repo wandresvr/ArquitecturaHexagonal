@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Product.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">order</a> &gt; <a href="index.source.html" class="el_package">com.itm.edu.order.domain.model</a> &gt; <span class="el_source">Product.java</span></div><h1>Product.java</h1><pre class="source lang-java linenums">package com.itm.edu.order.domain.model;
 
 import java.math.BigDecimal;
+import java.util.Objects;
 import java.util.UUID;
 
 public class Product {
@@ -10,79 +11,96 @@ public class Product {
     private final BigDecimal price;
     private final Integer stock;
 
-<span class="fc" id="L13">    private Product(Builder builder) {</span>
-<span class="fc" id="L14">        this.id = builder.id;</span>
-<span class="fc" id="L15">        this.name = builder.name;</span>
-<span class="fc" id="L16">        this.description = builder.description;</span>
-<span class="fc" id="L17">        this.price = builder.price;</span>
-<span class="fc" id="L18">        this.stock = builder.stock;</span>
-<span class="fc" id="L19">    }</span>
+<span class="fc" id="L14">    private Product(Builder builder) {</span>
+<span class="fc" id="L15">        this.id = builder.id;</span>
+<span class="fc" id="L16">        this.name = builder.name;</span>
+<span class="fc" id="L17">        this.description = builder.description;</span>
+<span class="fc" id="L18">        this.price = builder.price;</span>
+<span class="fc" id="L19">        this.stock = builder.stock;</span>
+<span class="fc" id="L20">    }</span>
 
-<span class="fc" id="L21">    private Product(UUID id, String name, String description, BigDecimal price, Integer stock) {</span>
-<span class="fc" id="L22">        this.id = id;</span>
-<span class="fc" id="L23">        this.name = name;</span>
-<span class="fc" id="L24">        this.description = description;</span>
-<span class="fc" id="L25">        this.price = price;</span>
-<span class="fc" id="L26">        this.stock = stock;</span>
-<span class="fc" id="L27">    }</span>
+<span class="fc" id="L22">    private Product(UUID id, String name, String description, BigDecimal price, Integer stock) {</span>
+<span class="fc" id="L23">        this.id = id;</span>
+<span class="fc" id="L24">        this.name = name;</span>
+<span class="fc" id="L25">        this.description = description;</span>
+<span class="fc" id="L26">        this.price = price;</span>
+<span class="fc" id="L27">        this.stock = stock;</span>
+<span class="fc" id="L28">    }</span>
 
     public static Product create(String name, String description, BigDecimal price, Integer stock) {
-<span class="nc" id="L30">        return builder()</span>
-<span class="nc" id="L31">                .id(UUID.randomUUID())</span>
-<span class="nc" id="L32">                .name(name)</span>
-<span class="nc" id="L33">                .description(description)</span>
-<span class="nc" id="L34">                .price(price)</span>
-<span class="nc" id="L35">                .stock(stock)</span>
-<span class="nc" id="L36">                .build();</span>
+<span class="fc" id="L31">        return builder()</span>
+<span class="fc" id="L32">                .id(UUID.randomUUID())</span>
+<span class="fc" id="L33">                .name(name)</span>
+<span class="fc" id="L34">                .description(description)</span>
+<span class="fc" id="L35">                .price(price)</span>
+<span class="fc" id="L36">                .stock(stock)</span>
+<span class="fc" id="L37">                .build();</span>
     }
 
     public static Product reconstitute(UUID id, String name, String description, BigDecimal price, Integer stock) {
-<span class="nc" id="L40">        return builder()</span>
-<span class="nc" id="L41">                .id(id)</span>
-<span class="nc" id="L42">                .name(name)</span>
-<span class="nc" id="L43">                .description(description)</span>
-<span class="nc" id="L44">                .price(price)</span>
-<span class="nc" id="L45">                .stock(stock)</span>
-<span class="nc" id="L46">                .build();</span>
+<span class="fc" id="L41">        return builder()</span>
+<span class="fc" id="L42">                .id(id)</span>
+<span class="fc" id="L43">                .name(name)</span>
+<span class="fc" id="L44">                .description(description)</span>
+<span class="fc" id="L45">                .price(price)</span>
+<span class="fc" id="L46">                .stock(stock)</span>
+<span class="fc" id="L47">                .build();</span>
     }
 
     public Product withUpdatedDetails(String name, String description, BigDecimal price, Integer stock) {
-<span class="fc" id="L50">        return builder()</span>
-<span class="fc" id="L51">                .id(this.id)</span>
-<span class="fc" id="L52">                .name(name)</span>
-<span class="fc" id="L53">                .description(description)</span>
-<span class="fc" id="L54">                .price(price)</span>
-<span class="fc" id="L55">                .stock(stock)</span>
-<span class="fc" id="L56">                .build();</span>
+<span class="fc" id="L51">        return builder()</span>
+<span class="fc" id="L52">                .id(this.id)</span>
+<span class="fc" id="L53">                .name(name)</span>
+<span class="fc" id="L54">                .description(description)</span>
+<span class="fc" id="L55">                .price(price)</span>
+<span class="fc" id="L56">                .stock(stock)</span>
+<span class="fc" id="L57">                .build();</span>
     }
 
     // Método especial para pruebas que no realiza validaciones
     public static Product createForTesting(UUID id, String name, String description, BigDecimal price, Integer stock) {
-<span class="fc" id="L61">        return new Product(id, name, description, price, stock);</span>
+<span class="fc" id="L62">        return new Product(id, name, description, price, stock);</span>
     }
 
     public static Builder builder() {
-<span class="fc" id="L65">        return new Builder();</span>
+<span class="fc" id="L66">        return new Builder();</span>
     }
 
     public UUID getId() {
-<span class="fc" id="L69">        return id;</span>
+<span class="fc" id="L70">        return id;</span>
     }
 
     public String getName() {
-<span class="fc" id="L73">        return name;</span>
+<span class="fc" id="L74">        return name;</span>
     }
 
     public String getDescription() {
-<span class="fc" id="L77">        return description;</span>
+<span class="fc" id="L78">        return description;</span>
     }
 
     public BigDecimal getPrice() {
-<span class="fc" id="L81">        return price;</span>
+<span class="fc" id="L82">        return price;</span>
     }
 
     public Integer getStock() {
-<span class="fc" id="L85">        return stock;</span>
+<span class="fc" id="L86">        return stock;</span>
+    }
+
+    @Override
+    public boolean equals(Object o) {
+<span class="fc bfc" id="L91" title="All 2 branches covered.">        if (this == o) return true;</span>
+<span class="pc bpc" id="L92" title="2 of 4 branches missed.">        if (o == null || getClass() != o.getClass()) return false;</span>
+<span class="fc" id="L93">        Product product = (Product) o;</span>
+<span class="fc bfc" id="L94" title="All 2 branches covered.">        return Objects.equals(id, product.id) &amp;&amp;</span>
+<span class="pc bpc" id="L95" title="1 of 2 branches missed.">                Objects.equals(name, product.name) &amp;&amp;</span>
+<span class="pc bpc" id="L96" title="1 of 2 branches missed.">                Objects.equals(description, product.description) &amp;&amp;</span>
+<span class="pc bpc" id="L97" title="1 of 2 branches missed.">                Objects.equals(price, product.price) &amp;&amp;</span>
+<span class="pc bpc" id="L98" title="1 of 2 branches missed.">                Objects.equals(stock, product.stock);</span>
+    }
+
+    @Override
+    public int hashCode() {
+<span class="fc" id="L103">        return Objects.hash(id, name, description, price, stock);</span>
     }
 
     public static class Builder {
@@ -95,49 +113,49 @@ public class Product {
         private Builder() {}
 
         public Builder id(UUID id) {
-<span class="fc" id="L98">            this.id = id;</span>
-<span class="fc" id="L99">            return this;</span>
+<span class="fc" id="L116">            this.id = id;</span>
+<span class="fc" id="L117">            return this;</span>
         }
 
         public Builder name(String name) {
-<span class="fc" id="L103">            this.name = name;</span>
-<span class="fc" id="L104">            return this;</span>
+<span class="fc" id="L121">            this.name = name;</span>
+<span class="fc" id="L122">            return this;</span>
         }
 
         public Builder description(String description) {
-<span class="fc" id="L108">            this.description = description;</span>
-<span class="fc" id="L109">            return this;</span>
+<span class="fc" id="L126">            this.description = description;</span>
+<span class="fc" id="L127">            return this;</span>
         }
 
         public Builder price(BigDecimal price) {
-<span class="fc" id="L113">            this.price = price;</span>
-<span class="fc" id="L114">            return this;</span>
+<span class="fc" id="L131">            this.price = price;</span>
+<span class="fc" id="L132">            return this;</span>
         }
 
         public Builder stock(Integer stock) {
-<span class="fc" id="L118">            this.stock = stock;</span>
-<span class="fc" id="L119">            return this;</span>
+<span class="fc" id="L136">            this.stock = stock;</span>
+<span class="fc" id="L137">            return this;</span>
         }
 
         public Product build() {
-<span class="fc" id="L123">            validate();</span>
-<span class="fc" id="L124">            return new Product(this);</span>
+<span class="fc" id="L141">            validate();</span>
+<span class="fc" id="L142">            return new Product(this);</span>
         }
 
         private void validate() {
-<span class="pc bpc" id="L128" title="1 of 4 branches missed.">            if (name == null || name.trim().isEmpty()) {</span>
-<span class="fc" id="L129">                throw new IllegalArgumentException(&quot;El nombre del producto no puede estar vacío&quot;);</span>
+<span class="fc bfc" id="L146" title="All 4 branches covered.">            if (name == null || name.trim().isEmpty()) {</span>
+<span class="fc" id="L147">                throw new IllegalArgumentException(&quot;El nombre del producto no puede estar vacío&quot;);</span>
             }
-<span class="pc bpc" id="L131" title="1 of 4 branches missed.">            if (description == null || description.trim().isEmpty()) {</span>
-<span class="fc" id="L132">                throw new IllegalArgumentException(&quot;La descripción del producto no puede estar vacía&quot;);</span>
+<span class="fc bfc" id="L149" title="All 4 branches covered.">            if (description == null || description.trim().isEmpty()) {</span>
+<span class="fc" id="L150">                throw new IllegalArgumentException(&quot;La descripción del producto no puede estar vacía&quot;);</span>
             }
-<span class="pc bpc" id="L134" title="1 of 4 branches missed.">            if (price == null || price.compareTo(BigDecimal.ZERO) &lt; 0) {</span>
-<span class="fc" id="L135">                throw new IllegalArgumentException(&quot;El precio no puede ser negativo&quot;);</span>
+<span class="pc bpc" id="L152" title="1 of 4 branches missed.">            if (price == null || price.compareTo(BigDecimal.ZERO) &lt; 0) {</span>
+<span class="fc" id="L153">                throw new IllegalArgumentException(&quot;El precio no puede ser negativo&quot;);</span>
             }
-<span class="pc bpc" id="L137" title="1 of 4 branches missed.">            if (stock == null || stock &lt; 0) {</span>
-<span class="fc" id="L138">                throw new IllegalArgumentException(&quot;El stock no puede ser negativo&quot;);</span>
+<span class="pc bpc" id="L155" title="1 of 4 branches missed.">            if (stock == null || stock &lt; 0) {</span>
+<span class="fc" id="L156">                throw new IllegalArgumentException(&quot;El stock no puede ser negativo&quot;);</span>
             }
-<span class="fc" id="L140">        }</span>
+<span class="fc" id="L158">        }</span>
     }
 } 
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

@@ -2,9 +2,11 @@ package com.itm.edu.stock.infrastructure.api.dto;
 
 import java.math.BigDecimal;
 import jakarta.validation.constraints.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 public class CreateIngredientRequestDto {
     @NotBlank(message = "El nombre es requerido")
     private String name;

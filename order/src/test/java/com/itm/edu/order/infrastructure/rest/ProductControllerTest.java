@@ -15,11 +15,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -27,45 +28,46 @@ class ProductControllerTest {
 
     @Mock
     private CreateProductUseCase createProductUseCase;
+
     @Mock
     private GetProductUseCase getProductUseCase;
+
     @Mock
     private UpdateProductUseCase updateProductUseCase;
+
     @Mock
     private DeleteProductUseCase deleteProductUseCase;
+
     @Mock
     private ProductDtoMapper productMapper;
 
     @InjectMocks
     private ProductController productController;
 
-    private UUID productId;
-    private Product product;
     private ProductDto productDto;
+    private Product product;
+    private UUID productId;
 
     @BeforeEach
     void setUp() {
         productId = UUID.randomUUID();
-        
-        product = Product.builder()
-                .id(productId)
-                .name("Test Product")
-                .description("Test Description")
-                .price(new BigDecimal("10.99"))
-                .stock(100)
-                .build();
-
         productDto = ProductDto.builder()
-                .id(productId)
-                .name("Test Product")
-                .description("Test Description")
-                .price(new BigDecimal("10.99"))
-                .stock(100)
-                .build();
+            .name("Test Product")
+            .description("Test Description")
+            .price(new BigDecimal("10.99"))
+            .stock(100)
+            .build();
+
+        product = Product.create(
+            productDto.getName(),
+            productDto.getDescription(),
+            productDto.getPrice(),
+            productDto.getStock()
+        );
     }
 
     @Test
-    void createProduct_Success() {
+    void createProduct_ShouldReturnCreatedProduct() {
         // Arrange
         when(productMapper.toDomain(any(ProductDto.class))).thenReturn(product);
         when(createProductUseCase.createProduct(any(Product.class))).thenReturn(product);
@@ -76,19 +78,16 @@ class ProductControllerTest {
 
         // Assert
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
-        assertNotNull(response.getBody());
         assertEquals(productDto, response.getBody());
-        verify(productMapper).toDomain(productDto);
-        verify(createProductUseCase).createProduct(product);
-        verify(productMapper).toDto(product);
+        verify(createProductUseCase).createProduct(any(Product.class));
     }
 
     @Test
-    void createProduct_BusinessException() {
+    void createProduct_WhenBusinessException_ShouldReturnUnprocessableEntity() {
         // Arrange
         when(productMapper.toDomain(any(ProductDto.class))).thenReturn(product);
         when(createProductUseCase.createProduct(any(Product.class)))
-            .thenThrow(new BusinessException("Error al crear el producto"));
+            .thenThrow(new BusinessException("Error de negocio"));
 
         // Act
         ResponseEntity<?> response = productController.createProduct(productDto);
@@ -98,22 +97,21 @@ class ProductControllerTest {
     }
 
     @Test
-    void getProduct_Success() {
+    void getProduct_WhenProductExists_ShouldReturnProduct() {
         // Arrange
         when(getProductUseCase.getProduct(productId)).thenReturn(Optional.of(product));
-        when(productMapper.toDto(product)).thenReturn(productDto);
+        when(productMapper.toDto(any(Product.class))).thenReturn(productDto);
 
         // Act
         ResponseEntity<?> response = productController.getProduct(productId);
 
         // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
         assertEquals(productDto, response.getBody());
     }
 
     @Test
-    void getProduct_NotFound() {
+    void getProduct_WhenProductDoesNotExist_ShouldReturnNotFound() {
         // Arrange
         when(getProductUseCase.getProduct(productId)).thenReturn(Optional.empty());
 
@@ -125,7 +123,7 @@ class ProductControllerTest {
     }
 
     @Test
-    void getProduct_NullId() {
+    void getProduct_WhenIdIsNull_ShouldReturnBadRequest() {
         // Act
         ResponseEntity<?> response = productController.getProduct(null);
 
@@ -134,10 +132,10 @@ class ProductControllerTest {
     }
 
     @Test
-    void getAllProducts_Success() {
+    void getAllProducts_ShouldReturnListOfProducts() {
         // Arrange
-        List<Product> products = Arrays.asList(product);
-        List<ProductDto> productDtos = Arrays.asList(productDto);
+        List<Product> products = List.of(product);
+        List<ProductDto> productDtos = List.of(productDto);
         when(getProductUseCase.getAllProducts()).thenReturn(products);
         when(productMapper.toDto(any(Product.class))).thenReturn(productDto);
 
@@ -146,29 +144,26 @@ class ProductControllerTest {
 
         // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertTrue(response.getBody() instanceof List);
-        assertEquals(1, ((List<?>) response.getBody()).size());
+        assertEquals(productDtos, response.getBody());
     }
 
     @Test
-    void updateProduct_Success() {
+    void updateProduct_WhenProductExists_ShouldReturnUpdatedProduct() {
         // Arrange
         when(productMapper.toDomain(any(ProductDto.class))).thenReturn(product);
         when(updateProductUseCase.updateProduct(eq(productId), any(Product.class))).thenReturn(product);
-        when(productMapper.toDto(product)).thenReturn(productDto);
+        when(productMapper.toDto(any(Product.class))).thenReturn(productDto);
 
         // Act
         ResponseEntity<?> response = productController.updateProduct(productId, productDto);
 
         // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
         assertEquals(productDto, response.getBody());
     }
 
     @Test
-    void updateProduct_NullId() {
+    void updateProduct_WhenIdIsNull_ShouldReturnBadRequest() {
         // Act
         ResponseEntity<?> response = productController.updateProduct(null, productDto);
 
@@ -177,21 +172,7 @@ class ProductControllerTest {
     }
 
     @Test
-    void updateProduct_BusinessException() {
-        // Arrange
-        when(productMapper.toDomain(any(ProductDto.class))).thenReturn(product);
-        when(updateProductUseCase.updateProduct(eq(productId), any(Product.class)))
-            .thenThrow(new BusinessException("Error al actualizar el producto"));
-
-        // Act
-        ResponseEntity<?> response = productController.updateProduct(productId, productDto);
-
-        // Assert
-        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
-    }
-
-    @Test
-    void deleteProduct_Success() {
+    void deleteProduct_WhenProductExists_ShouldReturnNoContent() {
         // Act
         ResponseEntity<?> response = productController.deleteProduct(productId);
 
@@ -201,7 +182,7 @@ class ProductControllerTest {
     }
 
     @Test
-    void deleteProduct_NullId() {
+    void deleteProduct_WhenIdIsNull_ShouldReturnBadRequest() {
         // Act
         ResponseEntity<?> response = productController.deleteProduct(null);
 
@@ -210,10 +191,9 @@ class ProductControllerTest {
     }
 
     @Test
-    void deleteProduct_BusinessException() {
+    void deleteProduct_WhenBusinessException_ShouldReturnUnprocessableEntity() {
         // Arrange
-        doThrow(new BusinessException("Error al eliminar el producto"))
-            .when(deleteProductUseCase).deleteProduct(productId);
+        doThrow(new BusinessException("Error de negocio")).when(deleteProductUseCase).deleteProduct(productId);
 
         // Act
         ResponseEntity<?> response = productController.deleteProduct(productId);

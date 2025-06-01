@@ -17,33 +17,33 @@ import java.util.Map;
 
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity&lt;ErrorResponse&gt; handleBusinessException(BusinessException ex) {
-<span class="nc" id="L20">        ErrorResponse error = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage());</span>
-<span class="nc" id="L21">        return new ResponseEntity&lt;&gt;(error, HttpStatus.BAD_REQUEST);</span>
+<span class="fc" id="L20">        ErrorResponse error = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage());</span>
+<span class="fc" id="L21">        return new ResponseEntity&lt;&gt;(error, HttpStatus.BAD_REQUEST);</span>
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity&lt;ErrorResponse&gt; handleValidationExceptions(MethodArgumentNotValidException ex) {
-<span class="nc" id="L26">        Map&lt;String, String&gt; errors = new HashMap&lt;&gt;();</span>
-<span class="nc" id="L27">        ex.getBindingResult().getAllErrors().forEach((error) -&gt; {</span>
-<span class="nc" id="L28">            String fieldName = ((FieldError) error).getField();</span>
-<span class="nc" id="L29">            String errorMessage = error.getDefaultMessage();</span>
-<span class="nc" id="L30">            errors.put(fieldName, errorMessage);</span>
-<span class="nc" id="L31">        });</span>
+<span class="fc" id="L26">        Map&lt;String, String&gt; errors = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L27">        ex.getBindingResult().getAllErrors().forEach((error) -&gt; {</span>
+<span class="fc" id="L28">            String fieldName = ((FieldError) error).getField();</span>
+<span class="fc" id="L29">            String errorMessage = error.getDefaultMessage();</span>
+<span class="fc" id="L30">            errors.put(fieldName, errorMessage);</span>
+<span class="fc" id="L31">        });</span>
         
-<span class="nc" id="L33">        ErrorResponse error = new ErrorResponse(</span>
-<span class="nc" id="L34">            HttpStatus.BAD_REQUEST.value(),</span>
-<span class="nc" id="L35">            &quot;Error de validación: &quot; + errors.toString()</span>
+<span class="fc" id="L33">        ErrorResponse error = new ErrorResponse(</span>
+<span class="fc" id="L34">            HttpStatus.BAD_REQUEST.value(),</span>
+<span class="fc" id="L35">            &quot;Error de validación: &quot; + errors.toString()</span>
         );
-<span class="nc" id="L37">        return new ResponseEntity&lt;&gt;(error, HttpStatus.BAD_REQUEST);</span>
+<span class="fc" id="L37">        return new ResponseEntity&lt;&gt;(error, HttpStatus.BAD_REQUEST);</span>
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity&lt;ErrorResponse&gt; handleGlobalException(Exception ex) {
-<span class="nc" id="L42">        ErrorResponse error = new ErrorResponse(</span>
-<span class="nc" id="L43">            HttpStatus.INTERNAL_SERVER_ERROR.value(),</span>
-<span class="nc" id="L44">            &quot;Error interno del servidor: &quot; + ex.getMessage()</span>
+<span class="fc" id="L42">        ErrorResponse error = new ErrorResponse(</span>
+<span class="fc" id="L43">            HttpStatus.INTERNAL_SERVER_ERROR.value(),</span>
+<span class="fc" id="L44">            &quot;Error interno del servidor: &quot; + ex.getMessage()</span>
         );
-<span class="nc" id="L46">        return new ResponseEntity&lt;&gt;(error, HttpStatus.INTERNAL_SERVER_ERROR);</span>
+<span class="fc" id="L46">        return new ResponseEntity&lt;&gt;(error, HttpStatus.INTERNAL_SERVER_ERROR);</span>
     }
 } 
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

@@ -9,36 +9,36 @@ import org.springframework.stereotype.Component;
 public class OrderItemMapper implements DomainMapper&lt;OrderItem, OrderItemEntity&gt; {
     private final ProductEntityMapper productMapper;
 
-<span class="nc" id="L12">    public OrderItemMapper(ProductEntityMapper productMapper) {</span>
-<span class="nc" id="L13">        this.productMapper = productMapper;</span>
-<span class="nc" id="L14">    }</span>
+<span class="fc" id="L12">    public OrderItemMapper(ProductEntityMapper productMapper) {</span>
+<span class="fc" id="L13">        this.productMapper = productMapper;</span>
+<span class="fc" id="L14">    }</span>
 
     @Override
     public OrderItem toDomain(OrderItemEntity entity) {
-<span class="nc bnc" id="L18" title="All 2 branches missed.">        if (entity == null) return null;</span>
+<span class="fc bfc" id="L18" title="All 2 branches covered.">        if (entity == null) return null;</span>
 
-<span class="nc" id="L20">        return OrderItem.builder()</span>
-<span class="nc" id="L21">                .product(productMapper.toDomain(entity.getProduct()))</span>
-<span class="nc" id="L22">                .quantity(entity.getQuantity())</span>
-<span class="nc" id="L23">                .build();</span>
+<span class="fc" id="L20">        return OrderItem.builder()</span>
+<span class="fc" id="L21">                .product(productMapper.toDomain(entity.getProduct()))</span>
+<span class="fc" id="L22">                .quantity(entity.getQuantity())</span>
+<span class="fc" id="L23">                .build();</span>
     }
 
     @Override
     public OrderItemEntity toEntity(OrderItem domain) {
-<span class="nc bnc" id="L28" title="All 2 branches missed.">        if (domain == null) return null;</span>
+<span class="fc bfc" id="L28" title="All 2 branches covered.">        if (domain == null) return null;</span>
 
-<span class="nc" id="L30">        return OrderItemEntity.builder()</span>
-<span class="nc" id="L31">                .product(productMapper.toEntity(domain.getProduct()))</span>
-<span class="nc" id="L32">                .quantity(domain.getQuantity())</span>
-<span class="nc" id="L33">                .build();</span>
+<span class="fc" id="L30">        return OrderItemEntity.builder()</span>
+<span class="fc" id="L31">                .product(productMapper.toEntity(domain.getProduct()))</span>
+<span class="fc" id="L32">                .quantity(domain.getQuantity())</span>
+<span class="fc" id="L33">                .build();</span>
     }
 
     public OrderItemEntity toEntityWithId(OrderItem domain, OrderItemEntity existingEntity) {
-<span class="nc" id="L37">        OrderItemEntity entity = toEntity(domain);</span>
-<span class="nc bnc" id="L38" title="All 2 branches missed.">        if (existingEntity != null) {</span>
-<span class="nc" id="L39">            entity.setId(existingEntity.getId());</span>
+<span class="fc" id="L37">        OrderItemEntity entity = toEntity(domain);</span>
+<span class="fc bfc" id="L38" title="All 2 branches covered.">        if (existingEntity != null) {</span>
+<span class="fc" id="L39">            entity.setId(existingEntity.getId());</span>
         }
-<span class="nc" id="L41">        return entity;</span>
+<span class="fc" id="L41">        return entity;</span>
     }
 } 
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>
