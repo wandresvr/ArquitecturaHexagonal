@@ -20,6 +20,12 @@ public class OpenApiConfig {
     @Value("${spring.application.name}")
     private String applicationName;
 
+    @Value("${server.port:8081}")
+    private String serverPort;
+
+    @Value("${swagger.server.url:http://localhost}")
+    private String serverUrl;
+
     @Bean
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
@@ -63,8 +69,8 @@ public class OpenApiConfig {
                                 .url("http://www.apache.org/licenses/LICENSE-2.0.html")))
                 .servers(List.of(
                         new Server()
-                                .url("/")
-                                .description("Servidor de Producción")
+                                .url(serverUrl + ":" + serverPort)
+                                .description("Servidor de producción")
                 ))
                 .tags(List.of(
                         new Tag()

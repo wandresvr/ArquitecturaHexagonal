@@ -23,6 +23,16 @@ print_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
+# Función para obtener la IP pública
+get_public_ip() {
+    local ip=$(curl -s ifconfig.me)
+    if [ -z "$ip" ]; then
+        print_error "No se pudo obtener la IP pública"
+        exit 1
+    fi
+    echo "$ip"
+}
+
 # Función para verificar si Docker está corriendo
 check_docker() {
     if ! docker info > /dev/null 2>&1; then
@@ -35,6 +45,10 @@ check_docker() {
 start_services() {
     print_message "Iniciando servicios..."
     
+    # Obtener IP pública
+    PUBLIC_IP=$(get_public_ip)
+    print_message "IP pública detectada: $PUBLIC_IP"
+    
     # Iniciar RabbitMQ
     print_message "Iniciando RabbitMQ..."
     cd "$PROJECT_ROOT/rabbitmq" && docker-compose up -d
@@ -45,7 +59,7 @@ start_services() {
     
     # Iniciar Order Service
     print_message "Iniciando Order Service..."
-    cd "$PROJECT_ROOT/order" && docker-compose up -d
+    cd "$PROJECT_ROOT/order" && SWAGGER_SERVER_URL="http://$PUBLIC_IP" docker-compose up -d
     if [ $? -ne 0 ]; then
         print_error "Error al iniciar Order Service"
         exit 1
@@ -53,7 +67,7 @@ start_services() {
     
     # Iniciar Stock Service
     print_message "Iniciando Stock Service..."
-    cd "$PROJECT_ROOT/stock" && docker-compose up -d
+    cd "$PROJECT_ROOT/stock" && SWAGGER_SERVER_URL="http://$PUBLIC_IP" docker-compose up -d
     if [ $? -ne 0 ]; then
         print_error "Error al iniciar Stock Service"
         exit 1
@@ -61,9 +75,9 @@ start_services() {
     
     cd "$SCRIPT_DIR"
     print_success "Servicios iniciados correctamente"
-    print_message "RabbitMQ Management UI: http://localhost:15672"
-    print_message "Order Service: http://localhost:8080"
-    print_message "Stock Service: http://localhost:8081"
+    print_message "RabbitMQ Management UI: http://$PUBLIC_IP:15672"
+    print_message "Order Service: http://$PUBLIC_IP:8080"
+    print_message "Stock Service: http://$PUBLIC_IP:8081"
 }
 
 # Función para detener los servicios
