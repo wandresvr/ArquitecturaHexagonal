@@ -101,7 +101,7 @@ COPY temp_recipe_ids FROM '/tmp/recipe_ids.csv' WITH CSV;
 -- Insertar productos basados en las recetas
 INSERT INTO products (id, name, description, price, stock)
 SELECT 
-    gen_random_uuid(),
+    r.id,
     CASE 
         WHEN r.name = 'Ensalada César' THEN 'Ensalada César Premium'
         WHEN r.name = 'Pasta Carbonara' THEN 'Pasta Carbonara Individual'
