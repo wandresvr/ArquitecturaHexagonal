@@ -1,11 +1,9 @@
 package com.itm.edu.stock.application.dto;
 
-import lombok.Getter;
-import lombok.AllArgsConstructor;
+import lombok.Value;
 import java.util.List;
 
-@Getter
-@AllArgsConstructor
+@Value
 public class CreateRecipeCommand {
     String name;
     String description;

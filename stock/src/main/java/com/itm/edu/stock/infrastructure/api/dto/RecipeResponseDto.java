@@ -1,13 +1,12 @@
 package com.itm.edu.stock.infrastructure.api.dto;
 
-import lombok.Getter;
-import lombok.Setter;
+import com.itm.edu.stock.domain.entities.Ingredient;
+import lombok.Data;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
-@Getter
-@Setter
+@Data
 public class RecipeResponseDto {
     private UUID id;
     private String name;

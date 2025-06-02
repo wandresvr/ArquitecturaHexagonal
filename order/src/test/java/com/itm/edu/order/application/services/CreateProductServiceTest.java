@@ -20,7 +20,7 @@ import static org.mockito.Mockito.*;
 class CreateProductServiceTest {
 
     @Mock
-    private ProductRepositoryPort productRepository;
+    private ProductRepositoryPort productRepositoryPort;
 
     @InjectMocks
     private CreateProductService createProductService;
@@ -29,90 +29,130 @@ class CreateProductServiceTest {
     void shouldCreateProductSuccessfully() {
         // Arrange
         Product product = Product.builder()
-                .id(UUID.randomUUID())
                 .name("Test Product")
                 .description("Test Description")
-                .price(new BigDecimal("10.99"))
+                .price(new BigDecimal("99.99"))
                 .stock(100)
                 .build();
 
-        when(productRepository.save(any(Product.class))).thenReturn(product);
+        when(productRepositoryPort.save(any(Product.class))).thenReturn(product);
 
         // Act
         Product result = createProductService.createProduct(product);
 
         // Assert
         assertNotNull(result);
-        assertEquals(product.getId(), result.getId());
         assertEquals(product.getName(), result.getName());
         assertEquals(product.getDescription(), result.getDescription());
         assertEquals(product.getPrice(), result.getPrice());
         assertEquals(product.getStock(), result.getStock());
-        verify(productRepository).save(product);
+        verify(productRepositoryPort).save(any(Product.class));
     }
 
     @Test
     void shouldThrowExceptionWhenProductIsNull() {
         // Act & Assert
-        BusinessException exception = assertThrows(BusinessException.class,
-                () -> createProductService.createProduct(null));
+        BusinessException exception = assertThrows(BusinessException.class, () -> {
+            createProductService.createProduct(null);
+        });
+
         assertEquals("El producto no puede ser nulo", exception.getMessage());
-        verify(productRepository, never()).save(any());
+        verifyNoInteractions(productRepositoryPort);
     }
 
     @Test
     void shouldThrowExceptionWhenNameIsEmpty() {
-        // Arrange
-        UUID productId = UUID.randomUUID();
-        Product invalidProduct = Product.createForTesting(
-            productId, "", "Test Description", new BigDecimal("10.99"), 100);
-
         // Act & Assert
-        BusinessException exception = assertThrows(BusinessException.class,
-                () -> createProductService.createProduct(invalidProduct));
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            Product.builder()
+                    .name("")
+                    .description("Test Description")
+                    .price(new BigDecimal("99.99"))
+                    .stock(100)
+                    .build();
+        });
+
         assertEquals("El nombre del producto no puede estar vacío", exception.getMessage());
-        verify(productRepository, never()).save(any());
+        verifyNoInteractions(productRepositoryPort);
     }
 
     @Test
     void shouldThrowExceptionWhenDescriptionIsEmpty() {
-        // Arrange
-        UUID productId = UUID.randomUUID();
-        Product invalidProduct = Product.createForTesting(
-            productId, "Test Product", "", new BigDecimal("10.99"), 100);
-
         // Act & Assert
-        BusinessException exception = assertThrows(BusinessException.class,
-                () -> createProductService.createProduct(invalidProduct));
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            Product.builder()
+                    .name("Test Product")
+                    .description("")
+                    .price(new BigDecimal("99.99"))
+                    .stock(100)
+                    .build();
+        });
+
         assertEquals("La descripción del producto no puede estar vacía", exception.getMessage());
-        verify(productRepository, never()).save(any());
+        verifyNoInteractions(productRepositoryPort);
+    }
+
+    @Test
+    void shouldThrowExceptionWhenPriceIsNull() {
+        // Act & Assert
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            Product.builder()
+                    .name("Test Product")
+                    .description("Test Description")
+                    .price(null)
+                    .stock(100)
+                    .build();
+        });
+
+        assertEquals("El precio no puede ser negativo", exception.getMessage());
+        verifyNoInteractions(productRepositoryPort);
     }
 
     @Test
     void shouldThrowExceptionWhenPriceIsNegative() {
-        // Arrange
-        UUID productId = UUID.randomUUID();
-        Product invalidProduct = Product.createForTesting(
-            productId, "Test Product", "Test Description", new BigDecimal("-10.99"), 100);
-
         // Act & Assert
-        BusinessException exception = assertThrows(BusinessException.class,
-                () -> createProductService.createProduct(invalidProduct));
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            Product.builder()
+                    .name("Test Product")
+                    .description("Test Description")
+                    .price(new BigDecimal("-1.00"))
+                    .stock(100)
+                    .build();
+        });
+
         assertEquals("El precio no puede ser negativo", exception.getMessage());
-        verify(productRepository, never()).save(any());
+        verifyNoInteractions(productRepositoryPort);
+    }
+
+    @Test
+    void shouldThrowExceptionWhenStockIsNull() {
+        // Act & Assert
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            Product.builder()
+                    .name("Test Product")
+                    .description("Test Description")
+                    .price(new BigDecimal("99.99"))
+                    .stock(null)
+                    .build();
+        });
+
+        assertEquals("El stock no puede ser negativo", exception.getMessage());
+        verifyNoInteractions(productRepositoryPort);
     }
 
     @Test
     void shouldThrowExceptionWhenStockIsNegative() {
-        // Arrange
-        UUID productId = UUID.randomUUID();
-        Product invalidProduct = Product.createForTesting(
-            productId, "Test Product", "Test Description", new BigDecimal("10.99"), -1);
-
         // Act & Assert
-        BusinessException exception = assertThrows(BusinessException.class,
-                () -> createProductService.createProduct(invalidProduct));
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            Product.builder()
+                    .name("Test Product")
+                    .description("Test Description")
+                    .price(new BigDecimal("99.99"))
+                    .stock(-1)
+                    .build();
+        });
+
         assertEquals("El stock no puede ser negativo", exception.getMessage());
-        verify(productRepository, never()).save(any());
+        verifyNoInteractions(productRepositoryPort);
     }
 } 

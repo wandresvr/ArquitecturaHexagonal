@@ -91,10 +91,10 @@ public class OrderController {
             );
             
 <span class="fc" id="L93">            return ResponseEntity.status(HttpStatus.CREATED).body(orderDtoMapper.toDto(order));</span>
-<span class="fc" id="L94">        } catch (BusinessException e) {</span>
-<span class="fc" id="L95">            log.error(&quot;Error de negocio al crear la orden: {}&quot;, e.getMessage());</span>
-<span class="fc" id="L96">            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)</span>
-<span class="fc" id="L97">                .body(ApiError.of(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage(), &quot;/api/v1/orders&quot;));</span>
+<span class="nc" id="L94">        } catch (BusinessException e) {</span>
+<span class="nc" id="L95">            log.error(&quot;Error de negocio al crear la orden: {}&quot;, e.getMessage());</span>
+<span class="nc" id="L96">            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)</span>
+<span class="nc" id="L97">                .body(ApiError.of(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage(), &quot;/api/v1/orders&quot;));</span>
 <span class="nc" id="L98">        } catch (Exception e) {</span>
 <span class="nc" id="L99">            log.error(&quot;Error inesperado al crear la orden: {}&quot;, e.getMessage());</span>
 <span class="nc" id="L100">            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)</span>
@@ -113,9 +113,9 @@ public class OrderController {
     })
     @GetMapping(&quot;/{id}&quot;)
     public ResponseEntity&lt;OrderDto&gt; getOrder(@PathVariable UUID id) {
-<span class="fc" id="L116">        return getOrderUseCase.getOrder(id)</span>
-<span class="fc" id="L117">                .map(order -&gt; ResponseEntity.ok(orderDtoMapper.toDto(order)))</span>
-<span class="fc" id="L118">                .orElse(ResponseEntity.notFound().build());</span>
+<span class="nc" id="L116">        return getOrderUseCase.getOrder(id)</span>
+<span class="nc" id="L117">                .map(order -&gt; ResponseEntity.ok(orderDtoMapper.toDto(order)))</span>
+<span class="nc" id="L118">                .orElse(ResponseEntity.notFound().build());</span>
     }
 
     @Operation(summary = &quot;Obtener todas las órdenes&quot;)
@@ -127,11 +127,11 @@ public class OrderController {
     })
     @GetMapping
     public ResponseEntity&lt;List&lt;OrderDto&gt;&gt; getAllOrders() {
-<span class="fc" id="L130">        List&lt;Order&gt; orders = getOrderUseCase.getAllOrders();</span>
-<span class="fc" id="L131">        List&lt;OrderDto&gt; orderDtos = orders.stream()</span>
-<span class="fc" id="L132">                .map(orderDtoMapper::toDto)</span>
-<span class="fc" id="L133">                .collect(Collectors.toList());</span>
-<span class="fc" id="L134">        return ResponseEntity.ok(orderDtos);</span>
+<span class="nc" id="L130">        List&lt;Order&gt; orders = getOrderUseCase.getAllOrders();</span>
+<span class="nc" id="L131">        List&lt;OrderDto&gt; orderDtos = orders.stream()</span>
+<span class="nc" id="L132">                .map(orderDtoMapper::toDto)</span>
+<span class="nc" id="L133">                .collect(Collectors.toList());</span>
+<span class="nc" id="L134">        return ResponseEntity.ok(orderDtos);</span>
     }
 
     @Operation(summary = &quot;Actualizar una orden&quot;)
@@ -152,12 +152,12 @@ public class OrderController {
             @Parameter(description = &quot;ID de la orden&quot;, required = true)
             @PathVariable UUID id,
             @RequestBody OrderDto request) {
-<span class="fc" id="L155">        Order orderDetails = Order.builder()</span>
-<span class="fc" id="L156">                .orderStatus(request.getOrderStatus())</span>
-<span class="fc" id="L157">                .build();</span>
+<span class="nc" id="L155">        Order orderDetails = Order.builder()</span>
+<span class="nc" id="L156">                .orderStatus(request.getOrderStatus())</span>
+<span class="nc" id="L157">                .build();</span>
 
-<span class="fc" id="L159">        Order updatedOrder = updateOrderUseCase.updateOrder(id, orderDetails);</span>
-<span class="fc" id="L160">        return ResponseEntity.ok(orderDtoMapper.toDto(updatedOrder));</span>
+<span class="nc" id="L159">        Order updatedOrder = updateOrderUseCase.updateOrder(id, orderDetails);</span>
+<span class="nc" id="L160">        return ResponseEntity.ok(orderDtoMapper.toDto(updatedOrder));</span>
     }
 
     @Operation(summary = &quot;Eliminar una orden&quot;)
@@ -173,11 +173,11 @@ public class OrderController {
     @DeleteMapping(&quot;/{id}&quot;)
     public ResponseEntity&lt;?&gt; deleteOrder(@PathVariable UUID id) {
         try {
-<span class="fc" id="L176">            deleteOrderUseCase.deleteOrder(id);</span>
-<span class="fc" id="L177">            return ResponseEntity.noContent().build();</span>
-<span class="fc" id="L178">        } catch (BusinessException e) {</span>
-<span class="fc" id="L179">            return ResponseEntity.badRequest()</span>
-<span class="fc" id="L180">                .body(ApiError.of(HttpStatus.BAD_REQUEST, e.getMessage(), &quot;/api/orders&quot;));</span>
+<span class="nc" id="L176">            deleteOrderUseCase.deleteOrder(id);</span>
+<span class="nc" id="L177">            return ResponseEntity.noContent().build();</span>
+<span class="nc" id="L178">        } catch (BusinessException e) {</span>
+<span class="nc" id="L179">            return ResponseEntity.badRequest()</span>
+<span class="nc" id="L180">                .body(ApiError.of(HttpStatus.BAD_REQUEST, e.getMessage(), &quot;/api/orders&quot;));</span>
         }
     }
 
@@ -200,11 +200,11 @@ public class OrderController {
             @PathVariable UUID orderId,
             @Valid @RequestBody UpdateShippingAddressRequest request) {
         try {
-<span class="fc" id="L203">            Order updatedOrder = updateShippingAddressUseCase.updateShippingAddress(</span>
+<span class="nc" id="L203">            Order updatedOrder = updateShippingAddressUseCase.updateShippingAddress(</span>
                 orderId,
-<span class="fc" id="L205">                request.getAddressShipping()</span>
+<span class="nc" id="L205">                request.getAddressShipping()</span>
             );
-<span class="fc" id="L207">            return ResponseEntity.ok(orderDtoMapper.toDto(updatedOrder));</span>
+<span class="nc" id="L207">            return ResponseEntity.ok(orderDtoMapper.toDto(updatedOrder));</span>
 <span class="nc" id="L208">        } catch (BusinessException e) {</span>
 <span class="nc" id="L209">            log.error(&quot;Error de negocio al actualizar la dirección: {}&quot;, e.getMessage());</span>
 <span class="nc" id="L210">            throw new BusinessException(e.getMessage());</span>

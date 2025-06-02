@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -28,7 +29,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
-<span class="fc" id="L31">@RequiredArgsConstructor</span>
+<span class="nc" id="L32">@RequiredArgsConstructor</span>
 public class CreateOrderService implements CreateOrderUseCase {
     private final OrderRepositoryPort orderRepository;
     private final ProductRepositoryPort productRepository;
@@ -38,125 +39,125 @@ public class CreateOrderService implements CreateOrderUseCase {
     @Override
     @Transactional
     public Order createOrder(CreateClientDto clientDto, Map&lt;UUID, BigDecimal&gt; productQuantities, AddressShipping addressShipping) {
-<span class="fc" id="L41">        validateOrderData(clientDto, productQuantities, addressShipping);</span>
+<span class="nc" id="L42">        validateOrderData(clientDto, productQuantities, addressShipping);</span>
         
         // Crear y guardar el cliente
-<span class="fc" id="L44">        Client client = createClient(clientDto);</span>
+<span class="nc" id="L45">        Client client = createClient(clientDto);</span>
         
         // Crear los items de la orden
-<span class="fc" id="L47">        List&lt;OrderItem&gt; orderItems = createOrderItems(productQuantities);</span>
+<span class="nc" id="L48">        List&lt;OrderItem&gt; orderItems = createOrderItems(productQuantities);</span>
         
         // Crear la orden usando el método de fábrica del dominio
-<span class="fc" id="L50">        Order order = Order.create(client, orderItems, addressShipping);</span>
+<span class="nc" id="L51">        Order order = Order.create(client, orderItems, addressShipping);</span>
         
         // Persistir la orden
-<span class="fc" id="L53">        order = orderRepository.save(order);</span>
+<span class="nc" id="L54">        order = orderRepository.save(order);</span>
         
         // Publicar el evento de orden creada
-<span class="fc" id="L56">        publishOrderMessage(order);</span>
+<span class="nc" id="L57">        publishOrderMessage(order);</span>
 
-<span class="fc" id="L58">        return order;</span>
+<span class="nc" id="L59">        return order;</span>
     }
 
     private Client createClient(CreateClientDto clientDto) {
-<span class="fc" id="L62">        Client client = Client.builder()</span>
-<span class="fc" id="L63">            .id(UUID.randomUUID())</span>
-<span class="fc" id="L64">            .name(clientDto.getName())</span>
-<span class="fc" id="L65">            .email(clientDto.getEmail())</span>
-<span class="fc" id="L66">            .phone(clientDto.getPhone())</span>
-<span class="fc" id="L67">            .build();</span>
+<span class="nc" id="L63">        Client client = Client.builder()</span>
+<span class="nc" id="L64">            .id(UUID.randomUUID())</span>
+<span class="nc" id="L65">            .name(clientDto.getName())</span>
+<span class="nc" id="L66">            .email(clientDto.getEmail())</span>
+<span class="nc" id="L67">            .phone(clientDto.getPhone())</span>
+<span class="nc" id="L68">            .build();</span>
             
-<span class="fc" id="L69">        return clientRepository.save(client);</span>
+<span class="nc" id="L70">        return clientRepository.save(client);</span>
     }
 
     private void validateOrderData(CreateClientDto clientDto, Map&lt;UUID, BigDecimal&gt; productQuantities, AddressShipping addressShipping) {
-<span class="fc bfc" id="L73" title="All 2 branches covered.">        if (clientDto == null) {</span>
-<span class="fc" id="L74">            throw new BusinessException(&quot;Los datos del cliente son requeridos&quot;);</span>
+<span class="nc bnc" id="L74" title="All 2 branches missed.">        if (clientDto == null) {</span>
+<span class="nc" id="L75">            throw new BusinessException(&quot;Los datos del cliente son requeridos&quot;);</span>
         }
-<span class="fc bfc" id="L76" title="All 4 branches covered.">        if (productQuantities == null || productQuantities.isEmpty()) {</span>
-<span class="fc" id="L77">            throw new BusinessException(&quot;Debe especificar al menos un producto&quot;);</span>
+<span class="nc bnc" id="L77" title="All 4 branches missed.">        if (productQuantities == null || productQuantities.isEmpty()) {</span>
+<span class="nc" id="L78">            throw new BusinessException(&quot;Debe especificar al menos un producto&quot;);</span>
         }
-<span class="fc bfc" id="L79" title="All 2 branches covered.">        if (addressShipping == null) {</span>
-<span class="fc" id="L80">            throw new BusinessException(&quot;La dirección de envío es requerida&quot;);</span>
+<span class="nc bnc" id="L80" title="All 2 branches missed.">        if (addressShipping == null) {</span>
+<span class="nc" id="L81">            throw new BusinessException(&quot;La dirección de envío es requerida&quot;);</span>
         }
-<span class="fc" id="L82">    }</span>
+<span class="nc" id="L83">    }</span>
 
     private List&lt;OrderItem&gt; createOrderItems(Map&lt;UUID, BigDecimal&gt; productQuantities) {
-<span class="fc" id="L85">        List&lt;OrderItem&gt; orderItems = new ArrayList&lt;&gt;();</span>
-<span class="fc" id="L86">        List&lt;String&gt; errors = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L86">        List&lt;OrderItem&gt; orderItems = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L87">        List&lt;String&gt; errors = new ArrayList&lt;&gt;();</span>
 
-<span class="fc bfc" id="L88" title="All 2 branches covered.">        for (Map.Entry&lt;UUID, BigDecimal&gt; entry : productQuantities.entrySet()) {</span>
+<span class="nc bnc" id="L89" title="All 2 branches missed.">        for (Map.Entry&lt;UUID, BigDecimal&gt; entry : productQuantities.entrySet()) {</span>
             try {
-<span class="fc" id="L90">                Product product = productRepository.findById(entry.getKey())</span>
-<span class="fc" id="L91">                    .orElseThrow(() -&gt; new BusinessException(&quot;Producto no encontrado con ID: &quot; + entry.getKey()));</span>
+<span class="nc" id="L91">                Product product = productRepository.findById(entry.getKey())</span>
+<span class="nc" id="L92">                    .orElseThrow(() -&gt; new BusinessException(&quot;Producto no encontrado con ID: &quot; + entry.getKey()));</span>
 
-<span class="fc" id="L93">                validateProductStock(product, entry.getValue());</span>
+<span class="nc" id="L94">                validateProductStock(product, entry.getValue());</span>
                 
-<span class="fc" id="L95">                OrderItem orderItem = OrderItem.create(product, entry.getValue().intValue());</span>
-<span class="fc" id="L96">                orderItems.add(orderItem);</span>
-<span class="fc" id="L97">            } catch (IllegalArgumentException | BusinessException e) {</span>
-<span class="fc" id="L98">                errors.add(e.getMessage());</span>
-<span class="fc" id="L99">            }</span>
-<span class="fc" id="L100">        }</span>
+<span class="nc" id="L96">                OrderItem orderItem = OrderItem.create(product, entry.getValue().intValue());</span>
+<span class="nc" id="L97">                orderItems.add(orderItem);</span>
+<span class="nc" id="L98">            } catch (IllegalArgumentException | BusinessException e) {</span>
+<span class="nc" id="L99">                errors.add(e.getMessage());</span>
+<span class="nc" id="L100">            }</span>
+<span class="nc" id="L101">        }</span>
 
-<span class="fc bfc" id="L102" title="All 2 branches covered.">        if (!errors.isEmpty()) {</span>
-<span class="fc" id="L103">            throw new BusinessException(&quot;Errores en la validación de productos: &quot; + String.join(&quot;, &quot;, errors));</span>
+<span class="nc bnc" id="L103" title="All 2 branches missed.">        if (!errors.isEmpty()) {</span>
+<span class="nc" id="L104">            throw new BusinessException(&quot;Errores en la validación de productos: &quot; + String.join(&quot;, &quot;, errors));</span>
         }
 
-<span class="fc" id="L106">        return orderItems;</span>
+<span class="nc" id="L107">        return orderItems;</span>
     }
 
     private void validateProductStock(Product product, BigDecimal quantity) {
-<span class="fc bfc" id="L110" title="All 2 branches covered.">        if (quantity.compareTo(BigDecimal.ZERO) &lt;= 0) {</span>
-<span class="fc" id="L111">            throw new BusinessException(&quot;La cantidad debe ser mayor a 0 para el producto: &quot; + product.getId());</span>
+<span class="nc bnc" id="L111" title="All 2 branches missed.">        if (quantity.compareTo(BigDecimal.ZERO) &lt;= 0) {</span>
+<span class="nc" id="L112">            throw new BusinessException(&quot;La cantidad debe ser mayor a 0 para el producto: &quot; + product.getId());</span>
         }
         
-<span class="fc bfc" id="L114" title="All 2 branches covered.">        if (product.getStock() &lt; quantity.intValue()) {</span>
-<span class="fc" id="L115">            throw new BusinessException(&quot;Stock insuficiente para el producto: &quot; + product.getName());</span>
+<span class="nc bnc" id="L115" title="All 2 branches missed.">        if (product.getStock() &lt; quantity.intValue()) {</span>
+<span class="nc" id="L116">            throw new BusinessException(&quot;Stock insuficiente para el producto: &quot; + product.getName());</span>
         }
-<span class="fc" id="L117">    }</span>
+<span class="nc" id="L118">    }</span>
 
     private void publishOrderMessage(Order order) {
         try {
-<span class="fc" id="L121">            OrderMessageDTO messageDTO = OrderMessageDTO.builder()</span>
-<span class="fc" id="L122">                .orderId(order.getOrderId())</span>
-<span class="fc" id="L123">                .client(mapClientToDTO(order.getClient()))</span>
-<span class="fc" id="L124">                .shippingAddress(mapAddressToDTO(order.getDeliveryAddress()))</span>
-<span class="fc" id="L125">                .products(mapOrderItemsToDTO(order.getProducts()))</span>
-<span class="fc" id="L126">                .build();</span>
+<span class="nc" id="L122">            OrderMessageDTO messageDTO = OrderMessageDTO.builder()</span>
+<span class="nc" id="L123">                .orderId(order.getOrderId())</span>
+<span class="nc" id="L124">                .client(mapClientToDTO(order.getClient()))</span>
+<span class="nc" id="L125">                .shippingAddress(mapAddressToDTO(order.getDeliveryAddress()))</span>
+<span class="nc" id="L126">                .products(mapOrderItemsToDTO(order.getProducts()))</span>
+<span class="nc" id="L127">                .build();</span>
 
-<span class="fc" id="L128">            orderPublisher.publish(messageDTO);</span>
-<span class="fc" id="L129">        } catch (Exception e) {</span>
-<span class="fc" id="L130">            throw new BusinessException(&quot;Error al publicar el mensaje de la orden: &quot; + e.getMessage());</span>
-<span class="fc" id="L131">        }</span>
-<span class="fc" id="L132">    }</span>
+<span class="nc" id="L129">            orderPublisher.publish(messageDTO);</span>
+<span class="nc" id="L130">        } catch (Exception e) {</span>
+<span class="nc" id="L131">            throw new BusinessException(&quot;Error al publicar el mensaje de la orden: &quot; + e.getMessage());</span>
+<span class="nc" id="L132">        }</span>
+<span class="nc" id="L133">    }</span>
 
     private ClientDTO mapClientToDTO(Client client) {
-<span class="fc" id="L135">        return ClientDTO.builder()</span>
-<span class="fc" id="L136">            .id(client.getId())</span>
-<span class="fc" id="L137">            .name(client.getName())</span>
-<span class="fc" id="L138">            .email(client.getEmail())</span>
-<span class="fc" id="L139">            .phone(client.getPhone())</span>
-<span class="fc" id="L140">            .build();</span>
+<span class="nc" id="L136">        return ClientDTO.builder()</span>
+<span class="nc" id="L137">            .id(client.getId())</span>
+<span class="nc" id="L138">            .name(client.getName())</span>
+<span class="nc" id="L139">            .email(client.getEmail())</span>
+<span class="nc" id="L140">            .phone(client.getPhone())</span>
+<span class="nc" id="L141">            .build();</span>
     }
 
     private AddressShippingDTO mapAddressToDTO(AddressShipping address) {
-<span class="fc" id="L144">        return AddressShippingDTO.builder()</span>
-<span class="fc" id="L145">            .street(address.getStreet())</span>
-<span class="fc" id="L146">            .city(address.getCity())</span>
-<span class="fc" id="L147">            .state(address.getState())</span>
-<span class="fc" id="L148">            .zipCode(address.getZipCode())</span>
-<span class="fc" id="L149">            .country(address.getCountry())</span>
-<span class="fc" id="L150">            .build();</span>
+<span class="nc" id="L145">        return AddressShippingDTO.builder()</span>
+<span class="nc" id="L146">            .street(address.getStreet())</span>
+<span class="nc" id="L147">            .city(address.getCity())</span>
+<span class="nc" id="L148">            .state(address.getState())</span>
+<span class="nc" id="L149">            .zipCode(address.getZipCode())</span>
+<span class="nc" id="L150">            .country(address.getCountry())</span>
+<span class="nc" id="L151">            .build();</span>
     }
 
     private List&lt;ProductOrderDTO&gt; mapOrderItemsToDTO(List&lt;OrderItem&gt; items) {
-<span class="fc" id="L154">        return items.stream()</span>
-<span class="fc" id="L155">            .map(item -&gt; ProductOrderDTO.builder()</span>
-<span class="fc" id="L156">                .productId(item.getProduct().getId())</span>
-<span class="fc" id="L157">                .quantity(item.getQuantity())</span>
-<span class="fc" id="L158">                .build())</span>
-<span class="fc" id="L159">            .collect(Collectors.toList());</span>
+<span class="nc" id="L155">        return items.stream()</span>
+<span class="nc" id="L156">            .map(item -&gt; ProductOrderDTO.builder()</span>
+<span class="nc" id="L157">                .productId(item.getProduct().getId())</span>
+<span class="nc" id="L158">                .quantity(item.getQuantity())</span>
+<span class="nc" id="L159">                .build())</span>
+<span class="nc" id="L160">            .collect(Collectors.toList());</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

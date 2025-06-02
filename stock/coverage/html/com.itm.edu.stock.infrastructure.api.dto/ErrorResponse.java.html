@@ -13,18 +13,18 @@ import java.time.LocalDateTime;
 @Schema(description = &quot;Respuesta de error de la API&quot;)
 public class ErrorResponse {
     @Schema(description = &quot;Código de estado HTTP&quot;, example = &quot;400&quot;)
-<span class="fc" id="L16">    private int status;</span>
+<span class="nc" id="L16">    private int status;</span>
 
     @Schema(description = &quot;Mensaje de error&quot;, example = &quot;Error de validación en los datos de entrada&quot;)
-<span class="fc" id="L19">    private String message;</span>
+<span class="nc" id="L19">    private String message;</span>
 
-<span class="pc" id="L21">    @Schema(description = &quot;Fecha y hora del error&quot;, example = &quot;2024-03-20T10:30:00&quot;)</span>
-<span class="pc" id="L22">    private LocalDateTime timestamp = LocalDateTime.now();</span>
+<span class="nc" id="L21">    @Schema(description = &quot;Fecha y hora del error&quot;, example = &quot;2024-03-20T10:30:00&quot;)</span>
+<span class="nc" id="L22">    private LocalDateTime timestamp = LocalDateTime.now();</span>
 
-<span class="fc" id="L24">    public ErrorResponse(int status, String message) {</span>
-<span class="fc" id="L25">        this.status = status;</span>
-<span class="fc" id="L26">        this.message = message;</span>
-<span class="fc" id="L27">        this.timestamp = LocalDateTime.now();</span>
-<span class="fc" id="L28">    }</span>
+<span class="nc" id="L24">    public ErrorResponse(int status, String message) {</span>
+<span class="nc" id="L25">        this.status = status;</span>
+<span class="nc" id="L26">        this.message = message;</span>
+<span class="nc" id="L27">        this.timestamp = LocalDateTime.now();</span>
+<span class="nc" id="L28">    }</span>
 } 
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

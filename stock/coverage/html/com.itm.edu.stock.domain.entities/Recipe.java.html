@@ -4,37 +4,39 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
+import lombok.With;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 @Getter
-<span class="pc bfc" id="L13" title="All 2 branches covered.">@Builder(toBuilder = true)</span>
-<span class="fc" id="L14">@AllArgsConstructor</span>
-<span class="fc" id="L15">@NoArgsConstructor</span>
+<span class="pc bfc" id="L14" title="All 2 branches covered.">@Builder(toBuilder = true)</span>
+<span class="fc" id="L15">@AllArgsConstructor</span>
+<span class="fc" id="L16">@NoArgsConstructor</span>
+@With
 public class Recipe {
-<span class="fc" id="L17">    private UUID id;</span>
-<span class="fc" id="L18">    private String name;</span>
-<span class="fc" id="L19">    private String description;</span>
-<span class="fc" id="L20">    private String instructions;</span>
-<span class="fc" id="L21">    private Integer preparationTime;</span>
-<span class="fc" id="L22">    private String difficulty;</span>
-<span class="fc" id="L23">    private BigDecimal cost;</span>
+<span class="pc bnc" id="L19" title="All 2 branches missed.">    private UUID id;</span>
+<span class="pc bnc" id="L20" title="All 2 branches missed.">    private String name;</span>
+<span class="pc bnc" id="L21" title="All 2 branches missed.">    private String description;</span>
+<span class="pc bnc" id="L22" title="All 2 branches missed.">    private String instructions;</span>
+<span class="pc bnc" id="L23" title="All 2 branches missed.">    private Integer preparationTime;</span>
+<span class="pc bnc" id="L24" title="All 2 branches missed.">    private String difficulty;</span>
+<span class="fc" id="L25">    private BigDecimal cost;</span>
     
     @Builder.Default
-<span class="fc" id="L26">    private List&lt;RecipeIngredient&gt; recipeIngredients = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L28">    private List&lt;RecipeIngredient&gt; recipeIngredients = new ArrayList&lt;&gt;();</span>
 
     public Recipe withCost(BigDecimal newCost) {
-<span class="fc" id="L29">        return this.toBuilder()</span>
-<span class="fc" id="L30">                .cost(newCost)</span>
-<span class="fc" id="L31">                .build();</span>
+<span class="fc" id="L31">        return this.toBuilder()</span>
+<span class="fc" id="L32">                .cost(newCost)</span>
+<span class="fc" id="L33">                .build();</span>
     }
 
     public Recipe withRecipeIngredients(List&lt;RecipeIngredient&gt; newIngredients) {
-<span class="fc" id="L35">        return this.toBuilder()</span>
-<span class="fc bfc" id="L36" title="All 2 branches covered.">                .recipeIngredients(newIngredients != null ? newIngredients : new ArrayList&lt;&gt;())</span>
-<span class="fc" id="L37">                .build();</span>
+<span class="fc" id="L37">        return this.toBuilder()</span>
+<span class="fc bfc" id="L38" title="All 2 branches covered.">                .recipeIngredients(newIngredients != null ? newIngredients : new ArrayList&lt;&gt;())</span>
+<span class="fc" id="L39">                .build();</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

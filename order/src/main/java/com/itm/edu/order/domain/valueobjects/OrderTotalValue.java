@@ -1,11 +1,14 @@
 package com.itm.edu.order.domain.valueobjects;
 
+import jakarta.persistence.Embeddable;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.util.Objects;
 
+@Embeddable
 @Getter
+@NoArgsConstructor
 public class OrderTotalValue {
     private BigDecimal amount;
     private String currency;
@@ -38,19 +41,5 @@ public class OrderTotalValue {
 
     public static OrderTotalValue zero() {
         return new OrderTotalValue(BigDecimal.ZERO, "USD");
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        OrderTotalValue that = (OrderTotalValue) o;
-        return Objects.equals(amount, that.amount) &&
-                Objects.equals(currency, that.currency);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(amount, currency);
     }
 } 

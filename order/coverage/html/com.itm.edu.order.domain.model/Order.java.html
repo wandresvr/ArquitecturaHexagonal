@@ -34,38 +34,38 @@ public class Order {
 <span class="fc" id="L34">    }</span>
 
     public void updateStatus(String newStatus) {
-<span class="fc bfc" id="L37" title="All 4 branches covered.">        if (newStatus == null || newStatus.trim().isEmpty()) {</span>
-<span class="fc" id="L38">            throw new IllegalArgumentException(&quot;El estado de la orden no puede ser nulo o vacío&quot;);</span>
+<span class="nc bnc" id="L37" title="All 4 branches missed.">        if (newStatus == null || newStatus.trim().isEmpty()) {</span>
+<span class="nc" id="L38">            throw new IllegalArgumentException(&quot;El estado de la orden no puede ser nulo o vacío&quot;);</span>
         }
-<span class="fc" id="L40">        this.orderStatus = newStatus;</span>
-<span class="fc" id="L41">    }</span>
+<span class="nc" id="L40">        this.orderStatus = newStatus;</span>
+<span class="nc" id="L41">    }</span>
 
     public void addProduct(Product product, int quantity) {
-<span class="fc bfc" id="L44" title="All 2 branches covered.">        if (product == null) {</span>
-<span class="fc" id="L45">            throw new IllegalArgumentException(&quot;El producto no puede ser nulo&quot;);</span>
+<span class="nc bnc" id="L44" title="All 2 branches missed.">        if (product == null) {</span>
+<span class="nc" id="L45">            throw new IllegalArgumentException(&quot;El producto no puede ser nulo&quot;);</span>
         }
-<span class="fc bfc" id="L47" title="All 2 branches covered.">        if (quantity &lt;= 0) {</span>
-<span class="fc" id="L48">            throw new IllegalArgumentException(&quot;La cantidad debe ser mayor a 0&quot;);</span>
+<span class="nc bnc" id="L47" title="All 2 branches missed.">        if (quantity &lt;= 0) {</span>
+<span class="nc" id="L48">            throw new IllegalArgumentException(&quot;La cantidad debe ser mayor a 0&quot;);</span>
         }
         
-<span class="fc" id="L51">        OrderItem orderItem = OrderItem.builder()</span>
-<span class="fc" id="L52">            .product(product)</span>
-<span class="fc" id="L53">            .quantity(quantity)</span>
-<span class="fc" id="L54">            .build();</span>
+<span class="nc" id="L51">        OrderItem orderItem = OrderItem.builder()</span>
+<span class="nc" id="L52">            .product(product)</span>
+<span class="nc" id="L53">            .quantity(quantity)</span>
+<span class="nc" id="L54">            .build();</span>
             
-<span class="fc" id="L56">        this.products.add(orderItem);</span>
-<span class="fc" id="L57">    }</span>
+<span class="nc" id="L56">        this.products.add(orderItem);</span>
+<span class="nc" id="L57">    }</span>
 
     public static Order create(Client client, List&lt;OrderItem&gt; products, AddressShipping deliveryAddress) {
-<span class="fc" id="L60">        return Order.builder()</span>
-<span class="fc" id="L61">            .orderId(UUID.randomUUID())</span>
-<span class="fc" id="L62">            .client(client)</span>
-<span class="fc" id="L63">            .products(products)</span>
-<span class="fc" id="L64">            .deliveryAddress(deliveryAddress)</span>
-<span class="fc" id="L65">            .orderDate(LocalDateTime.now())</span>
-<span class="fc" id="L66">            .orderStatus(&quot;PENDING_VALIDATION&quot;)</span>
-<span class="fc" id="L67">            .total(calculateTotalFromProducts(products))</span>
-<span class="fc" id="L68">            .build();</span>
+<span class="nc" id="L60">        return Order.builder()</span>
+<span class="nc" id="L61">            .orderId(UUID.randomUUID())</span>
+<span class="nc" id="L62">            .client(client)</span>
+<span class="nc" id="L63">            .products(products)</span>
+<span class="nc" id="L64">            .deliveryAddress(deliveryAddress)</span>
+<span class="nc" id="L65">            .orderDate(LocalDateTime.now())</span>
+<span class="nc" id="L66">            .orderStatus(&quot;PENDING_VALIDATION&quot;)</span>
+<span class="nc" id="L67">            .total(calculateTotalFromProducts(products))</span>
+<span class="nc" id="L68">            .build();</span>
     }
 
     public Order withUpdatedStatus(String newStatus) {
@@ -139,14 +139,14 @@ public class Order {
 
     private static OrderTotalValue calculateTotalFromProducts(List&lt;OrderItem&gt; products) {
 <span class="pc bpc" id="L141" title="1 of 4 branches missed.">        if (products == null || products.isEmpty()) {</span>
-<span class="fc" id="L142">            return new OrderTotalValue(BigDecimal.ZERO, &quot;COP&quot;);</span>
+<span class="fc" id="L142">            return new OrderTotalValue(BigDecimal.ZERO, &quot;USD&quot;);</span>
         }
         
 <span class="fc" id="L145">        BigDecimal totalAmount = products.stream()</span>
 <span class="fc" id="L146">            .map(OrderItem::calculateValue)</span>
 <span class="fc" id="L147">            .reduce(BigDecimal.ZERO, BigDecimal::add);</span>
         
-<span class="fc" id="L149">        return new OrderTotalValue(totalAmount, &quot;COP&quot;);</span>
+<span class="fc" id="L149">        return new OrderTotalValue(totalAmount, &quot;USD&quot;);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

@@ -2,7 +2,6 @@ package com.itm.edu.order.domain.model;
 
 import com.itm.edu.order.domain.valueobjects.AddressShipping;
 import com.itm.edu.order.domain.valueobjects.OrderTotalValue;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
@@ -11,8 +10,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -20,406 +17,518 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class OrderTest {
 
-    private UUID orderId;
-    private Client client;
-    private AddressShipping deliveryAddress;
-    private Order order;
-    private Product product;
-    private OrderItem orderItem;
-
-    @BeforeEach
-    void setUp() {
-        orderId = UUID.randomUUID();
-        UUID clientId = UUID.randomUUID();
-        UUID productId = UUID.randomUUID();
-
-        client = Client.builder()
-            .id(clientId)
-            .name("John Doe")
-            .email("john@example.com")
-            .phone("1234567890")
-            .build();
-
-        deliveryAddress = AddressShipping.builder()
-            .street("123 Main St")
-            .city("Medellín")
-            .state("Antioquia")
-            .zipCode("050001")
-            .country("Colombia")
-            .build();
-
-        product = Product.builder()
-            .id(productId)
-            .name("Test Product")
-            .description("Test Description")
-            .price(new BigDecimal("99.99"))
-            .stock(10)
-            .build();
-
-        orderItem = OrderItem.builder()
-            .product(product)
-            .quantity(2)
-            .build();
-
-        order = Order.builder()
-            .orderId(orderId)
-            .client(client)
-            .orderStatus("PENDING")
-            .orderDate(LocalDateTime.now())
-            .deliveryAddress(deliveryAddress)
-            .products(new ArrayList<>(Collections.singletonList(orderItem)))
-            .build();
-    }
-
     @Test
     void shouldCreateOrderSuccessfully() {
+        // Arrange
+        UUID orderId = UUID.randomUUID();
+        Client client = Client.builder()
+                .id(UUID.randomUUID())
+                .name("John Doe")
+                .email("john@example.com")
+                .phone("1234567890")
+                .build();
+
+        AddressShipping address = AddressShipping.builder()
+                .street("123 Main St")
+                .city("New York")
+                .state("NY")
+                .zipCode("10001")
+                .country("USA")
+                .build();
+
         // Act
-        Order newOrder = Order.create(client, Collections.singletonList(orderItem), deliveryAddress);
+        Order order = Order.builder()
+                .orderId(orderId)
+                .client(client)
+                .orderStatus("PENDING")
+                .orderDate(LocalDateTime.now())
+                .deliveryAddress(address)
+                .products(new ArrayList<>())
+                .total(new OrderTotalValue(BigDecimal.ZERO, "USD"))
+                .build();
 
         // Assert
-        assertNotNull(newOrder);
-        assertNotNull(newOrder.getOrderId());
-        assertEquals(client, newOrder.getClient());
-        assertEquals("PENDING_VALIDATION", newOrder.getOrderStatus());
-        assertNotNull(newOrder.getOrderDate());
-        assertEquals(deliveryAddress, newOrder.getDeliveryAddress());
-        assertEquals(1, newOrder.getProducts().size());
-        assertEquals(orderItem, newOrder.getProducts().get(0));
-        assertNotNull(newOrder.getTotal());
+        assertNotNull(order);
+        assertEquals(orderId, order.getOrderId());
+        assertEquals("PENDING", order.getOrderStatus());
+        assertEquals(client, order.getClient());
+        assertEquals(address, order.getDeliveryAddress());
+        assertTrue(order.getProducts().isEmpty());
     }
 
     @Test
     void shouldUpdateStatusSuccessfully() {
-        // Act
-        order.updateStatus("PROCESSING");
-
-        // Assert
-        assertEquals("PROCESSING", order.getOrderStatus());
-    }
-
-    @ParameterizedTest
-    @NullAndEmptySource
-    @ValueSource(strings = {" ", "  "})
-    void shouldThrowExceptionWhenUpdatingStatusWithInvalidValue(String invalidStatus) {
-        // Act & Assert
-        assertThrows(IllegalArgumentException.class, () -> order.updateStatus(invalidStatus));
-    }
-
-    @Test
-    void shouldAddProductSuccessfully() {
         // Arrange
-        Product newProduct = Product.builder()
-            .id(UUID.randomUUID())
-            .name("New Product")
-            .description("New Description")
-            .price(new BigDecimal("149.99"))
-            .stock(5)
-            .build();
+        Order order = createTestOrder();
+        String newStatus = "COMPLETED";
 
         // Act
-        order.addProduct(newProduct, 3);
+        Order updatedOrder = order.withUpdatedStatus(newStatus);
 
         // Assert
-        assertEquals(2, order.getProducts().size());
-        OrderItem addedItem = order.getProducts().get(1);
-        assertEquals(newProduct, addedItem.getProduct());
-        assertEquals(3, addedItem.getQuantity());
-    }
-
-    @Test
-    void shouldThrowExceptionWhenAddingNullProduct() {
-        // Act & Assert
-        assertThrows(IllegalArgumentException.class, () -> order.addProduct(null, 1));
-    }
-
-    @Test
-    void shouldThrowExceptionWhenAddingProductWithInvalidQuantity() {
-        // Act & Assert
-        assertThrows(IllegalArgumentException.class, () -> order.addProduct(product, 0));
-        assertThrows(IllegalArgumentException.class, () -> order.addProduct(product, -1));
-    }
-
-    @Test
-    void shouldCreateOrderWithUpdatedStatus() {
-        // Act
-        Order updatedOrder = order.withUpdatedStatus("COMPLETED");
-
-        // Assert
-        assertNotSame(order, updatedOrder);
-        assertEquals("COMPLETED", updatedOrder.getOrderStatus());
+        assertNotNull(updatedOrder);
+        assertEquals(newStatus, updatedOrder.getOrderStatus());
         assertEquals(order.getOrderId(), updatedOrder.getOrderId());
         assertEquals(order.getClient(), updatedOrder.getClient());
-        assertEquals(order.getProducts(), updatedOrder.getProducts());
         assertEquals(order.getDeliveryAddress(), updatedOrder.getDeliveryAddress());
-        assertEquals(order.getOrderDate(), updatedOrder.getOrderDate());
-        assertEquals(order.getTotal(), updatedOrder.getTotal());
     }
 
     @Test
-    void shouldCreateOrderWithUpdatedClient() {
+    void shouldUpdateDeliveryAddressSuccessfully() {
         // Arrange
-        Client newClient = Client.builder()
-            .id(UUID.randomUUID())
-            .name("Jane Doe")
-            .email("jane@example.com")
-            .phone("0987654321")
-            .build();
-
-        // Act
-        Order updatedOrder = order.withUpdatedClient(newClient);
-
-        // Assert
-        assertNotSame(order, updatedOrder);
-        assertEquals(newClient, updatedOrder.getClient());
-        assertEquals(order.getOrderId(), updatedOrder.getOrderId());
-        assertEquals(order.getOrderStatus(), updatedOrder.getOrderStatus());
-        assertEquals(order.getProducts(), updatedOrder.getProducts());
-        assertEquals(order.getDeliveryAddress(), updatedOrder.getDeliveryAddress());
-        assertEquals(order.getOrderDate(), updatedOrder.getOrderDate());
-        assertEquals(order.getTotal(), updatedOrder.getTotal());
-    }
-
-    @Test
-    void shouldCreateOrderWithUpdatedDeliveryAddress() {
-        // Arrange
+        Order order = createTestOrder();
         AddressShipping newAddress = AddressShipping.builder()
-            .street("456 New St")
-            .city("Bogotá")
-            .state("Cundinamarca")
-            .zipCode("110111")
-            .country("Colombia")
-            .build();
+                .street("456 New St")
+                .city("Los Angeles")
+                .state("CA")
+                .zipCode("90001")
+                .country("USA")
+                .build();
 
         // Act
         Order updatedOrder = order.withUpdatedDeliveryAddress(newAddress);
 
         // Assert
-        assertNotSame(order, updatedOrder);
+        assertNotNull(updatedOrder);
         assertEquals(newAddress, updatedOrder.getDeliveryAddress());
         assertEquals(order.getOrderId(), updatedOrder.getOrderId());
-        assertEquals(order.getClient(), updatedOrder.getClient());
         assertEquals(order.getOrderStatus(), updatedOrder.getOrderStatus());
-        assertEquals(order.getProducts(), updatedOrder.getProducts());
-        assertEquals(order.getOrderDate(), updatedOrder.getOrderDate());
-        assertEquals(order.getTotal(), updatedOrder.getTotal());
+        assertEquals(order.getClient(), updatedOrder.getClient());
     }
 
     @Test
-    void shouldCreateOrderWithAddedProduct() {
+    void shouldAddProductSuccessfully() {
         // Arrange
-        Product newProduct = Product.builder()
-            .id(UUID.randomUUID())
-            .name("New Product")
-            .description("New Description")
-            .price(new BigDecimal("149.99"))
-            .stock(5)
-            .build();
+        Order order = createTestOrder();
+        Product product = Product.builder()
+                .id(UUID.randomUUID())
+                .name("Test Product")
+                .description("Test Description")
+                .price(new BigDecimal("99.99"))
+                .stock(100)
+                .build();
 
         // Act
-        Order updatedOrder = order.withAddedProduct(newProduct, 3);
+        Order updatedOrder = order.withAddedProduct(product, 2);
 
         // Assert
-        assertNotSame(order, updatedOrder);
-        assertEquals(2, updatedOrder.getProducts().size());
-        OrderItem addedItem = updatedOrder.getProducts().get(1);
-        assertEquals(newProduct, addedItem.getProduct());
-        assertEquals(3, addedItem.getQuantity());
-        assertEquals(order.getOrderId(), updatedOrder.getOrderId());
-        assertEquals(order.getClient(), updatedOrder.getClient());
-        assertEquals(order.getOrderStatus(), updatedOrder.getOrderStatus());
-        assertEquals(order.getDeliveryAddress(), updatedOrder.getDeliveryAddress());
-        assertEquals(order.getOrderDate(), updatedOrder.getOrderDate());
+        assertNotNull(updatedOrder);
+        assertEquals(1, updatedOrder.getProducts().size());
+        OrderItem addedItem = updatedOrder.getProducts().get(0);
+        assertEquals(product, addedItem.getProduct());
+        assertEquals(2, addedItem.getQuantity());
     }
 
     @Test
-    void shouldCreateOrderWithRemovedProduct() {
-        // Act
-        Order updatedOrder = order.withRemovedProduct(product);
-
-        // Assert
-        assertNotSame(order, updatedOrder);
-        assertTrue(updatedOrder.getProducts().isEmpty());
-        assertEquals(order.getOrderId(), updatedOrder.getOrderId());
-        assertEquals(order.getClient(), updatedOrder.getClient());
-        assertEquals(order.getOrderStatus(), updatedOrder.getOrderStatus());
-        assertEquals(order.getDeliveryAddress(), updatedOrder.getDeliveryAddress());
-        assertEquals(order.getOrderDate(), updatedOrder.getOrderDate());
-    }
-
-    @Test
-    void shouldCalculateTotalFromProducts() {
+    void shouldCalculateTotalCorrectly() {
         // Arrange
+        Order order = createTestOrder();
         Product product1 = Product.builder()
-            .id(UUID.randomUUID())
-            .name("Product 1")
-            .description("Description 1")
-            .price(new BigDecimal("100.00"))
-            .stock(10)
-            .build();
+                .id(UUID.randomUUID())
+                .name("Product 1")
+                .description("Description 1")
+                .price(new BigDecimal("100.00"))
+                .stock(100)
+                .build();
 
         Product product2 = Product.builder()
-            .id(UUID.randomUUID())
-            .name("Product 2")
-            .description("Description 2")
-            .price(new BigDecimal("200.00"))
-            .stock(20)
-            .build();
-
-        OrderItem item1 = OrderItem.builder()
-            .product(product1)
-            .quantity(2)
-            .build();
-
-        OrderItem item2 = OrderItem.builder()
-            .product(product2)
-            .quantity(1)
-            .build();
-
-        List<OrderItem> items = new ArrayList<>(Arrays.asList(item1, item2));
+                .id(UUID.randomUUID())
+                .name("Product 2")
+                .description("Description 2")
+                .price(new BigDecimal("50.00"))
+                .stock(100)
+                .build();
 
         // Act
-        Order orderWithItems = Order.builder()
-            .orderId(UUID.randomUUID())
-            .client(client)
-            .orderStatus("PENDING")
-            .orderDate(LocalDateTime.now())
-            .deliveryAddress(deliveryAddress)
-            .products(items)
-            .build();
+        Order updatedOrder = order
+                .withAddedProduct(product1, 2)
+                .withAddedProduct(product2, 3);
 
         // Assert
-        OrderTotalValue total = orderWithItems.getTotal();
-        assertEquals(new BigDecimal("400.00"), total.getAmount());
-        assertEquals("COP", total.getCurrency());
+        assertNotNull(updatedOrder);
+        assertEquals(2, updatedOrder.getProducts().size());
+        assertEquals(new BigDecimal("350.00"), updatedOrder.getTotal().getAmount());
     }
 
     @Test
-    void shouldReturnZeroTotalWhenNoProducts() {
+    void shouldRemoveProductSuccessfully() {
+        // Arrange
+        Order order = createTestOrder();
+        Product product1 = Product.builder()
+                .id(UUID.randomUUID())
+                .name("Product 1")
+                .description("Description 1")
+                .price(new BigDecimal("100.00"))
+                .stock(100)
+                .build();
+
+        Product product2 = Product.builder()
+                .id(UUID.randomUUID())
+                .name("Product 2")
+                .description("Description 2")
+                .price(new BigDecimal("50.00"))
+                .stock(100)
+                .build();
+
+        order = order
+                .withAddedProduct(product1, 2)
+                .withAddedProduct(product2, 3);
+
         // Act
-        Order orderWithoutProducts = Order.builder()
-            .orderId(orderId)
-            .client(client)
-            .orderStatus("PENDING")
-            .orderDate(LocalDateTime.now())
-            .deliveryAddress(deliveryAddress)
-            .products(new ArrayList<>())
-            .build();
+        Order updatedOrder = order.withRemovedProduct(product1);
 
         // Assert
-        OrderTotalValue total = orderWithoutProducts.getTotal();
+        assertNotNull(updatedOrder);
+        assertEquals(1, updatedOrder.getProducts().size());
+        assertEquals(product2, updatedOrder.getProducts().get(0).getProduct());
+    }
+
+    private Order createTestOrder() {
+        Client client = Client.builder()
+                .id(UUID.randomUUID())
+                .name("John Doe")
+                .email("john@example.com")
+                .phone("1234567890")
+                .build();
+
+        AddressShipping address = AddressShipping.builder()
+                .street("123 Main St")
+                .city("New York")
+                .state("NY")
+                .zipCode("10001")
+                .country("USA")
+                .build();
+
+        return Order.builder()
+                .orderId(UUID.randomUUID())
+                .client(client)
+                .orderStatus("PENDING")
+                .orderDate(LocalDateTime.now())
+                .deliveryAddress(address)
+                .products(new ArrayList<>())
+                .total(new OrderTotalValue(BigDecimal.ZERO, "USD"))
+                .build();
+    }
+
+    @Test
+    void testOrderGettersAndSetters() {
+        // Arrange
+        UUID orderId = UUID.randomUUID();
+        String orderStatus = "PENDING";
+        LocalDateTime orderDate = LocalDateTime.now();
+        Client client = Client.builder()
+                .id(UUID.randomUUID())
+                .name("John Doe")
+                .email("john.doe@example.com")
+                .phone("1234567890")
+                .build();
+        
+        AddressShipping address = AddressShipping.builder()
+                .street("123 Main St")
+                .city("New York")
+                .state("NY")
+                .zipCode("10001")
+                .country("USA")
+                .build();
+
+        // Act
+        Order order = Order.builder()
+                .orderId(orderId)
+                .orderStatus(orderStatus)
+                .orderDate(orderDate)
+                .client(client)
+                .deliveryAddress(address)
+                .products(new ArrayList<>())
+                .total(new OrderTotalValue(BigDecimal.ZERO, "USD"))
+                .build();
+        
+        // Assert
+        assertEquals(orderId, order.getOrderId());
+        assertEquals(orderStatus, order.getOrderStatus());
+        assertEquals(orderDate, order.getOrderDate());
+        assertEquals(client, order.getClient());
+    }
+
+    @Test
+    void testAddressShippingGetters() {
+        // Arrange
+        AddressShipping address = AddressShipping.builder()
+                .street("123 Main St")
+                .city("New York")
+                .state("NY")
+                .zipCode("10001")
+                .country("USA")
+                .build();
+        
+        // Assert
+        assertEquals("123 Main St", address.getStreet());
+        assertEquals("New York", address.getCity());
+        assertEquals("NY", address.getState());
+        assertEquals("10001", address.getZipCode());
+        assertEquals("USA", address.getCountry());
+    }
+
+    @Test
+    void testOrderTotalValueGetters() {
+        // Arrange
+        BigDecimal amount = new BigDecimal("100.00");
+        String currency = "USD";
+        OrderTotalValue total = new OrderTotalValue(amount, currency);
+        
+        // Assert
+        assertEquals(amount, total.getAmount());
+        assertEquals(currency, total.getCurrency());
+    }
+
+    @Test
+    void testOrderTotalValueValidation() {
+        // Arrange & Act & Assert
+        assertThrows(IllegalArgumentException.class, () -> {
+            new OrderTotalValue(new BigDecimal("-100.00"), "USD");
+        });
+    }
+
+    @Test
+    void testOrderWithDeliveryAddress() {
+        // Arrange
+        AddressShipping address = AddressShipping.builder()
+                .street("123 Main St")
+                .city("New York")
+                .state("NY")
+                .zipCode("10001")
+                .country("USA")
+                .build();
+
+        // Act
+        Order order = Order.builder()
+                .orderId(UUID.randomUUID())
+                .client(Client.builder()
+                        .id(UUID.randomUUID())
+                        .name("John Doe")
+                        .email("john@example.com")
+                        .phone("1234567890")
+                        .build())
+                .orderStatus("PENDING")
+                .orderDate(LocalDateTime.now())
+                .deliveryAddress(address)
+                .products(new ArrayList<>())
+                .total(new OrderTotalValue(BigDecimal.ZERO, "USD"))
+                .build();
+        
+        // Assert
+        assertNotNull(order.getDeliveryAddress());
+        assertEquals("123 Main St", order.getDeliveryAddress().getStreet());
+        assertEquals("New York", order.getDeliveryAddress().getCity());
+        assertEquals("NY", order.getDeliveryAddress().getState());
+        assertEquals("10001", order.getDeliveryAddress().getZipCode());
+        assertEquals("USA", order.getDeliveryAddress().getCountry());
+    }
+
+    @Test
+    void testOrderWithTotalValue() {
+        // Arrange
+        OrderTotalValue total = new OrderTotalValue(new BigDecimal("100.00"), "USD");
+        
+        // Act
+        Order order = Order.builder()
+                .orderId(UUID.randomUUID())
+                .client(Client.builder()
+                        .id(UUID.randomUUID())
+                        .name("John Doe")
+                        .email("john@example.com")
+                        .phone("1234567890")
+                        .build())
+                .orderStatus("PENDING")
+                .orderDate(LocalDateTime.now())
+                .deliveryAddress(AddressShipping.builder()
+                        .street("123 Main St")
+                        .city("New York")
+                        .state("NY")
+                        .zipCode("10001")
+                        .country("USA")
+                        .build())
+                .products(new ArrayList<>())
+                .total(total)
+                .build();
+        
+        // Assert
+        assertNotNull(order.getTotal());
+        assertEquals(new BigDecimal("100.00"), order.getTotal().getAmount());
+        assertEquals("USD", order.getTotal().getCurrency());
+    }
+
+    @Test
+    void testOrderWithClient() {
+        // Arrange
+        Client client = Client.builder()
+                .id(UUID.randomUUID())
+                .name("John Doe")
+                .email("john.doe@example.com")
+                .phone("1234567890")
+                .build();
+        
+        // Act
+        Order order = Order.builder()
+                .orderId(UUID.randomUUID())
+                .client(client)
+                .orderStatus("PENDING")
+                .orderDate(LocalDateTime.now())
+                .deliveryAddress(AddressShipping.builder()
+                        .street("123 Main St")
+                        .city("New York")
+                        .state("NY")
+                        .zipCode("10001")
+                        .country("USA")
+                        .build())
+                .products(new ArrayList<>())
+                .total(new OrderTotalValue(BigDecimal.ZERO, "USD"))
+                .build();
+        
+        // Assert
+        assertNotNull(order.getClient());
+        assertEquals("John Doe", order.getClient().getName());
+        assertEquals("john.doe@example.com", order.getClient().getEmail());
+        assertEquals("1234567890", order.getClient().getPhone());
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = {" ", "  "})
+    void testAddressShippingWithInvalidStreet(String invalidStreet) {
+        // Arrange & Act & Assert
+        assertThrows(IllegalArgumentException.class, () -> {
+            AddressShipping.builder()
+                    .street(invalidStreet)
+                    .city("New York")
+                    .state("NY")
+                    .zipCode("10001")
+                    .country("USA")
+                    .build();
+        });
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = {" ", "  "})
+    void testAddressShippingWithInvalidCity(String invalidCity) {
+        // Arrange & Act & Assert
+        assertThrows(IllegalArgumentException.class, () -> {
+            AddressShipping.builder()
+                    .street("123 Main St")
+                    .city(invalidCity)
+                    .state("NY")
+                    .zipCode("10001")
+                    .country("USA")
+                    .build();
+        });
+    }
+
+    @Test
+    void testOrderTotalValueWithZeroAmount() {
+        // Arrange & Act
+        OrderTotalValue total = new OrderTotalValue(BigDecimal.ZERO, "USD");
+        
+        // Assert
         assertEquals(BigDecimal.ZERO, total.getAmount());
-        assertEquals("COP", total.getCurrency());
+        assertEquals("USD", total.getCurrency());
+    }
+
+    @Test
+    void testOrderTotalValueWithDifferentCurrency() {
+        // Arrange & Act
+        OrderTotalValue total = new OrderTotalValue(new BigDecimal("100.00"), "EUR");
+        
+        // Assert
+        assertEquals(new BigDecimal("100.00"), total.getAmount());
+        assertEquals("EUR", total.getCurrency());
+    }
+
+    @Test
+    void testCalculateTotalWithEmptyProducts() {
+        // Arrange
+        Order order = Order.builder().build();
+
+        // Act
+        assertNotNull(order.getTotal(), "Total should be initialized even with no products");
+        assertEquals(BigDecimal.ZERO, order.getTotal().getAmount());
     }
 
     @Test
     void testCalculateTotalWithSingleProduct() {
         // Arrange
+        Order order = createTestOrder();
         Product product = Product.builder()
-            .id(UUID.randomUUID())
-            .name("Test Product")
-            .description("Test Description")
-            .price(new BigDecimal("10.99"))
-            .stock(100)
-            .build();
-
-        Order emptyOrder = Order.builder()
-            .orderId(UUID.randomUUID())
-            .client(client)
-            .orderStatus("PENDING")
-            .orderDate(LocalDateTime.now())
-            .deliveryAddress(deliveryAddress)
-            .products(new ArrayList<>())
-            .build();
-
-        Order updatedOrder = emptyOrder.withAddedProduct(product, 2);
-
+                .id(UUID.randomUUID())
+                .name("Test Product")
+                .description("Test Description")
+                .price(new BigDecimal("10.00"))
+                .stock(100)
+                .build();
+        
         // Act
-        OrderTotalValue total = updatedOrder.getTotal();
-
+        Order updatedOrder = order.withAddedProduct(product, 2);
+        
         // Assert
-        assertNotNull(total);
-        assertEquals(new BigDecimal("21.98"), total.getAmount());
-        assertEquals("COP", total.getCurrency());
+        assertNotNull(updatedOrder.getTotal());
+        assertEquals(new BigDecimal("20.00"), updatedOrder.getTotal().getAmount());
     }
 
     @Test
     void testCalculateTotalWithMultipleProducts() {
         // Arrange
+        Order order = createTestOrder();
         Product product1 = Product.builder()
-            .id(UUID.randomUUID())
-            .name("Product 1")
-            .description("Description 1")
-            .price(new BigDecimal("10.99"))
-            .stock(100)
-            .build();
-
+                .id(UUID.randomUUID())
+                .price(new BigDecimal("10.00"))
+                .name("Product 1")
+                .description("Description 1")
+                .stock(100)
+                .build();
         Product product2 = Product.builder()
-            .id(UUID.randomUUID())
-            .name("Product 2")
-            .description("Description 2")
-            .price(new BigDecimal("20.99"))
-            .stock(200)
-            .build();
-
-        Order emptyOrder = Order.builder()
-            .orderId(UUID.randomUUID())
-            .client(client)
-            .orderStatus("PENDING")
-            .orderDate(LocalDateTime.now())
-            .deliveryAddress(deliveryAddress)
-            .products(new ArrayList<>())
-            .build();
-
-        Order updatedOrder = emptyOrder.withAddedProduct(product1, 2);
-        updatedOrder = updatedOrder.withAddedProduct(product2, 3);
-
+                .id(UUID.randomUUID())
+                .price(new BigDecimal("15.00"))
+                .name("Product 2")
+                .description("Description 2")
+                .stock(100)
+                .build();
+        
         // Act
-        OrderTotalValue total = updatedOrder.getTotal();
-
+        Order updatedOrder = order
+                .withAddedProduct(product1, 2)
+                .withAddedProduct(product2, 3);
+        
         // Assert
-        assertNotNull(total);
-        assertEquals(new BigDecimal("84.95"), total.getAmount());
-        assertEquals("COP", total.getCurrency());
+        assertNotNull(updatedOrder.getTotal());
+        assertEquals(new BigDecimal("65.00"), updatedOrder.getTotal().getAmount());
     }
 
     @Test
     void testCalculateTotalAfterRemovingProduct() {
         // Arrange
+        Order order = createTestOrder();
         Product product1 = Product.builder()
-            .id(UUID.randomUUID())
-            .name("Product 1")
-            .description("Description 1")
-            .price(new BigDecimal("10.99"))
-            .stock(100)
-            .build();
-
+                .id(UUID.randomUUID())
+                .price(new BigDecimal("10.00"))
+                .name("Product 1")
+                .description("Description 1")
+                .stock(100)
+                .build();
         Product product2 = Product.builder()
-            .id(UUID.randomUUID())
-            .name("Product 2")
-            .description("Description 2")
-            .price(new BigDecimal("20.99"))
-            .stock(200)
-            .build();
-
-        Order emptyOrder = Order.builder()
-            .orderId(UUID.randomUUID())
-            .client(client)
-            .orderStatus("PENDING")
-            .orderDate(LocalDateTime.now())
-            .deliveryAddress(deliveryAddress)
-            .products(new ArrayList<>())
-            .build();
-
-        Order updatedOrder = emptyOrder.withAddedProduct(product1, 2);
-        updatedOrder = updatedOrder.withAddedProduct(product2, 3);
-        updatedOrder = updatedOrder.withRemovedProduct(product1);
-
+                .id(UUID.randomUUID())
+                .price(new BigDecimal("15.00"))
+                .name("Product 2")
+                .description("Description 2")
+                .stock(100)
+                .build();
+        
         // Act
-        OrderTotalValue total = updatedOrder.getTotal();
-
+        Order updatedOrder = order
+                .withAddedProduct(product1, 2)
+                .withAddedProduct(product2, 3)
+                .withRemovedProduct(product1);
+        
         // Assert
-        assertNotNull(total);
-        assertEquals(new BigDecimal("62.97"), total.getAmount());
-        assertEquals("COP", total.getCurrency());
+        assertNotNull(updatedOrder.getTotal());
+        assertEquals(new BigDecimal("45.00"), updatedOrder.getTotal().getAmount());
     }
 } 

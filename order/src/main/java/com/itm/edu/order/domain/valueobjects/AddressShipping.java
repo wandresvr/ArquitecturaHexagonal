@@ -1,10 +1,12 @@
 package com.itm.edu.order.domain.valueobjects;
 
+import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+@Embeddable
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor

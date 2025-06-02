@@ -26,26 +26,26 @@ Esta desarrollada usando Sprint Booot, Gradle y Lombok, usa una arquitecura hexa
 ## Estructura:
 
 ```plaintext
-├── src/
-│   ├── main/
-│   │   ├── java/com/itm/edu/stock/
-│   │   │   ├── application/
-│   │   │   │   ├── ports/
-│   │   │   │   │   ├── inputs/
-│   │   │   │   │   └── outputs/
-│   │   │   │   └── services/
-│   │   │   ├── domain/
-│   │   │   │   ├── entities/
-│   │   │   │   ├── repository/
-│   │   │   │   └── valueobjects/
-│   │   │   ├── infrastructure/
-│   │   │   │   ├── api/
-│   │   │   │   │   ├── dto/
-│   │   │   │   │   └── exception/
-│   │   │   │   └── persistence/
-│   │   │   └── StockApplication.java
-│   │   └── resources/
-│   └── test/
+
+├── order/src/
+│ ├── main/
+│ │ ├── java/com/wilson/stock/
+│ │ │ ├── application/
+│ │ │ │ ├── ports/
+│ │ │ │ │ └── inputs/
+│ │ │ │ │ └── outputs/
+│ │ │ │ └── services/
+│ │ │ ├── domain/
+│ │ │ │ ├── entitites/
+│ │ │ │ ├── repository/
+│ │ │ │ └── valueobjects/
+│ │ │ ├── infrastructure/api
+│ │ │ │ ├── dto/
+│ │ │ │ ├── exception/
+│ ├── test/
+├── coverage/
+
+
 ```
 
 ## Diagrama UML del Dominio:

@@ -8,32 +8,28 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
 
-<span class="fc" id="L11">@Slf4j</span>
+<span class="nc" id="L11">@Slf4j</span>
 @Component
-<span class="fc" id="L13">@RequiredArgsConstructor</span>
+<span class="nc" id="L13">@RequiredArgsConstructor</span>
 public class RabbitOrderPublisher implements OrderPublisherPort {
 
     private final RabbitTemplate rabbitTemplate;
 
     @Override
     public void publish(OrderMessageDTO orderMessage) {
-<span class="fc bfc" id="L20" title="All 2 branches covered.">        if (orderMessage == null) {</span>
-<span class="fc" id="L21">            throw new IllegalArgumentException(&quot;El mensaje de orden no puede ser nulo&quot;);</span>
-        }
-
         try {
-<span class="fc" id="L25">            rabbitTemplate.convertAndSend(</span>
+<span class="nc" id="L21">            rabbitTemplate.convertAndSend(</span>
                 RabbitMQConfig.ORDER_EXCHANGE,
                 RabbitMQConfig.ORDER_ROUTING_KEY,
                 orderMessage
             );
-<span class="fc" id="L30">            log.info(&quot;✅ Mensaje de orden enviado a {}: {}&quot;, RabbitMQConfig.ORDER_EXCHANGE, orderMessage);</span>
-<span class="fc" id="L31">        } catch (Exception e) {</span>
-<span class="fc" id="L32">            log.error(&quot;❌ Error enviando mensaje: {}&quot;, e.getMessage());</span>
-
-<span class="fc" id="L34">            throw e;</span>
-<span class="fc" id="L35">        }</span>
-<span class="fc" id="L36">    }</span>
+<span class="nc" id="L26">            log.info(&quot;✅ Mensaje de orden enviado a {}: {}&quot;, RabbitMQConfig.ORDER_EXCHANGE, orderMessage);</span>
+<span class="nc" id="L27">        } catch (Exception e) {</span>
+<span class="nc" id="L28">            log.error(&quot;❌ Error enviando mensaje: {}&quot;, e.getMessage());</span>
+<span class="nc" id="L29">            e.printStackTrace();</span>
+<span class="nc" id="L30">            throw e;</span>
+<span class="nc" id="L31">        }</span>
+<span class="nc" id="L32">    }</span>
 }
 
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

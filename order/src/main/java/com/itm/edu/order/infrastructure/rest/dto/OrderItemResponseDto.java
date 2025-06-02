@@ -1,11 +1,11 @@
 package com.itm.edu.order.infrastructure.rest.dto;
 
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
 
 import java.util.UUID;
 
-@Getter
+@Data
 @Builder
 public class OrderItemResponseDto {
     private UUID id;

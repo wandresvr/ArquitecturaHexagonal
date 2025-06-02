@@ -3,8 +3,6 @@ package com.itm.edu.order.infrastructure.exception;
 import com.itm.edu.order.domain.exception.ApiError;
 import com.itm.edu.order.domain.exception.BusinessException;
 import com.itm.edu.order.domain.exception.HttpStatusException;
-import com.itm.edu.order.domain.exception.ProductNotFoundException;
-import com.itm.edu.order.domain.exception.OrderNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +14,6 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
-import java.time.LocalDateTime;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -24,101 +21,61 @@ import java.util.stream.Collectors;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(BusinessException.class)
-    public ResponseEntity<ErrorResponse> handleBusinessException(BusinessException ex) {
+    public ResponseEntity<ApiError> handleBusinessException(BusinessException ex) {
         log.error("Error de negocio: {}", ex.getMessage());
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .status(HttpStatus.BAD_REQUEST.value())
-                .message(ex.getMessage())
-                .timestamp(LocalDateTime.now().toString())
-                .build();
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        return ResponseEntity
+            .status(HttpStatus.UNPROCESSABLE_ENTITY)
+            .body(ApiError.of(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage(), null));
     }
 
     @ExceptionHandler(HttpStatusException.class)
-    public ResponseEntity<ErrorResponse> handleHttpStatusException(HttpStatusException ex) {
+    public ResponseEntity<ApiError> handleHttpStatusException(HttpStatusException ex) {
         log.error("Error HTTP: {}", ex.getMessage());
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .status(ex.getStatus().value())
-                .message(ex.getMessage())
-                .timestamp(LocalDateTime.now().toString())
-                .build();
-        return ResponseEntity.status(ex.getStatus()).body(errorResponse);
+        return ResponseEntity
+            .status(ex.getStatus())
+            .body(ApiError.of(ex.getStatus(), ex.getMessage(), null));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleValidationExceptions(MethodArgumentNotValidException ex) {
+    public ResponseEntity<ApiError> handleValidationExceptions(MethodArgumentNotValidException ex) {
         String message = ex.getBindingResult().getFieldErrors().stream()
             .map(error -> error.getField() + ": " + error.getDefaultMessage())
             .collect(Collectors.joining("; "));
 
         log.error("Error de validación: {}", message);
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .status(HttpStatus.BAD_REQUEST.value())
-                .message(message)
-                .timestamp(LocalDateTime.now().toString())
-                .build();
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        return ResponseEntity
+            .status(HttpStatus.BAD_REQUEST)
+            .body(ApiError.of(HttpStatus.BAD_REQUEST, message, null));
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<ErrorResponse> handleConstraintViolationException(ConstraintViolationException ex) {
+    public ResponseEntity<ApiError> handleConstraintViolationException(ConstraintViolationException ex) {
         String message = ex.getConstraintViolations().stream()
             .map(violation -> violation.getPropertyPath() + ": " + violation.getMessage())
             .collect(Collectors.joining("; "));
 
         log.error("Error de validación: {}", message);
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .status(HttpStatus.BAD_REQUEST.value())
-                .message(message)
-                .timestamp(LocalDateTime.now().toString())
-                .build();
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        return ResponseEntity
+            .status(HttpStatus.BAD_REQUEST)
+            .body(ApiError.of(HttpStatus.BAD_REQUEST, message, null));
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    public ResponseEntity<ErrorResponse> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
+    public ResponseEntity<ApiError> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
         String message = String.format("El parámetro '%s' con valor '%s' no puede ser convertido al tipo requerido", 
             ex.getName(), ex.getValue());
             
         log.error("Error de tipo de datos: {}", message);
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .status(HttpStatus.BAD_REQUEST.value())
-                .message(message)
-                .timestamp(LocalDateTime.now().toString())
-                .build();
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
-    }
-
-    @ExceptionHandler(ProductNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleProductNotFoundException(ProductNotFoundException ex) {
-        log.error("Producto no encontrado: {}", ex.getMessage());
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .status(HttpStatus.NOT_FOUND.value())
-                .message(ex.getMessage())
-                .timestamp(LocalDateTime.now().toString())
-                .build();
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
-    }
-
-    @ExceptionHandler(OrderNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleOrderNotFoundException(OrderNotFoundException ex) {
-        log.error("Orden no encontrada: {}", ex.getMessage());
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .status(HttpStatus.NOT_FOUND.value())
-                .message(ex.getMessage())
-                .timestamp(LocalDateTime.now().toString())
-                .build();
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+        return ResponseEntity
+            .status(HttpStatus.BAD_REQUEST)
+            .body(ApiError.of(HttpStatus.BAD_REQUEST, message, null));
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleGenericException(Exception ex) {
+    public ResponseEntity<ApiError> handleGenericException(Exception ex) {
         log.error("Error interno del servidor: ", ex);
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                .message("Error interno del servidor")
-                .timestamp(LocalDateTime.now().toString())
-                .build();
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        return ResponseEntity
+            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body(ApiError.of(HttpStatus.INTERNAL_SERVER_ERROR, "Error interno del servidor", null));
     }
 } 

@@ -12,21 +12,21 @@ public class DeleteProductService implements DeleteProductUseCase {
 
     private final ProductRepositoryPort productRepositoryPort;
 
-<span class="fc" id="L15">    public DeleteProductService(ProductRepositoryPort productRepositoryPort) {</span>
-<span class="fc" id="L16">        this.productRepositoryPort = productRepositoryPort;</span>
-<span class="fc" id="L17">    }</span>
+<span class="nc" id="L15">    public DeleteProductService(ProductRepositoryPort productRepositoryPort) {</span>
+<span class="nc" id="L16">        this.productRepositoryPort = productRepositoryPort;</span>
+<span class="nc" id="L17">    }</span>
 
     @Override
     public void deleteProduct(UUID id) {
-<span class="fc bfc" id="L21" title="All 2 branches covered.">        if (id == null) {</span>
-<span class="fc" id="L22">            throw new IllegalArgumentException(&quot;Product ID cannot be null&quot;);</span>
+<span class="nc bnc" id="L21" title="All 2 branches missed.">        if (id == null) {</span>
+<span class="nc" id="L22">            throw new IllegalArgumentException(&quot;Product ID cannot be null&quot;);</span>
         }
 
-<span class="fc bfc" id="L25" title="All 2 branches covered.">        if (!productRepositoryPort.findById(id).isPresent()) {</span>
-<span class="fc" id="L26">            throw new ProductNotFoundException(&quot;Product not found with id: &quot; + id);</span>
+<span class="nc bnc" id="L25" title="All 2 branches missed.">        if (!productRepositoryPort.findById(id).isPresent()) {</span>
+<span class="nc" id="L26">            throw new ProductNotFoundException(&quot;Product not found with id: &quot; + id);</span>
         }
 
-<span class="fc" id="L29">        productRepositoryPort.deleteById(id);</span>
-<span class="fc" id="L30">    }</span>
+<span class="nc" id="L29">        productRepositoryPort.deleteById(id);</span>
+<span class="nc" id="L30">    }</span>
 } 
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

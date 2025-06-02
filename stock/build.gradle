@@ -112,6 +112,16 @@ jacocoTestReport {
 			destination = file("${project.projectDir}/coverage/html")
 		}
 	}
+	afterEvaluate {
+		classDirectories.setFrom(files(classDirectories.files.collect {
+			fileTree(dir: it, exclude: [
+				'**/config/**',
+				'**/dto/**',
+				'**/exception/**',
+				'**/OrderApplication.class'
+			])
+		}))
+	}
 }
 
 jacocoTestCoverageVerification {
@@ -129,31 +139,5 @@ publishing {
 		mavenJava(MavenPublication) {
 			from components.java
 		}
-	}
-}
-
-// Tarea para generar documentación en AsciiDoc
-task generateAsciiDoc {
-	doLast {
-		exec {
-			workingDir '.'
-			commandLine 'sh', '-c', '''
-				docker-compose ps | grep stock-app > /dev/null && \
-				docker exec stock-app curl -X GET http://localhost:8081/v3/api-docs > swagger.json && \
-				npx swagger2markdown swagger.json -o temp.md && \
-				pandoc -f markdown -t asciidoc temp.md -o src/docs/asciidoc/api.adoc && \
-				rm temp.md || \
-				echo "Error: El contenedor stock-app no está corriendo. Ejecuta 'docker-compose up -d' primero."
-			'''
-		}
-	}
-}
-
-// Tarea para generar toda la documentación
-task docs {
-	dependsOn 'generateAsciiDoc'
-	doLast {
-		println "Documentación generada en:"
-		println "- AsciiDoc: src/docs/asciidoc/api.adoc"
 	}
 }

@@ -1,9 +1,9 @@
 package com.itm.edu.order.infrastructure.rest.dto;
 
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
 
-@Getter
+@Data
 @Builder
 public class AddressShippingDto {
     private String street;

@@ -13,22 +13,22 @@ public class DeleteOrderService implements DeleteOrderUseCase {
 
     private final OrderRepositoryPort orderRepositoryPort;
 
-<span class="fc" id="L16">    public DeleteOrderService(OrderRepositoryPort orderRepositoryPort) {</span>
-<span class="fc" id="L17">        this.orderRepositoryPort = orderRepositoryPort;</span>
-<span class="fc" id="L18">    }</span>
+<span class="nc" id="L16">    public DeleteOrderService(OrderRepositoryPort orderRepositoryPort) {</span>
+<span class="nc" id="L17">        this.orderRepositoryPort = orderRepositoryPort;</span>
+<span class="nc" id="L18">    }</span>
 
     @Override
     @Transactional
     public void deleteOrder(UUID id) {
-<span class="fc bfc" id="L23" title="All 2 branches covered.">        if (id == null) {</span>
-<span class="fc" id="L24">            throw new IllegalArgumentException(&quot;Order ID cannot be null&quot;);</span>
+<span class="nc bnc" id="L23" title="All 2 branches missed.">        if (id == null) {</span>
+<span class="nc" id="L24">            throw new IllegalArgumentException(&quot;Order ID cannot be null&quot;);</span>
         }
 
-<span class="fc bfc" id="L27" title="All 2 branches covered.">        if (!orderRepositoryPort.findById(id).isPresent()) {</span>
-<span class="fc" id="L28">            throw new OrderNotFoundException(&quot;Order not found with id: &quot; + id);</span>
+<span class="nc bnc" id="L27" title="All 2 branches missed.">        if (!orderRepositoryPort.findById(id).isPresent()) {</span>
+<span class="nc" id="L28">            throw new OrderNotFoundException(&quot;Order not found with id: &quot; + id);</span>
         }
 
-<span class="fc" id="L31">        orderRepositoryPort.deleteById(id);</span>
-<span class="fc" id="L32">    }</span>
+<span class="nc" id="L31">        orderRepositoryPort.deleteById(id);</span>
+<span class="nc" id="L32">    }</span>
 } 
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

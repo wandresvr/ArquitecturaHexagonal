@@ -1,11 +1,11 @@
 package com.itm.edu.stock.application.dto;
 
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Value;
 import java.math.BigDecimal;
 import java.util.UUID;
 
-@Getter
+@Value
 @Builder
 public class RecipeIngredientResponse {
     UUID id;

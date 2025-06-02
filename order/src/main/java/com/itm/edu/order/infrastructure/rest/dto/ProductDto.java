@@ -1,12 +1,12 @@
 package com.itm.edu.order.infrastructure.rest.dto;
 
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
 
 import java.math.BigDecimal;
 import java.util.UUID;
 
-@Getter
+@Data
 @Builder
 public class ProductDto {
     private UUID id;

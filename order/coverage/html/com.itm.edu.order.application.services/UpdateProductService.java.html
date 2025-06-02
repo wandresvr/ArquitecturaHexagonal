@@ -12,45 +12,45 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 @Service
-<span class="fc" id="L15">@RequiredArgsConstructor</span>
+<span class="nc" id="L15">@RequiredArgsConstructor</span>
 public class UpdateProductService implements UpdateProductUseCase {
     private final ProductRepositoryPort productRepository;
 
     @Override
     @Transactional
     public Product updateProduct(UUID id, Product product) {
-<span class="fc" id="L22">        validateProductData(product);</span>
+<span class="nc" id="L22">        validateProductData(product);</span>
         
-<span class="fc" id="L24">        Product existingProduct = productRepository.findById(id)</span>
-<span class="fc" id="L25">            .orElseThrow(() -&gt; new BusinessException(&quot;Producto no encontrado con ID: &quot; + id));</span>
+<span class="nc" id="L24">        Product existingProduct = productRepository.findById(id)</span>
+<span class="nc" id="L25">            .orElseThrow(() -&gt; new BusinessException(&quot;Producto no encontrado con ID: &quot; + id));</span>
 
-<span class="fc" id="L27">        Product updatedProduct = Product.builder()</span>
-<span class="fc" id="L28">            .id(existingProduct.getId())</span>
-<span class="fc" id="L29">            .name(product.getName())</span>
-<span class="fc" id="L30">            .description(product.getDescription())</span>
-<span class="fc" id="L31">            .price(product.getPrice())</span>
-<span class="fc" id="L32">            .stock(product.getStock())</span>
-<span class="fc" id="L33">            .build();</span>
+<span class="nc" id="L27">        Product updatedProduct = Product.builder()</span>
+<span class="nc" id="L28">            .id(existingProduct.getId())</span>
+<span class="nc" id="L29">            .name(product.getName())</span>
+<span class="nc" id="L30">            .description(product.getDescription())</span>
+<span class="nc" id="L31">            .price(product.getPrice())</span>
+<span class="nc" id="L32">            .stock(product.getStock())</span>
+<span class="nc" id="L33">            .build();</span>
 
-<span class="fc" id="L35">        return productRepository.save(updatedProduct);</span>
+<span class="nc" id="L35">        return productRepository.save(updatedProduct);</span>
     }
 
     private void validateProductData(Product product) {
-<span class="fc bfc" id="L39" title="All 2 branches covered.">        if (product == null) {</span>
-<span class="fc" id="L40">            throw new BusinessException(&quot;El producto no puede ser nulo&quot;);</span>
+<span class="nc bnc" id="L39" title="All 2 branches missed.">        if (product == null) {</span>
+<span class="nc" id="L40">            throw new BusinessException(&quot;El producto no puede ser nulo&quot;);</span>
         }
-<span class="pc bpc" id="L42" title="1 of 4 branches missed.">        if (product.getName() == null || product.getName().trim().isEmpty()) {</span>
-<span class="fc" id="L43">            throw new BusinessException(&quot;El nombre del producto no puede estar vacío&quot;);</span>
+<span class="nc bnc" id="L42" title="All 4 branches missed.">        if (product.getName() == null || product.getName().trim().isEmpty()) {</span>
+<span class="nc" id="L43">            throw new BusinessException(&quot;El nombre del producto no puede estar vacío&quot;);</span>
         }
-<span class="pc bpc" id="L45" title="1 of 4 branches missed.">        if (product.getDescription() == null || product.getDescription().trim().isEmpty()) {</span>
-<span class="fc" id="L46">            throw new BusinessException(&quot;La descripción del producto no puede estar vacía&quot;);</span>
+<span class="nc bnc" id="L45" title="All 4 branches missed.">        if (product.getDescription() == null || product.getDescription().trim().isEmpty()) {</span>
+<span class="nc" id="L46">            throw new BusinessException(&quot;La descripción del producto no puede estar vacía&quot;);</span>
         }
-<span class="pc bpc" id="L48" title="1 of 4 branches missed.">        if (product.getPrice() == null || product.getPrice().compareTo(BigDecimal.ZERO) &lt; 0) {</span>
-<span class="fc" id="L49">            throw new BusinessException(&quot;El precio no puede ser negativo&quot;);</span>
+<span class="nc bnc" id="L48" title="All 4 branches missed.">        if (product.getPrice() == null || product.getPrice().compareTo(BigDecimal.ZERO) &lt; 0) {</span>
+<span class="nc" id="L49">            throw new BusinessException(&quot;El precio no puede ser negativo&quot;);</span>
         }
-<span class="pc bpc" id="L51" title="1 of 4 branches missed.">        if (product.getStock() == null || product.getStock() &lt; 0) {</span>
-<span class="fc" id="L52">            throw new BusinessException(&quot;El stock no puede ser negativo&quot;);</span>
+<span class="nc bnc" id="L51" title="All 4 branches missed.">        if (product.getStock() == null || product.getStock() &lt; 0) {</span>
+<span class="nc" id="L52">            throw new BusinessException(&quot;El stock no puede ser negativo&quot;);</span>
         }
-<span class="fc" id="L54">    }</span>
+<span class="nc" id="L54">    }</span>
 } 
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

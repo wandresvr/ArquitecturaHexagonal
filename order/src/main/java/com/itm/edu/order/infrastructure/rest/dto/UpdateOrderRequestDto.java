@@ -2,11 +2,10 @@ package com.itm.edu.order.infrastructure.rest.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
-@Getter
+@Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
