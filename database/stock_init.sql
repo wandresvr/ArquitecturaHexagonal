@@ -1,7 +1,7 @@
 -- Crear tabla de recetas si no existe
 CREATE TABLE IF NOT EXISTS recipes (
     id UUID PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
+    name VARCHAR(255) NOT NULL UNIQUE,
     description TEXT,
     preparation_time INTEGER,
     cooking_time INTEGER,
@@ -64,6 +64,16 @@ BEGIN
     ) THEN
         ALTER TABLE recipes ADD COLUMN updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
     END IF;
+
+    -- Agregar restricción UNIQUE a name si no existe
+    IF NOT EXISTS (
+        SELECT 1 
+        FROM information_schema.table_constraints 
+        WHERE table_name = 'recipes' 
+        AND constraint_name = 'recipes_name_key'
+    ) THEN
+        ALTER TABLE recipes ADD CONSTRAINT recipes_name_key UNIQUE (name);
+    END IF;
 END $$;
 
 -- Crear tabla de ingredientes si no existe
@@ -97,19 +107,19 @@ BEGIN
     INSERT INTO recipes (id, name, description, preparation_time, cooking_time, servings, instructions, difficulty)
     VALUES 
         (gen_random_uuid(), 'Ensalada César', 'Ensalada clásica con pollo a la parrilla', 15, 20, 2, 'Mezclar todos los ingredientes y servir', 'FÁCIL')
-    ON CONFLICT (id) DO NOTHING
+    ON CONFLICT (name) DO NOTHING
     RETURNING id INTO v_recipe_id;
 
     INSERT INTO recipes (id, name, description, preparation_time, cooking_time, servings, instructions, difficulty)
     VALUES 
         (gen_random_uuid(), 'Pasta Carbonara', 'Pasta con salsa cremosa y panceta', 10, 20, 4, 'Cocer la pasta y mezclar con la salsa', 'MEDIA')
-    ON CONFLICT (id) DO NOTHING
+    ON CONFLICT (name) DO NOTHING
     RETURNING id INTO v_recipe_id;
 
     INSERT INTO recipes (id, name, description, preparation_time, cooking_time, servings, instructions, difficulty)
     VALUES 
         (gen_random_uuid(), 'Pizza Margherita', 'Pizza clásica con tomate y mozzarella', 20, 15, 4, 'Estirar la masa y hornear', 'MEDIA')
-    ON CONFLICT (id) DO NOTHING
+    ON CONFLICT (name) DO NOTHING
     RETURNING id INTO v_recipe_id;
 
     -- Insertar ingredientes si no existen
