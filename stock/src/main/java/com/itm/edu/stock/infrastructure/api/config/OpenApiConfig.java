@@ -28,6 +28,7 @@ public class OpenApiConfig {
 
     @Bean
     public OpenAPI customOpenAPI() {
+        String baseUrl = serverUrl + ":" + serverPort;
         return new OpenAPI()
                 .info(new Info()
                         .title("API de Gestión de Stock")
@@ -69,7 +70,7 @@ public class OpenApiConfig {
                                 .url("http://www.apache.org/licenses/LICENSE-2.0.html")))
                 .servers(List.of(
                         new Server()
-                                .url(serverUrl + ":" + serverPort)
+                                .url(baseUrl)
                                 .description("Servidor de producción")
                 ))
                 .tags(List.of(
