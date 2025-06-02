@@ -89,31 +89,33 @@ ON CONFLICT (email) DO NOTHING;
 -- Limpiar productos existentes
 TRUNCATE TABLE products CASCADE;
 
--- Insertar productos basados en las recetas del archivo CSV
-DO $$
-DECLARE
-    recipe_record RECORD;
-BEGIN
-    FOR recipe_record IN 
-        SELECT id, name 
-        FROM pg_read_csv('/tmp/recipe_ids.csv', 'id UUID, name VARCHAR(255)')
-    LOOP
-        INSERT INTO products (id, name, description, price, recipe_id)
-        VALUES (
-            gen_random_uuid(),
-            CASE 
-                WHEN recipe_record.name = 'Ensalada César' THEN 'Ensalada César Premium'
-                WHEN recipe_record.name = 'Pasta Carbonara' THEN 'Pasta Carbonara Individual'
-                WHEN recipe_record.name = 'Pizza Margherita' THEN 'Pizza Margherita Familiar'
-            END,
-            'Producto basado en ' || recipe_record.name,
-            CASE 
-                WHEN recipe_record.name = 'Ensalada César' THEN 12.99
-                WHEN recipe_record.name = 'Pasta Carbonara' THEN 15.99
-                WHEN recipe_record.name = 'Pizza Margherita' THEN 14.99
-                ELSE 10.99
-            END,
-            recipe_record.id
-        );
-    END LOOP;
-END $$; 
+-- Crear tabla temporal para los IDs de recetas
+CREATE TEMPORARY TABLE temp_recipe_ids (
+    id UUID,
+    name VARCHAR(255)
+);
+
+-- Copiar IDs de recetas desde el archivo CSV
+COPY temp_recipe_ids FROM '/tmp/recipe_ids.csv' WITH CSV;
+
+-- Insertar productos basados en las recetas
+INSERT INTO products (id, name, description, price, recipe_id)
+SELECT 
+    gen_random_uuid(),
+    CASE 
+        WHEN r.name = 'Ensalada César' THEN 'Ensalada César Premium'
+        WHEN r.name = 'Pasta Carbonara' THEN 'Pasta Carbonara Individual'
+        WHEN r.name = 'Pizza Margherita' THEN 'Pizza Margherita Familiar'
+    END,
+    'Producto basado en ' || r.name,
+    CASE 
+        WHEN r.name = 'Ensalada César' THEN 12.99
+        WHEN r.name = 'Pasta Carbonara' THEN 15.99
+        WHEN r.name = 'Pizza Margherita' THEN 14.99
+        ELSE 10.99
+    END,
+    r.id
+FROM temp_recipe_ids r;
+
+-- Eliminar tabla temporal
+DROP TABLE temp_recipe_ids; 
