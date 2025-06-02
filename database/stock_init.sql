@@ -106,6 +106,11 @@ DECLARE
     v_recipe_id UUID;
     v_ingredient_id UUID;
 BEGIN
+    -- Limpiar datos existentes
+    TRUNCATE TABLE recipes CASCADE;
+    TRUNCATE TABLE ingredients CASCADE;
+    TRUNCATE TABLE recipe_ingredients CASCADE;
+
     -- Insertar recetas
     INSERT INTO recipes (id, name, description, preparation_time, cooking_time, servings, instructions, difficulty)
     VALUES 
@@ -203,6 +208,8 @@ BEGIN
     CROSS JOIN ingredient_ids i
     WHERE (r.name = 'Ensalada César' AND i.name IN ('Lechuga Romana', 'Pollo a la parrilla', 'Crutones', 'Queso Parmesano', 'Aderezo César'))
     OR (r.name = 'Pasta Carbonara' AND i.name IN ('Espaguetis', 'Panceta', 'Huevo', 'Queso Pecorino'))
-    OR (r.name = 'Pizza Margherita' AND i.name IN ('Masa de pizza', 'Salsa de tomate', 'Mozzarella'))
-    ON CONFLICT (id) DO NOTHING;
+    OR (r.name = 'Pizza Margherita' AND i.name IN ('Masa de pizza', 'Salsa de tomate', 'Mozzarella'));
+
+    -- Exportar IDs de recetas a CSV
+    COPY (SELECT id, name FROM recipes ORDER BY name) TO '/tmp/recipe_ids.csv' WITH CSV;
 END $$; 

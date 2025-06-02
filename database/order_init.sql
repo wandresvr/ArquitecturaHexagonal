@@ -93,10 +93,10 @@ CREATE TEMPORARY TABLE temp_recipe_ids (
 );
 
 -- Copiar IDs de recetas desde el archivo CSV
-COPY temp_recipe_ids FROM '/tmp/recipe_ids.csv' WITH CSV;
+\COPY temp_recipe_ids FROM '/tmp/recipe_ids.csv' WITH CSV;
 
 -- Limpiar productos existentes
-DELETE FROM products;
+TRUNCATE TABLE products CASCADE;
 
 -- Insertar productos basados en las recetas
 INSERT INTO products (id, name, description, price, recipe_id)
