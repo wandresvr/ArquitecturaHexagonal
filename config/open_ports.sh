@@ -45,7 +45,24 @@ else
   echo "✅ NSG detectado: $NSG_NAME"
 fi
 
-# ====== Puertos a verificar ======
+# ====== Asegurar puerto SSH (22) ======
+EXISTE_SSH=$(az network nsg rule list --resource-group "$RESOURCE_GROUP" --nsg-name "$NSG_NAME" --query "[?destinationPortRange=='22'] | length(@)" -o tsv)
+if [[ "$EXISTE_SSH" -eq 0 ]]; then
+  echo "🛠️ Abriendo puerto SSH (22)..."
+  az network nsg rule create \
+    --resource-group "$RESOURCE_GROUP" \
+    --nsg-name "$NSG_NAME" \
+    --name "permitir-ssh" \
+    --priority 100 \
+    --access Allow \
+    --direction Inbound \
+    --protocol Tcp \
+    --destination-port-range 22 \
+    --source-address-prefixes "*" \
+    --only-show-errors
+fi
+
+# ====== Puertos a verificar (con tratamiento especial para DB) ======
 declare -A PUERTOS=(
   [sonarqube_9000]=9000
   [sonarqube_5433]=5433
@@ -74,6 +91,13 @@ for nombre in "${!PUERTOS[@]}"; do
     PRIORIDAD=$((1000 + puerto % 1000))
     RULE_NAME="permitir-${nombre}"
 
+    # Base de datos → sólo accesible desde la red virtual
+    if [[ "$puerto" == "5432" || "$puerto" == "5433" || "$puerto" == "5434" ]]; then
+      SOURCE="VirtualNetwork"
+    else
+      SOURCE="*"
+    fi
+
     echo "➕ Creando regla '$RULE_NAME' para puerto $puerto con prioridad $PRIORIDAD..."
     az network nsg rule create \
       --resource-group "$RESOURCE_GROUP" \
@@ -84,9 +108,9 @@ for nombre in "${!PUERTOS[@]}"; do
       --direction Inbound \
       --protocol Tcp \
       --destination-port-range "$puerto" \
-      --source-address-prefixes "*" \
+      --source-address-prefixes "$SOURCE" \
       --only-show-errors
   fi
 done
 
-echo "🎉 Todos los puertos han sido verificados y abiertos si fue necesario."
+echo "🎉 Todos los puertos han sido verificados y configurados correctamente."
