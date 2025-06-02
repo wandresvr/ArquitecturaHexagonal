@@ -81,6 +81,37 @@ EOF
     print_message "Variable de sistema SWAGGER_SERVER_URL configurada permanentemente como http://$ip"
 }
 
+# Función para construir los servicios
+build_services() {
+    print_message "Construyendo servicios..."
+    
+    # Obtener IP pública
+    PUBLIC_IP=$(get_public_ip)
+    print_message "IP pública detectada: $PUBLIC_IP"
+    
+    # Configurar variables de entorno
+    setup_environment "$PUBLIC_IP"
+    
+    # Construir Order Service
+    print_message "Construyendo Order Service..."
+    cd "$PROJECT_ROOT/order" && SWAGGER_SERVER_URL="http://$PUBLIC_IP" docker-compose build --no-cache
+    if [ $? -ne 0 ]; then
+        print_error "Error al construir Order Service"
+        exit 1
+    fi
+    
+    # Construir Stock Service
+    print_message "Construyendo Stock Service..."
+    cd "$PROJECT_ROOT/stock" && SWAGGER_SERVER_URL="http://$PUBLIC_IP" docker-compose build --no-cache
+    if [ $? -ne 0 ]; then
+        print_error "Error al construir Stock Service"
+        exit 1
+    fi
+    
+    cd "$SCRIPT_DIR"
+    print_success "Servicios construidos correctamente"
+}
+
 # Función para iniciar los servicios
 start_services() {
     print_message "Iniciando servicios..."
@@ -232,8 +263,12 @@ case "$1" in
     "verify")
         verify_environment
         ;;
+    "build")
+        check_docker
+        build_services
+        ;;
     *)
-        echo "Uso: $0 {start|stop|restart|status|logs|verify}"
+        echo "Uso: $0 {start|stop|restart|status|logs|verify|build}"
         exit 1
         ;;
 esac
