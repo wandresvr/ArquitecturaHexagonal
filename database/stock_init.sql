@@ -1,7 +1,7 @@
 -- Crear tabla de recetas si no existe
 CREATE TABLE IF NOT EXISTS recipes (
     id UUID PRIMARY KEY,
-    name VARCHAR(255) NOT NULL UNIQUE,
+    name VARCHAR(255) NOT NULL,
     description TEXT,
     preparation_time INTEGER,
     cooking_time INTEGER,
@@ -64,6 +64,19 @@ BEGIN
     ) THEN
         ALTER TABLE recipes ADD COLUMN updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
     END IF;
+END $$;
+
+-- Limpiar datos duplicados
+DO $$
+BEGIN
+    -- Eliminar recetas duplicadas, manteniendo solo la más reciente
+    DELETE FROM recipes a USING (
+        SELECT name, MAX(created_at) as max_created_at
+        FROM recipes
+        GROUP BY name
+        HAVING COUNT(*) > 1
+    ) b
+    WHERE a.name = b.name AND a.created_at < b.max_created_at;
 
     -- Agregar restricción UNIQUE a name si no existe
     IF NOT EXISTS (
@@ -79,7 +92,7 @@ END $$;
 -- Crear tabla de ingredientes si no existe
 CREATE TABLE IF NOT EXISTS ingredients (
     id UUID PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
+    name VARCHAR(255) NOT NULL UNIQUE,
     description TEXT,
     unit VARCHAR(50),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
