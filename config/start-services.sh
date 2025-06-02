@@ -41,11 +41,29 @@ check_docker() {
     fi
 }
 
-# Función para crear archivo .env temporal
-create_env_file() {
+# Función para configurar variables de entorno permanentemente
+setup_environment() {
     local ip="$1"
+    
+    # Crear archivo en /etc/profile.d/
+    local env_file="/etc/profile.d/swagger-server.sh"
+    echo "export SWAGGER_SERVER_URL=http://$ip" | sudo tee "$env_file" > /dev/null
+    sudo chmod +x "$env_file" > /dev/null
+    
+    # Agregar también a /etc/environment
+    if ! grep -q "SWAGGER_SERVER_URL" /etc/environment; then
+        echo "SWAGGER_SERVER_URL=http://$ip" | sudo tee -a /etc/environment > /dev/null
+    else
+        sudo sed -i "s|SWAGGER_SERVER_URL=.*|SWAGGER_SERVER_URL=http://$ip|" /etc/environment > /dev/null
+    fi
+    
+    # Exportar la variable para la sesión actual
     export SWAGGER_SERVER_URL="http://$ip"
-    print_message "Variable de sistema SWAGGER_SERVER_URL configurada como http://$ip"
+    
+    # Cargar la variable en la sesión actual
+    source /etc/environment > /dev/null 2>&1
+    
+    print_message "Variable de sistema SWAGGER_SERVER_URL configurada permanentemente como http://$ip"
 }
 
 # Función para iniciar los servicios
@@ -56,8 +74,8 @@ start_services() {
     PUBLIC_IP=$(get_public_ip)
     print_message "IP pública detectada: $PUBLIC_IP"
     
-    # Configurar variable de sistema
-    create_env_file "$PUBLIC_IP"
+    # Configurar variables de entorno
+    setup_environment "$PUBLIC_IP"
     
     # Iniciar RabbitMQ
     print_message "Iniciando RabbitMQ..."
