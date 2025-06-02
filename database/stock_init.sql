@@ -76,18 +76,8 @@ BEGIN
     END IF;
 END $$;
 
--- Limpiar datos duplicados
-DO $$
-BEGIN
-    -- Eliminar recetas duplicadas, manteniendo solo la más reciente
-    DELETE FROM recipes a USING (
-        SELECT name, MAX(updated_at) as max_updated_at
-        FROM recipes
-        GROUP BY name
-        HAVING COUNT(*) > 1
-    ) b
-    WHERE a.name = b.name AND a.updated_at < b.max_updated_at;
-END $$;
+-- Limpiar datos existentes
+TRUNCATE TABLE recipes CASCADE;
 
 -- Crear tabla de ingredientes si no existe
 CREATE TABLE IF NOT EXISTS ingredients (
@@ -110,105 +100,75 @@ CREATE TABLE IF NOT EXISTS recipe_ingredients (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Insertar datos de ejemplo solo si no existen
+-- Insertar datos de ejemplo
 DO $$
 DECLARE
     v_recipe_id UUID;
     v_ingredient_id UUID;
 BEGIN
-    -- Insertar recetas si no existen
+    -- Insertar recetas
     INSERT INTO recipes (id, name, description, preparation_time, cooking_time, servings, instructions, difficulty)
     VALUES 
-        (gen_random_uuid(), 'Ensalada César', 'Ensalada clásica con pollo a la parrilla', 15, 20, 2, 'Mezclar todos los ingredientes y servir', 'FÁCIL')
-    ON CONFLICT (name) DO NOTHING
-    RETURNING id INTO v_recipe_id;
-
-    INSERT INTO recipes (id, name, description, preparation_time, cooking_time, servings, instructions, difficulty)
-    VALUES 
-        (gen_random_uuid(), 'Pasta Carbonara', 'Pasta con salsa cremosa y panceta', 10, 20, 4, 'Cocer la pasta y mezclar con la salsa', 'MEDIA')
-    ON CONFLICT (name) DO NOTHING
-    RETURNING id INTO v_recipe_id;
+        (gen_random_uuid(), 'Ensalada César', 'Ensalada clásica con pollo a la parrilla', 15, 20, 2, 'Mezclar todos los ingredientes y servir', 'FÁCIL');
 
     INSERT INTO recipes (id, name, description, preparation_time, cooking_time, servings, instructions, difficulty)
     VALUES 
-        (gen_random_uuid(), 'Pizza Margherita', 'Pizza clásica con tomate y mozzarella', 20, 15, 4, 'Estirar la masa y hornear', 'MEDIA')
-    ON CONFLICT (name) DO NOTHING
-    RETURNING id INTO v_recipe_id;
+        (gen_random_uuid(), 'Pasta Carbonara', 'Pasta con salsa cremosa y panceta', 10, 20, 4, 'Cocer la pasta y mezclar con la salsa', 'MEDIA');
 
-    -- Insertar ingredientes si no existen
+    INSERT INTO recipes (id, name, description, preparation_time, cooking_time, servings, instructions, difficulty)
+    VALUES 
+        (gen_random_uuid(), 'Pizza Margherita', 'Pizza clásica con tomate y mozzarella', 20, 15, 4, 'Estirar la masa y hornear', 'MEDIA');
+
+    -- Insertar ingredientes
     INSERT INTO ingredients (id, name, description, unit)
     VALUES 
-        (gen_random_uuid(), 'Lechuga Romana', 'Lechuga fresca', 'g')
-    ON CONFLICT (id) DO NOTHING
-    RETURNING id INTO v_ingredient_id;
-
-    INSERT INTO ingredients (id, name, description, unit)
-    VALUES 
-        (gen_random_uuid(), 'Pollo a la parrilla', 'Pechuga de pollo asada', 'g')
-    ON CONFLICT (id) DO NOTHING
-    RETURNING id INTO v_ingredient_id;
+        (gen_random_uuid(), 'Lechuga Romana', 'Lechuga fresca', 'g');
 
     INSERT INTO ingredients (id, name, description, unit)
     VALUES 
-        (gen_random_uuid(), 'Crutones', 'Pan tostado en cubos', 'g')
-    ON CONFLICT (id) DO NOTHING
-    RETURNING id INTO v_ingredient_id;
+        (gen_random_uuid(), 'Pollo a la parrilla', 'Pechuga de pollo asada', 'g');
 
     INSERT INTO ingredients (id, name, description, unit)
     VALUES 
-        (gen_random_uuid(), 'Queso Parmesano', 'Queso rallado', 'g')
-    ON CONFLICT (id) DO NOTHING
-    RETURNING id INTO v_ingredient_id;
+        (gen_random_uuid(), 'Crutones', 'Pan tostado en cubos', 'g');
 
     INSERT INTO ingredients (id, name, description, unit)
     VALUES 
-        (gen_random_uuid(), 'Aderezo César', 'Salsa cremosa', 'ml')
-    ON CONFLICT (id) DO NOTHING
-    RETURNING id INTO v_ingredient_id;
+        (gen_random_uuid(), 'Queso Parmesano', 'Queso rallado', 'g');
 
     INSERT INTO ingredients (id, name, description, unit)
     VALUES 
-        (gen_random_uuid(), 'Espaguetis', 'Pasta larga', 'g')
-    ON CONFLICT (id) DO NOTHING
-    RETURNING id INTO v_ingredient_id;
+        (gen_random_uuid(), 'Aderezo César', 'Salsa cremosa', 'ml');
 
     INSERT INTO ingredients (id, name, description, unit)
     VALUES 
-        (gen_random_uuid(), 'Panceta', 'Tocino italiano', 'g')
-    ON CONFLICT (id) DO NOTHING
-    RETURNING id INTO v_ingredient_id;
+        (gen_random_uuid(), 'Espaguetis', 'Pasta larga', 'g');
 
     INSERT INTO ingredients (id, name, description, unit)
     VALUES 
-        (gen_random_uuid(), 'Huevo', 'Huevo fresco', 'unidad')
-    ON CONFLICT (id) DO NOTHING
-    RETURNING id INTO v_ingredient_id;
+        (gen_random_uuid(), 'Panceta', 'Tocino italiano', 'g');
 
     INSERT INTO ingredients (id, name, description, unit)
     VALUES 
-        (gen_random_uuid(), 'Queso Pecorino', 'Queso italiano', 'g')
-    ON CONFLICT (id) DO NOTHING
-    RETURNING id INTO v_ingredient_id;
+        (gen_random_uuid(), 'Huevo', 'Huevo fresco', 'unidad');
 
     INSERT INTO ingredients (id, name, description, unit)
     VALUES 
-        (gen_random_uuid(), 'Masa de pizza', 'Masa fresca', 'g')
-    ON CONFLICT (id) DO NOTHING
-    RETURNING id INTO v_ingredient_id;
+        (gen_random_uuid(), 'Queso Pecorino', 'Queso italiano', 'g');
 
     INSERT INTO ingredients (id, name, description, unit)
     VALUES 
-        (gen_random_uuid(), 'Salsa de tomate', 'Salsa para pizza', 'ml')
-    ON CONFLICT (id) DO NOTHING
-    RETURNING id INTO v_ingredient_id;
+        (gen_random_uuid(), 'Masa de pizza', 'Masa fresca', 'g');
 
     INSERT INTO ingredients (id, name, description, unit)
     VALUES 
-        (gen_random_uuid(), 'Mozzarella', 'Queso mozzarella', 'g')
-    ON CONFLICT (id) DO NOTHING
-    RETURNING id INTO v_ingredient_id;
+        (gen_random_uuid(), 'Salsa de tomate', 'Salsa para pizza', 'ml');
 
-    -- Insertar relaciones receta-ingrediente si no existen
+    INSERT INTO ingredients (id, name, description, unit)
+    VALUES 
+        (gen_random_uuid(), 'Mozzarella', 'Queso mozzarella', 'g');
+
+    -- Insertar relaciones receta-ingrediente
     WITH recipe_ids AS (
         SELECT id, name FROM recipes ORDER BY name
     ),
