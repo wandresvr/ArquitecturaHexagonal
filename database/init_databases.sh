@@ -6,6 +6,27 @@ BLUE='\033[0;34m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
+# Función para limpiar volúmenes
+clean_volumes() {
+    echo -e "${BLUE}Limpiando volúmenes de Docker...${NC}"
+    
+    # Detener contenedores si están corriendo
+    if docker ps -q | grep -q .; then
+        echo -e "${BLUE}Deteniendo contenedores...${NC}"
+        docker-compose down
+    fi
+    
+    # Listar y eliminar volúmenes específicos
+    for volume in stock-db-data order-db-data; do
+        if docker volume ls -q | grep -q "^${volume}$"; then
+            echo -e "${BLUE}Eliminando volumen ${volume}...${NC}"
+            docker volume rm ${volume}
+        fi
+    done
+    
+    echo -e "${GREEN}Limpieza de volúmenes completada${NC}"
+}
+
 # Función para verificar la conexión a una base de datos
 check_database_connection() {
     local container=$1
@@ -52,6 +73,17 @@ check_table_data() {
 }
 
 echo -e "${BLUE}Iniciando proceso de inicialización de bases de datos...${NC}"
+
+# Limpiar volúmenes existentes
+clean_volumes
+
+# Iniciar contenedores
+echo -e "${BLUE}Iniciando contenedores...${NC}"
+docker-compose up -d
+
+# Esperar a que los contenedores estén listos
+echo -e "${BLUE}Esperando a que los contenedores estén listos...${NC}"
+sleep 10
 
 # Verificar conexiones antes de comenzar
 if ! check_database_connection "stock-db-1" "postgres" "5434"; then
