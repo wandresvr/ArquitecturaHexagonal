@@ -98,7 +98,7 @@ if ! check_database_connection "stock-db-1" "postgres" "5434"; then
     exit 1
 fi
 
-if ! check_database_connection "order-db-1" "postgres" "5432"; then
+if ! check_database_connection "order-db-1" "orderdb" "5432"; then
     echo -e "${RED}Error: No se pudo conectar a la base de datos de order${NC}"
     exit 1
 fi
@@ -143,10 +143,10 @@ docker exec -i order-db-1 cat /tmp/recipe_ids.csv
 
 # 4. Ejecutar script de order
 echo -e "${GREEN}Ejecutando script de inicialización de order...${NC}"
-docker exec -i order-db-1 psql -U postgres -d postgres < order_init.sql
+docker exec -i order-db-1 psql -U postgres -d orderdb < order_init.sql
 
 # Verificar que se crearon los productos
-if ! check_table_data "order-db-1" "postgres" "products"; then
+if ! check_table_data "order-db-1" "orderdb" "products"; then
     echo -e "${RED}Error: No se pudieron crear los productos en order${NC}"
     exit 1
 fi
@@ -160,6 +160,6 @@ echo -e "${GREEN}Verificando sincronización de IDs...${NC}"
 echo -e "${BLUE}IDs de recetas en stock (puerto 5434):${NC}"
 docker exec -i stock-db-1 psql -U postgres -d postgres -c "SELECT id, name FROM recipes ORDER BY name;"
 echo -e "\n${BLUE}IDs de productos en order (puerto 5432):${NC}"
-docker exec -i order-db-1 psql -U postgres -d postgres -c "SELECT id, name, recipe_id FROM products ORDER BY name;"
+docker exec -i order-db-1 psql -U postgres -d orderdb -c "SELECT id, name, recipe_id FROM products ORDER BY name;"
 
 echo -e "${GREEN}¡Proceso completado!${NC}" 
