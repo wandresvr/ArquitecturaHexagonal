@@ -36,11 +36,12 @@ fi
 echo "✅ VM detectada: $VM_NAME"
 echo "✅ Grupo de recursos: $RESOURCE_GROUP"
 
-# ============ OBTENER NSG ASOCIADO ============
-NSG_NAME=$(az network nic list \
-  --resource-group "$RESOURCE_GROUP" \
-  --query "[?virtualMachine.id.contains('$VM_NAME')].ipConfigurations[0].networkSecurityGroup.id" \
-  -o tsv | awk -F/ '{print $NF}')
+# ============ OBTENER NSG ASOCIADO CORRECTAMENTE ============
+NIC_ID=$(az vm show --resource-group "$RESOURCE_GROUP" --name "$VM_NAME" --query "networkProfile.networkInterfaces[0].id" -o tsv)
+NIC_NAME=$(basename "$NIC_ID")
+
+NSG_ID=$(az network nic show --resource-group "$RESOURCE_GROUP" --name "$NIC_NAME" --query "ipConfigurations[0].networkSecurityGroup.id" -o tsv)
+NSG_NAME=$(basename "$NSG_ID")
 
 if [[ -z "$NSG_NAME" ]]; then
   echo "❌ No se pudo detectar un NSG para la VM."
