@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS products (
     name VARCHAR(255) NOT NULL,
     description TEXT,
     price DECIMAL(10,2) NOT NULL,
-    recipe_id UUID NOT NULL UNIQUE,
+    stock INTEGER NOT NULL DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -99,7 +99,7 @@ CREATE TEMPORARY TABLE temp_recipe_ids (
 COPY temp_recipe_ids FROM '/tmp/recipe_ids.csv' WITH CSV;
 
 -- Insertar productos basados en las recetas
-INSERT INTO products (id, name, description, price, recipe_id)
+INSERT INTO products (id, name, description, price, stock)
 SELECT 
     gen_random_uuid(),
     CASE 
@@ -114,7 +114,7 @@ SELECT
         WHEN r.name = 'Pizza Margherita' THEN 14.99
         ELSE 10.99
     END,
-    r.id
+    100
 FROM temp_recipe_ids r;
 
 -- Eliminar tabla temporal
