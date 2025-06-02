@@ -123,6 +123,10 @@ if [ ! -s recipe_ids.csv ]; then
     exit 1
 fi
 
+# Mostrar contenido del CSV
+echo -e "${BLUE}Contenido del archivo recipe_ids.csv:${NC}"
+cat recipe_ids.csv
+
 # 3. Copiar archivo CSV al contenedor de order
 echo -e "${GREEN}Copiando IDs de recetas al contenedor de order...${NC}"
 docker cp recipe_ids.csv order-db-1:/tmp/recipe_ids.csv
@@ -132,6 +136,10 @@ if ! docker exec -i order-db-1 test -s /tmp/recipe_ids.csv; then
     echo -e "${RED}Error: El archivo recipe_ids.csv no se copió correctamente al contenedor de order${NC}"
     exit 1
 fi
+
+# Mostrar contenido del archivo en el contenedor
+echo -e "${BLUE}Contenido del archivo en order-db-1:${NC}"
+docker exec -i order-db-1 cat /tmp/recipe_ids.csv
 
 # 4. Ejecutar script de order
 echo -e "${GREEN}Ejecutando script de inicialización de order...${NC}"
