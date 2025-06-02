@@ -52,6 +52,6 @@ class OpenApiConfigTest {
         Server server = servers.get(0);
         assertNotNull(server);
         assertEquals("http://localhost:8080", server.getUrl());
-        assertEquals("Servidor de desarrollo", server.getDescription());
+        assertEquals("Servidor de producción", server.getDescription());
     }
 } 
