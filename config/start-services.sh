@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Obtener el directorio del script
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+
 # Colores para mensajes
 GREEN='\033[0;32m'
 RED='\033[0;31m'
@@ -33,7 +37,7 @@ start_services() {
     
     # Iniciar RabbitMQ
     print_message "Iniciando RabbitMQ..."
-    cd ../rabbitmq && docker-compose up -d
+    cd "$PROJECT_ROOT/rabbitmq" && docker-compose up -d
     if [ $? -ne 0 ]; then
         print_error "Error al iniciar RabbitMQ"
         exit 1
@@ -41,7 +45,7 @@ start_services() {
     
     # Iniciar Order Service
     print_message "Iniciando Order Service..."
-    cd ../order && docker-compose up -d
+    cd "$PROJECT_ROOT/order" && docker-compose up -d
     if [ $? -ne 0 ]; then
         print_error "Error al iniciar Order Service"
         exit 1
@@ -49,13 +53,13 @@ start_services() {
     
     # Iniciar Stock Service
     print_message "Iniciando Stock Service..."
-    cd ../stock && docker-compose up -d
+    cd "$PROJECT_ROOT/stock" && docker-compose up -d
     if [ $? -ne 0 ]; then
         print_error "Error al iniciar Stock Service"
         exit 1
     fi
     
-    cd ../config
+    cd "$SCRIPT_DIR"
     print_success "Servicios iniciados correctamente"
     print_message "RabbitMQ Management UI: http://localhost:15672"
     print_message "Order Service: http://localhost:8080"
@@ -68,17 +72,17 @@ stop_services() {
     
     # Detener Stock Service
     print_message "Deteniendo Stock Service..."
-    cd ../stock && docker-compose down
+    cd "$PROJECT_ROOT/stock" && docker-compose down
     
     # Detener Order Service
     print_message "Deteniendo Order Service..."
-    cd ../order && docker-compose down
+    cd "$PROJECT_ROOT/order" && docker-compose down
     
     # Detener RabbitMQ
     print_message "Deteniendo RabbitMQ..."
-    cd ../rabbitmq && docker-compose down
+    cd "$PROJECT_ROOT/rabbitmq" && docker-compose down
     
-    cd ../config
+    cd "$SCRIPT_DIR"
     print_success "Servicios detenidos correctamente"
 }
 
@@ -86,12 +90,12 @@ stop_services() {
 status_services() {
     print_message "Estado de los servicios:"
     echo "RabbitMQ:"
-    cd ../rabbitmq && docker-compose ps
+    cd "$PROJECT_ROOT/rabbitmq" && docker-compose ps
     echo "Order Service:"
-    cd ../order && docker-compose ps
+    cd "$PROJECT_ROOT/order" && docker-compose ps
     echo "Stock Service:"
-    cd ../stock && docker-compose ps
-    cd ../config
+    cd "$PROJECT_ROOT/stock" && docker-compose ps
+    cd "$SCRIPT_DIR"
 }
 
 # Función para mostrar los logs
@@ -105,13 +109,13 @@ show_logs() {
     
     case $choice in
         1)
-            cd ../rabbitmq && docker-compose logs -f
+            cd "$PROJECT_ROOT/rabbitmq" && docker-compose logs -f
             ;;
         2)
-            cd ../order && docker-compose logs -f
+            cd "$PROJECT_ROOT/order" && docker-compose logs -f
             ;;
         3)
-            cd ../stock && docker-compose logs -f
+            cd "$PROJECT_ROOT/stock" && docker-compose logs -f
             ;;
         *)
             print_error "Opción inválida"
