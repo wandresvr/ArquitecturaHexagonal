@@ -47,7 +47,7 @@ setup_environment() {
     
     # Crear archivo en /etc/profile.d/
     local env_file="/etc/profile.d/swagger-server.sh"
-    echo "export SWAGGER_SERVER_URL=http://$ip" | sudo tee "$env_file" > /dev/null
+    echo "SWAGGER_SERVER_URL=http://$ip" | sudo tee "$env_file" > /dev/null
     sudo chmod +x "$env_file" > /dev/null
     
     # Agregar también a /etc/environment
@@ -57,11 +57,13 @@ setup_environment() {
         sudo sed -i "s|SWAGGER_SERVER_URL=.*|SWAGGER_SERVER_URL=http://$ip|" /etc/environment > /dev/null
     fi
     
-    # Exportar la variable para la sesión actual
-    export SWAGGER_SERVER_URL="http://$ip"
+    # Configurar la variable en el sistema
+    sudo sh -c "echo 'SWAGGER_SERVER_URL=http://$ip' >> /etc/profile"
     
     # Cargar la variable en la sesión actual
+    set -a
     source /etc/environment > /dev/null 2>&1
+    set +a
     
     print_message "Variable de sistema SWAGGER_SERVER_URL configurada permanentemente como http://$ip"
 }
@@ -166,6 +168,35 @@ show_logs() {
     esac
 }
 
+# Función para verificar la variable de entorno
+verify_environment() {
+    print_message "Verificando configuración de variables de entorno..."
+    
+    # Verificar en /etc/environment
+    if grep -q "SWAGGER_SERVER_URL" /etc/environment; then
+        print_success "Variable SWAGGER_SERVER_URL encontrada en /etc/environment"
+        echo "Valor: $(grep SWAGGER_SERVER_URL /etc/environment | cut -d'=' -f2)"
+    else
+        print_error "Variable SWAGGER_SERVER_URL no encontrada en /etc/environment"
+    fi
+    
+    # Verificar en /etc/profile.d/
+    if [ -f "/etc/profile.d/swagger-server.sh" ]; then
+        print_success "Archivo swagger-server.sh encontrado en /etc/profile.d/"
+        echo "Contenido: $(cat /etc/profile.d/swagger-server.sh)"
+    else
+        print_error "Archivo swagger-server.sh no encontrado en /etc/profile.d/"
+    fi
+    
+    # Verificar en la sesión actual
+    if [ -n "$SWAGGER_SERVER_URL" ]; then
+        print_success "Variable SWAGGER_SERVER_URL está configurada en la sesión actual"
+        echo "Valor actual: $SWAGGER_SERVER_URL"
+    else
+        print_error "Variable SWAGGER_SERVER_URL no está configurada en la sesión actual"
+    fi
+}
+
 # Menú principal
 case "$1" in
     "start")
@@ -185,8 +216,11 @@ case "$1" in
     "logs")
         show_logs
         ;;
+    "verify")
+        verify_environment
+        ;;
     *)
-        echo "Uso: $0 {start|stop|restart|status|logs}"
+        echo "Uso: $0 {start|stop|restart|status|logs|verify}"
         exit 1
         ;;
 esac
