@@ -15,7 +15,7 @@ if ! az account show &> /dev/null; then
   az login
 fi
 
-# ====== Detectar primera VM y su grupo ======
+# ====== Detectar primera VM y grupo ======
 VM_INFO=$(az vm list --query "[0]" -o json)
 VM_NAME=$(echo "$VM_INFO" | jq -r .name)
 RESOURCE_GROUP=$(echo "$VM_INFO" | jq -r .resourceGroup)
@@ -28,24 +28,24 @@ fi
 echo "✅ VM detectada: $VM_NAME"
 echo "✅ Grupo de recursos: $RESOURCE_GROUP"
 
-# ====== Obtener NIC y NSG asociado ======
+# ====== Obtener NIC y nombre ======
 NIC_ID=$(az vm show --resource-group "$RESOURCE_GROUP" --name "$VM_NAME" --query "networkProfile.networkInterfaces[0].id" -o tsv)
 NIC_NAME=$(basename "$NIC_ID")
 
-NSG_ID=$(az network nic show --resource-group "$RESOURCE_GROUP" --name "$NIC_NAME" --query "ipConfigurations[0].networkSecurityGroup.id" -o tsv)
-NSG_NAME=$(basename "$NSG_ID")
-
-if [[ -z "$NSG_NAME" ]]; then
-  echo "❌ No se detectó un NSG asociado a la VM ($VM_NAME)."
-  echo "ℹ️ Puedes asociar uno con:"
-  echo "   az network nsg create --resource-group $RESOURCE_GROUP --name ${VM_NAME}-NSG"
-  echo "   az network nic update --resource-group $RESOURCE_GROUP --name $NIC_NAME --network-security-group ${VM_NAME}-NSG"
-  exit 1
+# ====== Obtener o crear NSG ======
+NSG_ID=$(az network nic show --resource-group "$RESOURCE_GROUP" --name "$NIC_NAME" --query "ipConfigurations[0].networkSecurityGroup.id" -o tsv || true)
+if [[ -z "$NSG_ID" ]]; then
+  NSG_NAME="${VM_NAME}-NSG"
+  echo "⚠️ No se encontró un NSG asociado. Creando: $NSG_NAME..."
+  az network nsg create --resource-group "$RESOURCE_GROUP" --name "$NSG_NAME" --location "$(az vm show --resource-group "$RESOURCE_GROUP" --name "$VM_NAME" --query "location" -o tsv)"
+  echo "🔗 Asociando NSG a la NIC $NIC_NAME..."
+  az network nic update --resource-group "$RESOURCE_GROUP" --name "$NIC_NAME" --network-security-group "$NSG_NAME"
+else
+  NSG_NAME=$(basename "$NSG_ID")
+  echo "✅ NSG detectado: $NSG_NAME"
 fi
 
-echo "✅ NSG detectado: $NSG_NAME"
-
-# ====== Puertos a validar/abrir ======
+# ====== Puertos a verificar ======
 declare -A PUERTOS=(
   [sonarqube_9000]=9000
   [sonarqube_5433]=5433
@@ -57,21 +57,21 @@ declare -A PUERTOS=(
   [inventario_5434]=5434
 )
 
-# ====== Recorrer los puertos ======
+# ====== Validar y abrir puertos ======
 for nombre in "${!PUERTOS[@]}"; do
   puerto=${PUERTOS[$nombre]}
   echo "🔍 Verificando puerto $puerto ($nombre)..."
 
-  regla_existente=$(az network nsg rule list \
+  ya_existe=$(az network nsg rule list \
     --resource-group "$RESOURCE_GROUP" \
     --nsg-name "$NSG_NAME" \
     --query "[?destinationPortRange=='$puerto'] | length(@)" \
     -o tsv)
 
-  if [[ "$regla_existente" -gt 0 ]]; then
+  if [[ "$ya_existe" -gt 0 ]]; then
     echo "✅ Ya existe una regla para el puerto $puerto."
   else
-    PRIORIDAD=$((1000 + puerto % 1000))  # Prioridades únicas y válidas
+    PRIORIDAD=$((1000 + puerto % 1000))
     RULE_NAME="permitir-${nombre}"
 
     echo "➕ Creando regla '$RULE_NAME' para puerto $puerto con prioridad $PRIORIDAD..."
