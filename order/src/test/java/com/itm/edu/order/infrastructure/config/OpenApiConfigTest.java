@@ -19,7 +19,7 @@ class OpenApiConfigTest {
         OpenApiConfig config = new OpenApiConfig();
 
         // Act
-        OpenAPI openAPI = config.orderOpenAPI();
+        OpenAPI openAPI = config.customOpenAPI();
 
         // Assert
         assertNotNull(openAPI);

@@ -32,6 +32,25 @@ check_database_connection() {
     return 0
 }
 
+# Función para verificar si existen datos en una tabla
+check_table_data() {
+    local container=$1
+    local db=$2
+    local table=$3
+    
+    echo -e "${BLUE}Verificando datos en la tabla ${table}...${NC}"
+    
+    local count=$(docker exec -i $container psql -U postgres -d $db -t -c "SELECT COUNT(*) FROM ${table};" | tr -d ' ')
+    
+    if [ "$count" -eq "0" ]; then
+        echo -e "${RED}Error: No hay datos en la tabla ${table}${NC}"
+        return 1
+    fi
+    
+    echo -e "${GREEN}Se encontraron ${count} registros en ${table}${NC}"
+    return 0
+}
+
 echo -e "${BLUE}Iniciando proceso de inicialización de bases de datos...${NC}"
 
 # Verificar conexiones antes de comenzar
@@ -49,17 +68,41 @@ fi
 echo -e "${GREEN}Ejecutando script de inicialización de stock...${NC}"
 docker exec -i stock-db-1 psql -U postgres -d postgres < database/stock_init.sql
 
+# Verificar que se crearon las recetas
+if ! check_table_data "stock-db-1" "postgres" "recipes"; then
+    echo -e "${RED}Error: No se pudieron crear las recetas en stock${NC}"
+    exit 1
+fi
+
 # 2. Exportar IDs de recetas
 echo -e "${GREEN}Exportando IDs de recetas...${NC}"
 docker exec -i stock-db-1 psql -U postgres -d postgres -c "COPY (SELECT id, name FROM recipes ORDER BY name) TO STDOUT WITH CSV" > recipe_ids.csv
+
+# Verificar que el archivo CSV se creó correctamente
+if [ ! -s recipe_ids.csv ]; then
+    echo -e "${RED}Error: El archivo recipe_ids.csv está vacío${NC}"
+    exit 1
+fi
 
 # 3. Copiar archivo CSV al contenedor de order
 echo -e "${GREEN}Copiando IDs de recetas al contenedor de order...${NC}"
 docker cp recipe_ids.csv order-db-1:/tmp/recipe_ids.csv
 
+# Verificar que el archivo se copió correctamente
+if ! docker exec -i order-db-1 test -s /tmp/recipe_ids.csv; then
+    echo -e "${RED}Error: El archivo recipe_ids.csv no se copió correctamente al contenedor de order${NC}"
+    exit 1
+fi
+
 # 4. Ejecutar script de order
 echo -e "${GREEN}Ejecutando script de inicialización de order...${NC}"
 docker exec -i order-db-1 psql -U postgres -d postgres < database/order_init.sql
+
+# Verificar que se crearon los productos
+if ! check_table_data "order-db-1" "postgres" "products"; then
+    echo -e "${RED}Error: No se pudieron crear los productos en order${NC}"
+    exit 1
+fi
 
 # 5. Limpiar archivo CSV temporal
 echo -e "${GREEN}Limpiando archivos temporales...${NC}"
@@ -72,4 +115,4 @@ docker exec -i stock-db-1 psql -U postgres -d postgres -c "SELECT id, name FROM 
 echo -e "\n${BLUE}IDs de productos en order (puerto 5432):${NC}"
 docker exec -i order-db-1 psql -U postgres -d postgres -c "SELECT id, name, recipe_id FROM products ORDER BY name;"
 
-echo -e "${BLUE}¡Proceso completado!${NC}" 
+echo -e "${GREEN}¡Proceso completado!${NC}" 
