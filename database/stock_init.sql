@@ -17,9 +17,10 @@ CREATE TABLE IF NOT EXISTS ingredients (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Agregar columna unit_measure si no existe
+-- Agregar columnas si no existen
 DO $$ 
 BEGIN
+    -- Agregar columna unit_measure si no existe
     IF NOT EXISTS (
         SELECT 1 
         FROM information_schema.columns 
@@ -27,6 +28,16 @@ BEGIN
         AND column_name = 'unit_measure'
     ) THEN
         ALTER TABLE ingredients ADD COLUMN unit_measure VARCHAR(50);
+    END IF;
+
+    -- Agregar columna stock_quantity si no existe
+    IF NOT EXISTS (
+        SELECT 1 
+        FROM information_schema.columns 
+        WHERE table_name = 'ingredients' 
+        AND column_name = 'stock_quantity'
+    ) THEN
+        ALTER TABLE ingredients ADD COLUMN stock_quantity DECIMAL(10,2) DEFAULT 0;
     END IF;
 END $$;
 
