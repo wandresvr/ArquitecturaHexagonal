@@ -24,7 +24,7 @@ public class OpenApiConfig {
     private String serverUrl;
 
     @Bean
-    public OpenAPI orderOpenAPI() {
+    public OpenAPI customOpenAPI() {
         String baseUrl = serverUrl + ":" + serverPort;
         
         return new OpenAPI()
