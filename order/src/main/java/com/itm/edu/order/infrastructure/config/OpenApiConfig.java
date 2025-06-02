@@ -8,7 +8,6 @@ import io.swagger.v3.oas.models.servers.Server;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
 
 import java.util.List;
 
@@ -18,15 +17,11 @@ public class OpenApiConfig {
     @Value("${server.port:8080}")
     private String serverPort;
 
-    private final Environment environment;
-
-    public OpenApiConfig(Environment environment) {
-        this.environment = environment;
-    }
+    @Value("${swagger.server.url:http://localhost}")
+    private String serverUrl;
 
     @Bean
     public OpenAPI orderOpenAPI() {
-        String serverUrl = environment.getProperty("swagger.server.url", "http://localhost");
         String baseUrl = serverUrl + ":" + serverPort;
         
         return new OpenAPI()
