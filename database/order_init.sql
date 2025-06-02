@@ -31,6 +31,16 @@ BEGIN
     ) THEN
         ALTER TABLE clients ADD COLUMN updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
     END IF;
+
+    -- Agregar restricción UNIQUE a email si no existe
+    IF NOT EXISTS (
+        SELECT 1 
+        FROM information_schema.table_constraints 
+        WHERE table_name = 'clients' 
+        AND constraint_name = 'clients_email_key'
+    ) THEN
+        ALTER TABLE clients ADD CONSTRAINT clients_email_key UNIQUE (email);
+    END IF;
 END $$;
 
 -- Crear tabla de productos si no existe

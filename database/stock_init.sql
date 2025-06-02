@@ -192,8 +192,9 @@ BEGIN
     ingredient_ids AS (
         SELECT id, name FROM ingredients ORDER BY name
     )
-    INSERT INTO recipe_ingredients (quantity, unit, ingredient_id, recipe_id)
+    INSERT INTO recipe_ingredients (id, quantity, unit, ingredient_id, recipe_id)
     SELECT 
+        gen_random_uuid(),
         CASE 
             WHEN i.name = 'Lechuga Romana' THEN 200
             WHEN i.name = 'Pollo a la parrilla' THEN 150
