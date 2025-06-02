@@ -17,12 +17,26 @@ CREATE TABLE IF NOT EXISTS ingredients (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Agregar columna unit_measure si no existe
+DO $$ 
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 
+        FROM information_schema.columns 
+        WHERE table_name = 'ingredients' 
+        AND column_name = 'unit_measure'
+    ) THEN
+        ALTER TABLE ingredients ADD COLUMN unit_measure VARCHAR(50);
+    END IF;
+END $$;
+
 -- Crear tabla de relación receta_ingredientes si no existe
 CREATE TABLE IF NOT EXISTS recipe_ingredients (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     recipe_id UUID REFERENCES recipes(id),
     ingredient_id UUID REFERENCES ingredients(id),
     quantity DECIMAL(10,2),
-    PRIMARY KEY (recipe_id, ingredient_id)
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Insertar datos de ejemplo para recetas (solo si no existen)
