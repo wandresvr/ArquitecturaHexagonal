@@ -6,6 +6,30 @@ BLUE='\033[0;34m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
+# Función para limpiar en caso de error
+cleanup() {
+    local exit_code=$?
+    echo -e "${RED}Error en el proceso. Limpiando...${NC}"
+    
+    # Detener contenedores
+    cd ../order && docker-compose down && cd ../stock && docker-compose down && cd ../database
+    
+    # Eliminar volúmenes
+    for volume in stock-db-data order-db-data; do
+        if docker volume ls -q | grep -q "^${volume}$"; then
+            docker volume rm ${volume}
+        fi
+    done
+    
+    # Eliminar archivo CSV si existe
+    [ -f recipe_ids.csv ] && rm recipe_ids.csv
+    
+    exit $exit_code
+}
+
+# Configurar trap para manejar errores
+trap cleanup ERR
+
 # Verificar que estamos en el directorio correcto
 if [ ! -d "../order" ] || [ ! -d "../stock" ]; then
     echo -e "${RED}Error: No se encuentran los directorios order y stock${NC}"
@@ -160,6 +184,9 @@ echo -e "${GREEN}Verificando sincronización de IDs...${NC}"
 echo -e "${BLUE}IDs de recetas en stock (puerto 5434):${NC}"
 docker exec -i stock-db-1 psql -U postgres -d postgres -c "SELECT id, name FROM recipes ORDER BY name;"
 echo -e "\n${BLUE}IDs de productos en order (puerto 5432):${NC}"
-docker exec -i order-db-1 psql -U postgres -d orderdb -c "SELECT id, name, recipe_id FROM products ORDER BY name;"
+docker exec -i order-db-1 psql -U postgres -d orderdb -c "SELECT id, name, stock FROM products ORDER BY name;"
 
-echo -e "${GREEN}¡Proceso completado!${NC}" 
+echo -e "${GREEN}¡Proceso completado!${NC}"
+
+# Remover el trap al finalizar exitosamente
+trap - ERR 
