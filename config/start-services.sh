@@ -45,25 +45,38 @@ check_docker() {
 setup_environment() {
     local ip="$1"
     
-    # Crear archivo en /etc/profile.d/
-    local env_file="/etc/profile.d/swagger-server.sh"
+    # Crear archivo de configuración systemd
+    local env_file="/etc/default/swagger-server"
     echo "SWAGGER_SERVER_URL=http://$ip" | sudo tee "$env_file" > /dev/null
-    sudo chmod +x "$env_file" > /dev/null
     
-    # Agregar también a /etc/environment
-    if ! grep -q "SWAGGER_SERVER_URL" /etc/environment; then
-        echo "SWAGGER_SERVER_URL=http://$ip" | sudo tee -a /etc/environment > /dev/null
-    else
-        sudo sed -i "s|SWAGGER_SERVER_URL=.*|SWAGGER_SERVER_URL=http://$ip|" /etc/environment > /dev/null
-    fi
+    # Crear servicio systemd para cargar la variable
+    local service_file="/etc/systemd/system/swagger-server.service"
+    cat << EOF | sudo tee "$service_file" > /dev/null
+[Unit]
+Description=Swagger Server Environment Service
+After=network.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+Environment="SWAGGER_SERVER_URL=http://$ip"
+ExecStart=/bin/true
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+    # Recargar systemd y habilitar el servicio
+    sudo systemctl daemon-reload
+    sudo systemctl enable swagger-server.service
+    sudo systemctl start swagger-server.service
     
     # Configurar la variable en el sistema
-    sudo sh -c "echo 'SWAGGER_SERVER_URL=http://$ip' >> /etc/profile"
+    echo "SWAGGER_SERVER_URL=http://$ip" | sudo tee /etc/environment > /dev/null
     
-    # Cargar la variable en la sesión actual
-    set -a
-    source /etc/environment > /dev/null 2>&1
-    set +a
+    # Forzar la recarga de las variables de entorno
+    sudo systemctl daemon-reload
+    sudo systemctl restart systemd-user-sessions.service
     
     print_message "Variable de sistema SWAGGER_SERVER_URL configurada permanentemente como http://$ip"
 }
