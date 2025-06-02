@@ -41,6 +41,16 @@ check_docker() {
     fi
 }
 
+# Función para crear archivo .env temporal
+create_env_file() {
+    local service_dir="$1"
+    local ip="$2"
+    local env_file="$service_dir/.env"
+    
+    echo "SWAGGER_SERVER_URL=http://$ip" > "$env_file"
+    print_message "Archivo .env creado en $service_dir con SWAGGER_SERVER_URL=http://$ip"
+}
+
 # Función para iniciar los servicios
 start_services() {
     print_message "Iniciando servicios..."
@@ -49,9 +59,9 @@ start_services() {
     PUBLIC_IP=$(get_public_ip)
     print_message "IP pública detectada: $PUBLIC_IP"
     
-    # Exportar variable de entorno
-    export SWAGGER_SERVER_URL="http://$PUBLIC_IP"
-    print_message "Configurando SWAGGER_SERVER_URL: $SWAGGER_SERVER_URL"
+    # Crear archivos .env para cada servicio
+    create_env_file "$PROJECT_ROOT/order" "$PUBLIC_IP"
+    create_env_file "$PROJECT_ROOT/stock" "$PUBLIC_IP"
     
     # Iniciar RabbitMQ
     print_message "Iniciando RabbitMQ..."
@@ -63,7 +73,7 @@ start_services() {
     
     # Iniciar Order Service
     print_message "Iniciando Order Service..."
-    cd "$PROJECT_ROOT/order" && SWAGGER_SERVER_URL="$SWAGGER_SERVER_URL" docker-compose up -d
+    cd "$PROJECT_ROOT/order" && docker-compose --env-file .env up -d
     if [ $? -ne 0 ]; then
         print_error "Error al iniciar Order Service"
         exit 1
@@ -71,7 +81,7 @@ start_services() {
     
     # Iniciar Stock Service
     print_message "Iniciando Stock Service..."
-    cd "$PROJECT_ROOT/stock" && SWAGGER_SERVER_URL="$SWAGGER_SERVER_URL" docker-compose up -d
+    cd "$PROJECT_ROOT/stock" && docker-compose --env-file .env up -d
     if [ $? -ne 0 ]; then
         print_error "Error al iniciar Stock Service"
         exit 1
