@@ -51,6 +51,7 @@ start_services() {
     
     # Exportar variable de entorno
     export SWAGGER_SERVER_URL="http://$PUBLIC_IP"
+    print_message "Configurando SWAGGER_SERVER_URL: $SWAGGER_SERVER_URL"
     
     # Iniciar RabbitMQ
     print_message "Iniciando RabbitMQ..."
@@ -62,7 +63,7 @@ start_services() {
     
     # Iniciar Order Service
     print_message "Iniciando Order Service..."
-    cd "$PROJECT_ROOT/order" && docker-compose up -d
+    cd "$PROJECT_ROOT/order" && SWAGGER_SERVER_URL="$SWAGGER_SERVER_URL" docker-compose up -d
     if [ $? -ne 0 ]; then
         print_error "Error al iniciar Order Service"
         exit 1
@@ -70,7 +71,7 @@ start_services() {
     
     # Iniciar Stock Service
     print_message "Iniciando Stock Service..."
-    cd "$PROJECT_ROOT/stock" && docker-compose up -d
+    cd "$PROJECT_ROOT/stock" && SWAGGER_SERVER_URL="$SWAGGER_SERVER_URL" docker-compose up -d
     if [ $? -ne 0 ]; then
         print_error "Error al iniciar Stock Service"
         exit 1
