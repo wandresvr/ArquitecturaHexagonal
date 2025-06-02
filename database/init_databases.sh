@@ -7,8 +7,8 @@ RED='\033[0;31m'
 NC='\033[0m' # No Color
 
 # Verificar que estamos en el directorio correcto
-if [ ! -f "../docker-compose.yml" ]; then
-    echo -e "${RED}Error: No se encuentra el archivo docker-compose.yml${NC}"
+if [ ! -d "../order" ] || [ ! -d "../stock" ]; then
+    echo -e "${RED}Error: No se encuentran los directorios order y stock${NC}"
     echo -e "${RED}Por favor, ejecuta este script desde el directorio database/${NC}"
     exit 1
 fi
@@ -20,7 +20,7 @@ clean_volumes() {
     # Detener contenedores si están corriendo
     if docker ps -q | grep -q .; then
         echo -e "${BLUE}Deteniendo contenedores...${NC}"
-        cd .. && docker-compose down && cd database
+        cd ../order && docker-compose down && cd ../stock && docker-compose down && cd ../database
     fi
     
     # Listar y eliminar volúmenes específicos
@@ -86,7 +86,7 @@ clean_volumes
 
 # Iniciar contenedores
 echo -e "${BLUE}Iniciando contenedores...${NC}"
-cd .. && docker-compose up -d && cd database
+cd ../order && docker-compose up -d && cd ../stock && docker-compose up -d && cd ../database
 
 # Esperar a que los contenedores estén listos
 echo -e "${BLUE}Esperando a que los contenedores estén listos...${NC}"
