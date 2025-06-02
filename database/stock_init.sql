@@ -11,6 +11,50 @@ CREATE TABLE IF NOT EXISTS recipes (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Agregar columnas si no existen
+DO $$ 
+BEGIN
+    -- Agregar columna cooking_time si no existe
+    IF NOT EXISTS (
+        SELECT 1 
+        FROM information_schema.columns 
+        WHERE table_name = 'recipes' 
+        AND column_name = 'cooking_time'
+    ) THEN
+        ALTER TABLE recipes ADD COLUMN cooking_time INTEGER;
+    END IF;
+
+    -- Agregar columna servings si no existe
+    IF NOT EXISTS (
+        SELECT 1 
+        FROM information_schema.columns 
+        WHERE table_name = 'recipes' 
+        AND column_name = 'servings'
+    ) THEN
+        ALTER TABLE recipes ADD COLUMN servings INTEGER;
+    END IF;
+
+    -- Agregar columna instructions si no existe
+    IF NOT EXISTS (
+        SELECT 1 
+        FROM information_schema.columns 
+        WHERE table_name = 'recipes' 
+        AND column_name = 'instructions'
+    ) THEN
+        ALTER TABLE recipes ADD COLUMN instructions TEXT;
+    END IF;
+
+    -- Agregar columna updated_at si no existe
+    IF NOT EXISTS (
+        SELECT 1 
+        FROM information_schema.columns 
+        WHERE table_name = 'recipes' 
+        AND column_name = 'updated_at'
+    ) THEN
+        ALTER TABLE recipes ADD COLUMN updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+    END IF;
+END $$;
+
 -- Crear tabla de ingredientes si no existe
 CREATE TABLE IF NOT EXISTS ingredients (
     id UUID PRIMARY KEY,

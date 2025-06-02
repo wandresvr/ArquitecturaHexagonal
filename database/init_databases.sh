@@ -6,6 +6,13 @@ BLUE='\033[0;34m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
+# Verificar que estamos en el directorio correcto
+if [ ! -f "../docker-compose.yml" ]; then
+    echo -e "${RED}Error: No se encuentra el archivo docker-compose.yml${NC}"
+    echo -e "${RED}Por favor, ejecuta este script desde el directorio database/${NC}"
+    exit 1
+fi
+
 # Función para limpiar volúmenes
 clean_volumes() {
     echo -e "${BLUE}Limpiando volúmenes de Docker...${NC}"
@@ -13,7 +20,7 @@ clean_volumes() {
     # Detener contenedores si están corriendo
     if docker ps -q | grep -q .; then
         echo -e "${BLUE}Deteniendo contenedores...${NC}"
-        docker-compose down
+        cd .. && docker-compose down && cd database
     fi
     
     # Listar y eliminar volúmenes específicos
@@ -79,7 +86,7 @@ clean_volumes
 
 # Iniciar contenedores
 echo -e "${BLUE}Iniciando contenedores...${NC}"
-docker-compose up -d
+cd .. && docker-compose up -d && cd database
 
 # Esperar a que los contenedores estén listos
 echo -e "${BLUE}Esperando a que los contenedores estén listos...${NC}"
@@ -98,7 +105,7 @@ fi
 
 # 1. Ejecutar script de stock
 echo -e "${GREEN}Ejecutando script de inicialización de stock...${NC}"
-docker exec -i stock-db-1 psql -U postgres -d postgres < database/stock_init.sql
+docker exec -i stock-db-1 psql -U postgres -d postgres < stock_init.sql
 
 # Verificar que se crearon las recetas
 if ! check_table_data "stock-db-1" "postgres" "recipes"; then
@@ -128,7 +135,7 @@ fi
 
 # 4. Ejecutar script de order
 echo -e "${GREEN}Ejecutando script de inicialización de order...${NC}"
-docker exec -i order-db-1 psql -U postgres -d postgres < database/order_init.sql
+docker exec -i order-db-1 psql -U postgres -d postgres < order_init.sql
 
 # Verificar que se crearon los productos
 if ! check_table_data "order-db-1" "postgres" "products"; then
