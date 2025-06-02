@@ -85,6 +85,7 @@ CREATE TABLE IF NOT EXISTS ingredients (
     name VARCHAR(255) NOT NULL UNIQUE,
     description TEXT,
     unit VARCHAR(50),
+    quantity DECIMAL(10,2),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -125,53 +126,53 @@ BEGIN
         (gen_random_uuid(), 'Pizza Margherita', 'Pizza clásica con tomate y mozzarella', 20, 15, 4, 'Estirar la masa y hornear', 'MEDIA');
 
     -- Insertar ingredientes
-    INSERT INTO ingredients (id, name, description, unit)
+    INSERT INTO ingredients (id, name, description, unit, quantity)
     VALUES 
-        (gen_random_uuid(), 'Lechuga Romana', 'Lechuga fresca', 'g');
+        (gen_random_uuid(), 'Lechuga Romana', 'Lechuga fresca', 'g', 1000);
 
-    INSERT INTO ingredients (id, name, description, unit)
+    INSERT INTO ingredients (id, name, description, unit, quantity)
     VALUES 
-        (gen_random_uuid(), 'Pollo a la parrilla', 'Pechuga de pollo asada', 'g');
+        (gen_random_uuid(), 'Pollo a la parrilla', 'Pechuga de pollo asada', 'g', 2000);
 
-    INSERT INTO ingredients (id, name, description, unit)
+    INSERT INTO ingredients (id, name, description, unit, quantity)
     VALUES 
-        (gen_random_uuid(), 'Crutones', 'Pan tostado en cubos', 'g');
+        (gen_random_uuid(), 'Crutones', 'Pan tostado en cubos', 'g', 500);
 
-    INSERT INTO ingredients (id, name, description, unit)
+    INSERT INTO ingredients (id, name, description, unit, quantity)
     VALUES 
-        (gen_random_uuid(), 'Queso Parmesano', 'Queso rallado', 'g');
+        (gen_random_uuid(), 'Queso Parmesano', 'Queso rallado', 'g', 1000);
 
-    INSERT INTO ingredients (id, name, description, unit)
+    INSERT INTO ingredients (id, name, description, unit, quantity)
     VALUES 
-        (gen_random_uuid(), 'Aderezo César', 'Salsa cremosa', 'ml');
+        (gen_random_uuid(), 'Aderezo César', 'Salsa cremosa', 'ml', 500);
 
-    INSERT INTO ingredients (id, name, description, unit)
+    INSERT INTO ingredients (id, name, description, unit, quantity)
     VALUES 
-        (gen_random_uuid(), 'Espaguetis', 'Pasta larga', 'g');
+        (gen_random_uuid(), 'Espaguetis', 'Pasta larga', 'g', 2000);
 
-    INSERT INTO ingredients (id, name, description, unit)
+    INSERT INTO ingredients (id, name, description, unit, quantity)
     VALUES 
-        (gen_random_uuid(), 'Panceta', 'Tocino italiano', 'g');
+        (gen_random_uuid(), 'Panceta', 'Tocino italiano', 'g', 1000);
 
-    INSERT INTO ingredients (id, name, description, unit)
+    INSERT INTO ingredients (id, name, description, unit, quantity)
     VALUES 
-        (gen_random_uuid(), 'Huevo', 'Huevo fresco', 'unidad');
+        (gen_random_uuid(), 'Huevo', 'Huevo fresco', 'unidad', 100);
 
-    INSERT INTO ingredients (id, name, description, unit)
+    INSERT INTO ingredients (id, name, description, unit, quantity)
     VALUES 
-        (gen_random_uuid(), 'Queso Pecorino', 'Queso italiano', 'g');
+        (gen_random_uuid(), 'Queso Pecorino', 'Queso italiano', 'g', 1000);
 
-    INSERT INTO ingredients (id, name, description, unit)
+    INSERT INTO ingredients (id, name, description, unit, quantity)
     VALUES 
-        (gen_random_uuid(), 'Masa de pizza', 'Masa fresca', 'g');
+        (gen_random_uuid(), 'Masa de pizza', 'Masa fresca', 'g', 2000);
 
-    INSERT INTO ingredients (id, name, description, unit)
+    INSERT INTO ingredients (id, name, description, unit, quantity)
     VALUES 
-        (gen_random_uuid(), 'Salsa de tomate', 'Salsa para pizza', 'ml');
+        (gen_random_uuid(), 'Salsa de tomate', 'Salsa para pizza', 'ml', 1000);
 
-    INSERT INTO ingredients (id, name, description, unit)
+    INSERT INTO ingredients (id, name, description, unit, quantity)
     VALUES 
-        (gen_random_uuid(), 'Mozzarella', 'Queso mozzarella', 'g');
+        (gen_random_uuid(), 'Mozzarella', 'Queso mozzarella', 'g', 2000);
 
     -- Insertar relaciones receta-ingrediente
     WITH recipe_ids AS (
@@ -183,86 +184,33 @@ BEGIN
     INSERT INTO recipe_ingredients (id, quantity, unit, ingredient_id, recipe_id)
     SELECT 
         gen_random_uuid(),
-        quantity,
-        unit,
-        ingredient_id,
-        recipe_id
-    FROM (
-        -- Ensalada César
-        SELECT 
-            200 as quantity,
-            'g' as unit,
-            (SELECT id FROM ingredient_ids WHERE name = 'Lechuga Romana') as ingredient_id,
-            (SELECT id FROM recipe_ids WHERE name = 'Ensalada César') as recipe_id
-        UNION ALL
-        SELECT 
-            150 as quantity,
-            'g' as unit,
-            (SELECT id FROM ingredient_ids WHERE name = 'Pollo a la parrilla') as ingredient_id,
-            (SELECT id FROM recipe_ids WHERE name = 'Ensalada César') as recipe_id
-        UNION ALL
-        SELECT 
-            50 as quantity,
-            'g' as unit,
-            (SELECT id FROM ingredient_ids WHERE name = 'Crutones') as ingredient_id,
-            (SELECT id FROM recipe_ids WHERE name = 'Ensalada César') as recipe_id
-        UNION ALL
-        SELECT 
-            30 as quantity,
-            'g' as unit,
-            (SELECT id FROM ingredient_ids WHERE name = 'Queso Parmesano') as ingredient_id,
-            (SELECT id FROM recipe_ids WHERE name = 'Ensalada César') as recipe_id
-        UNION ALL
-        SELECT 
-            30 as quantity,
-            'ml' as unit,
-            (SELECT id FROM ingredient_ids WHERE name = 'Aderezo César') as ingredient_id,
-            (SELECT id FROM recipe_ids WHERE name = 'Ensalada César') as recipe_id
-        UNION ALL
-        -- Pasta Carbonara
-        SELECT 
-            500 as quantity,
-            'g' as unit,
-            (SELECT id FROM ingredient_ids WHERE name = 'Espaguetis') as ingredient_id,
-            (SELECT id FROM recipe_ids WHERE name = 'Pasta Carbonara') as recipe_id
-        UNION ALL
-        SELECT 
-            200 as quantity,
-            'g' as unit,
-            (SELECT id FROM ingredient_ids WHERE name = 'Panceta') as ingredient_id,
-            (SELECT id FROM recipe_ids WHERE name = 'Pasta Carbonara') as recipe_id
-        UNION ALL
-        SELECT 
-            2 as quantity,
-            'unidad' as unit,
-            (SELECT id FROM ingredient_ids WHERE name = 'Huevo') as ingredient_id,
-            (SELECT id FROM recipe_ids WHERE name = 'Pasta Carbonara') as recipe_id
-        UNION ALL
-        SELECT 
-            100 as quantity,
-            'g' as unit,
-            (SELECT id FROM ingredient_ids WHERE name = 'Queso Pecorino') as ingredient_id,
-            (SELECT id FROM recipe_ids WHERE name = 'Pasta Carbonara') as recipe_id
-        UNION ALL
-        -- Pizza Margherita
-        SELECT 
-            300 as quantity,
-            'g' as unit,
-            (SELECT id FROM ingredient_ids WHERE name = 'Masa de pizza') as ingredient_id,
-            (SELECT id FROM recipe_ids WHERE name = 'Pizza Margherita') as recipe_id
-        UNION ALL
-        SELECT 
-            150 as quantity,
-            'ml' as unit,
-            (SELECT id FROM ingredient_ids WHERE name = 'Salsa de tomate') as ingredient_id,
-            (SELECT id FROM recipe_ids WHERE name = 'Pizza Margherita') as recipe_id
-        UNION ALL
-        SELECT 
-            200 as quantity,
-            'g' as unit,
-            (SELECT id FROM ingredient_ids WHERE name = 'Mozzarella') as ingredient_id,
-            (SELECT id FROM recipe_ids WHERE name = 'Pizza Margherita') as recipe_id
-    ) as recipe_ingredients_data;
+        CASE 
+            WHEN r.name = 'Ensalada César' AND i.name = 'Lechuga Romana' THEN 200
+            WHEN r.name = 'Ensalada César' AND i.name = 'Pollo a la parrilla' THEN 150
+            WHEN r.name = 'Ensalada César' AND i.name = 'Crutones' THEN 50
+            WHEN r.name = 'Ensalada César' AND i.name = 'Queso Parmesano' THEN 30
+            WHEN r.name = 'Ensalada César' AND i.name = 'Aderezo César' THEN 30
+            WHEN r.name = 'Pasta Carbonara' AND i.name = 'Espaguetis' THEN 500
+            WHEN r.name = 'Pasta Carbonara' AND i.name = 'Panceta' THEN 200
+            WHEN r.name = 'Pasta Carbonara' AND i.name = 'Huevo' THEN 2
+            WHEN r.name = 'Pasta Carbonara' AND i.name = 'Queso Pecorino' THEN 100
+            WHEN r.name = 'Pizza Margherita' AND i.name = 'Masa de pizza' THEN 300
+            WHEN r.name = 'Pizza Margherita' AND i.name = 'Salsa de tomate' THEN 150
+            WHEN r.name = 'Pizza Margherita' AND i.name = 'Mozzarella' THEN 200
+        END as quantity,
+        CASE 
+            WHEN i.name IN ('Aderezo César', 'Salsa de tomate') THEN 'ml'
+            WHEN i.name = 'Huevo' THEN 'unidad'
+            ELSE 'g'
+        END as unit,
+        i.id as ingredient_id,
+        r.id as recipe_id
+    FROM recipe_ids r
+    JOIN ingredient_ids i ON (
+        (r.name = 'Ensalada César' AND i.name IN ('Lechuga Romana', 'Pollo a la parrilla', 'Crutones', 'Queso Parmesano', 'Aderezo César'))
+        OR (r.name = 'Pasta Carbonara' AND i.name IN ('Espaguetis', 'Panceta', 'Huevo', 'Queso Pecorino'))
+        OR (r.name = 'Pizza Margherita' AND i.name IN ('Masa de pizza', 'Salsa de tomate', 'Mozzarella'))
+    );
 
     -- Exportar IDs de recetas a CSV
     COPY (SELECT id, name FROM recipes ORDER BY name) TO '/tmp/recipe_ids.csv' WITH CSV;
