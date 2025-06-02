@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GlobalExceptionHandler.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">order</a> &gt; <a href="index.source.html" class="el_package">com.itm.edu.order.infrastructure.exception</a> &gt; <span class="el_source">GlobalExceptionHandler.java</span></div><h1>GlobalExceptionHandler.java</h1><pre class="source lang-java linenums">package com.itm.edu.order.infrastructure.exception;
+
+import com.itm.edu.order.domain.exception.ApiError;
+import com.itm.edu.order.domain.exception.BusinessException;
+import com.itm.edu.order.domain.exception.HttpStatusException;
+import com.itm.edu.order.domain.exception.ProductNotFoundException;
+import com.itm.edu.order.domain.exception.OrderNotFoundException;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
+
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
+import java.time.LocalDateTime;
+import java.util.stream.Collectors;
+
+<span class="fc" id="L22">@Slf4j</span>
+@RestControllerAdvice
+<span class="fc" id="L24">public class GlobalExceptionHandler {</span>
+
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity&lt;ErrorResponse&gt; handleBusinessException(BusinessException ex) {
+<span class="fc" id="L28">        log.error(&quot;Error de negocio: {}&quot;, ex.getMessage());</span>
+<span class="fc" id="L29">        ErrorResponse errorResponse = ErrorResponse.builder()</span>
+<span class="fc" id="L30">                .status(HttpStatus.BAD_REQUEST.value())</span>
+<span class="fc" id="L31">                .message(ex.getMessage())</span>
+<span class="fc" id="L32">                .timestamp(LocalDateTime.now().toString())</span>
+<span class="fc" id="L33">                .build();</span>
+<span class="fc" id="L34">        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);</span>
+    }
+
+    @ExceptionHandler(HttpStatusException.class)
+    public ResponseEntity&lt;ErrorResponse&gt; handleHttpStatusException(HttpStatusException ex) {
+<span class="fc" id="L39">        log.error(&quot;Error HTTP: {}&quot;, ex.getMessage());</span>
+<span class="fc" id="L40">        ErrorResponse errorResponse = ErrorResponse.builder()</span>
+<span class="fc" id="L41">                .status(ex.getStatus().value())</span>
+<span class="fc" id="L42">                .message(ex.getMessage())</span>
+<span class="fc" id="L43">                .timestamp(LocalDateTime.now().toString())</span>
+<span class="fc" id="L44">                .build();</span>
+<span class="fc" id="L45">        return ResponseEntity.status(ex.getStatus()).body(errorResponse);</span>
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity&lt;ErrorResponse&gt; handleValidationExceptions(MethodArgumentNotValidException ex) {
+<span class="fc" id="L50">        String message = ex.getBindingResult().getFieldErrors().stream()</span>
+<span class="fc" id="L51">            .map(error -&gt; error.getField() + &quot;: &quot; + error.getDefaultMessage())</span>
+<span class="fc" id="L52">            .collect(Collectors.joining(&quot;; &quot;));</span>
+
+<span class="fc" id="L54">        log.error(&quot;Error de validación: {}&quot;, message);</span>
+<span class="fc" id="L55">        ErrorResponse errorResponse = ErrorResponse.builder()</span>
+<span class="fc" id="L56">                .status(HttpStatus.BAD_REQUEST.value())</span>
+<span class="fc" id="L57">                .message(message)</span>
+<span class="fc" id="L58">                .timestamp(LocalDateTime.now().toString())</span>
+<span class="fc" id="L59">                .build();</span>
+<span class="fc" id="L60">        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);</span>
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity&lt;ErrorResponse&gt; handleConstraintViolationException(ConstraintViolationException ex) {
+<span class="fc" id="L65">        String message = ex.getConstraintViolations().stream()</span>
+<span class="pc" id="L66">            .map(violation -&gt; violation.getPropertyPath() + &quot;: &quot; + violation.getMessage())</span>
+<span class="fc" id="L67">            .collect(Collectors.joining(&quot;; &quot;));</span>
+
+<span class="fc" id="L69">        log.error(&quot;Error de validación: {}&quot;, message);</span>
+<span class="fc" id="L70">        ErrorResponse errorResponse = ErrorResponse.builder()</span>
+<span class="fc" id="L71">                .status(HttpStatus.BAD_REQUEST.value())</span>
+<span class="fc" id="L72">                .message(message)</span>
+<span class="fc" id="L73">                .timestamp(LocalDateTime.now().toString())</span>
+<span class="fc" id="L74">                .build();</span>
+<span class="fc" id="L75">        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);</span>
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity&lt;ErrorResponse&gt; handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
+<span class="fc" id="L80">        String message = String.format(&quot;El parámetro '%s' con valor '%s' no puede ser convertido al tipo requerido&quot;, </span>
+<span class="fc" id="L81">            ex.getName(), ex.getValue());</span>
+            
+<span class="fc" id="L83">        log.error(&quot;Error de tipo de datos: {}&quot;, message);</span>
+<span class="fc" id="L84">        ErrorResponse errorResponse = ErrorResponse.builder()</span>
+<span class="fc" id="L85">                .status(HttpStatus.BAD_REQUEST.value())</span>
+<span class="fc" id="L86">                .message(message)</span>
+<span class="fc" id="L87">                .timestamp(LocalDateTime.now().toString())</span>
+<span class="fc" id="L88">                .build();</span>
+<span class="fc" id="L89">        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);</span>
+    }
+
+    @ExceptionHandler(ProductNotFoundException.class)
+    public ResponseEntity&lt;ErrorResponse&gt; handleProductNotFoundException(ProductNotFoundException ex) {
+<span class="fc" id="L94">        log.error(&quot;Producto no encontrado: {}&quot;, ex.getMessage());</span>
+<span class="fc" id="L95">        ErrorResponse errorResponse = ErrorResponse.builder()</span>
+<span class="fc" id="L96">                .status(HttpStatus.NOT_FOUND.value())</span>
+<span class="fc" id="L97">                .message(ex.getMessage())</span>
+<span class="fc" id="L98">                .timestamp(LocalDateTime.now().toString())</span>
+<span class="fc" id="L99">                .build();</span>
+<span class="fc" id="L100">        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);</span>
+    }
+
+    @ExceptionHandler(OrderNotFoundException.class)
+    public ResponseEntity&lt;ErrorResponse&gt; handleOrderNotFoundException(OrderNotFoundException ex) {
+<span class="fc" id="L105">        log.error(&quot;Orden no encontrada: {}&quot;, ex.getMessage());</span>
+<span class="fc" id="L106">        ErrorResponse errorResponse = ErrorResponse.builder()</span>
+<span class="fc" id="L107">                .status(HttpStatus.NOT_FOUND.value())</span>
+<span class="fc" id="L108">                .message(ex.getMessage())</span>
+<span class="fc" id="L109">                .timestamp(LocalDateTime.now().toString())</span>
+<span class="fc" id="L110">                .build();</span>
+<span class="fc" id="L111">        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);</span>
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity&lt;ErrorResponse&gt; handleGenericException(Exception ex) {
+<span class="fc" id="L116">        log.error(&quot;Error interno del servidor: &quot;, ex);</span>
+<span class="fc" id="L117">        ErrorResponse errorResponse = ErrorResponse.builder()</span>
+<span class="fc" id="L118">                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())</span>
+<span class="fc" id="L119">                .message(&quot;Error interno del servidor&quot;)</span>
+<span class="fc" id="L120">                .timestamp(LocalDateTime.now().toString())</span>
+<span class="fc" id="L121">                .build();</span>
+<span class="fc" id="L122">        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);</span>
+    }
+} 
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

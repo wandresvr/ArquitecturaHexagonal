@@ -4,32 +4,31 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.math.BigDecimal;
-import java.util.UUID;
 
 @Getter
-<span class="pc" id="L10">@Builder</span>
+<span class="pc" id="L9">@Builder</span>
 public class OrderItem {
-<span class="fc" id="L12">    private final Product product;</span>
-<span class="fc" id="L13">    private final int quantity;</span>
+<span class="fc" id="L11">    private final Product product;</span>
+<span class="fc" id="L12">    private final int quantity;</span>
 
-<span class="fc" id="L15">    public OrderItem(Product product, int quantity) {</span>
-<span class="pc bpc" id="L16" title="1 of 2 branches missed.">        if (product == null) {</span>
-<span class="nc" id="L17">            throw new IllegalArgumentException(&quot;El producto no puede ser nulo&quot;);</span>
-        }
-<span class="pc bpc" id="L19" title="1 of 2 branches missed.">        if (quantity &lt;= 0) {</span>
-<span class="nc" id="L20">            throw new IllegalArgumentException(&quot;La cantidad debe ser mayor a 0&quot;);</span>
+<span class="fc" id="L14">    public OrderItem(Product product, int quantity) {</span>
+<span class="pc bpc" id="L15" title="1 of 2 branches missed.">        if (quantity &lt;= 0) {</span>
+<span class="nc" id="L16">            throw new IllegalArgumentException(&quot;La cantidad debe ser mayor a 0&quot;);</span>
         }
         
-<span class="fc" id="L23">        this.product = product;</span>
-<span class="fc" id="L24">        this.quantity = quantity;</span>
-<span class="fc" id="L25">    }</span>
+<span class="fc" id="L19">        this.product = product;</span>
+<span class="fc" id="L20">        this.quantity = quantity;</span>
+<span class="fc" id="L21">    }</span>
 
     public BigDecimal calculateValue() {
-<span class="fc" id="L28">        return product.getPrice().multiply(BigDecimal.valueOf(quantity));</span>
+<span class="fc bfc" id="L24" title="All 2 branches covered.">        if (product == null) {</span>
+<span class="fc" id="L25">            return BigDecimal.ZERO;</span>
+        }
+<span class="fc" id="L27">        return product.getPrice().multiply(BigDecimal.valueOf(quantity));</span>
     }
 
     public static OrderItem create(Product product, int quantity) {
-<span class="fc" id="L32">        return new OrderItem(product, quantity);</span>
+<span class="fc" id="L31">        return new OrderItem(product, quantity);</span>
     }
 } 
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

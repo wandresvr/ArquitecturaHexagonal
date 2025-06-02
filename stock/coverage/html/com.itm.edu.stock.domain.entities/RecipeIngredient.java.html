@@ -4,33 +4,31 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
-import lombok.With;
 import java.math.BigDecimal;
 import java.util.UUID;
 
 @Getter
-<span class="pc" id="L12">@Builder(toBuilder = true)</span>
-<span class="fc" id="L13">@AllArgsConstructor</span>
-<span class="fc" id="L14">@NoArgsConstructor</span>
-@With
+<span class="pc" id="L11">@Builder(toBuilder = true)</span>
+<span class="fc" id="L12">@AllArgsConstructor</span>
+<span class="fc" id="L13">@NoArgsConstructor</span>
 public class RecipeIngredient {
-<span class="pc bnc" id="L17" title="All 2 branches missed.">    private UUID id;</span>
-<span class="pc bnc" id="L18" title="All 2 branches missed.">    private UUID recipeId;</span>
-<span class="pc bnc" id="L19" title="All 2 branches missed.">    private UUID ingredientId;</span>
-<span class="pc bnc" id="L20" title="All 2 branches missed.">    private String ingredientName;</span>
-<span class="fc" id="L21">    private BigDecimal quantity;</span>
-<span class="fc" id="L22">    private String unit;</span>
+<span class="fc" id="L15">    private UUID id;</span>
+<span class="fc" id="L16">    private UUID recipeId;</span>
+<span class="fc" id="L17">    private UUID ingredientId;</span>
+<span class="fc" id="L18">    private String ingredientName;</span>
+<span class="fc" id="L19">    private BigDecimal quantity;</span>
+<span class="fc" id="L20">    private String unit;</span>
 
     public RecipeIngredient withQuantity(BigDecimal newQuantity) {
-<span class="fc" id="L25">        return this.toBuilder()</span>
-<span class="fc" id="L26">                .quantity(newQuantity)</span>
-<span class="fc" id="L27">                .build();</span>
+<span class="fc" id="L23">        return this.toBuilder()</span>
+<span class="fc" id="L24">                .quantity(newQuantity)</span>
+<span class="fc" id="L25">                .build();</span>
     }
 
     public RecipeIngredient withUnit(String newUnit) {
-<span class="fc" id="L31">        return this.toBuilder()</span>
-<span class="fc" id="L32">                .unit(newUnit)</span>
-<span class="fc" id="L33">                .build();</span>
+<span class="fc" id="L29">        return this.toBuilder()</span>
+<span class="fc" id="L30">                .unit(newUnit)</span>
+<span class="fc" id="L31">                .build();</span>
     }
 } 
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

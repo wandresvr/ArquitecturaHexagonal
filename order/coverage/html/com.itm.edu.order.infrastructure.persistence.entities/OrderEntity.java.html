@@ -18,31 +18,31 @@ import com.itm.edu.order.domain.valueobjects.OrderTotalValue;
 @Entity
 @Table(name = &quot;orders&quot;)
 @Getter
-<span class="nc" id="L21">@Setter</span>
+<span class="pc" id="L21">@Setter</span>
 <span class="nc" id="L22">@NoArgsConstructor</span>
-<span class="nc" id="L23">@AllArgsConstructor</span>
-<span class="nc bnc" id="L24" title="All 2 branches missed.">@Builder</span>
+<span class="fc" id="L23">@AllArgsConstructor</span>
+<span class="pc bfc" id="L24" title="All 2 branches covered.">@Builder</span>
 public class OrderEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-<span class="nc" id="L28">    private UUID orderId;</span>
+<span class="fc" id="L28">    private UUID orderId;</span>
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = &quot;order_id&quot;)
     @Builder.Default
-<span class="nc" id="L33">    private List&lt;OrderItemEntity&gt; products = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L33">    private List&lt;OrderItemEntity&gt; products = new ArrayList&lt;&gt;();</span>
 
-<span class="nc" id="L35">    private String orderStatus;</span>
-<span class="nc" id="L36">    private LocalDateTime orderDate;</span>
-
-    @Embedded
-<span class="nc" id="L39">    private AddressShipping deliveryAddress;</span>
+<span class="fc" id="L35">    private String orderStatus;</span>
+<span class="fc" id="L36">    private LocalDateTime orderDate;</span>
 
     @Embedded
-<span class="nc" id="L42">    private OrderTotalValue total;</span>
+<span class="fc" id="L39">    private AddressShipping deliveryAddress;</span>
+
+    @Embedded
+<span class="fc" id="L42">    private OrderTotalValue total;</span>
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = &quot;client_id&quot;)
-<span class="nc" id="L46">    private ClientEntity client;</span>
+<span class="fc" id="L46">    private ClientEntity client;</span>
 } 
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

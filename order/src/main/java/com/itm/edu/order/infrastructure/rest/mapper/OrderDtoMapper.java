@@ -28,11 +28,11 @@ public class OrderDtoMapper {
         return OrderDto.builder()
                 .orderId(domain.getOrderId())
                 .client(toClientDto(domain.getClient()))
-                .items(domain.getProducts() != null ? domain.getProducts().stream()
+                .items((domain.getProducts() == null || domain.getProducts().isEmpty()) ? null : domain.getProducts().stream()
                         .map(this::toOrderItemDto)
-                        .collect(Collectors.toList()) : null)
+                        .collect(Collectors.toList()))
                 .shippingAddress(toAddressDto(domain.getDeliveryAddress()))
-                .total(toMoneyDto(domain.getTotal()))
+                .total(domain.getTotal() == null ? null : toMoneyDto(domain.getTotal()))
                 .orderDate(domain.getOrderDate())
                 .orderStatus(domain.getOrderStatus())
                 .build();
@@ -84,8 +84,6 @@ public class OrderDtoMapper {
     }
 
     private OrderDto.MoneyDto toMoneyDto(OrderTotalValue domain) {
-        if (domain == null) return null;
-        
         return OrderDto.MoneyDto.builder()
                 .amount(domain.getAmount())
                 .currency(domain.getCurrency())

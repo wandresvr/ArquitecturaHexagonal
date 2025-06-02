@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.core.MessageProperties;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -78,7 +79,11 @@ public class StockEventListenerService {
             rabbitTemplate.convertAndSend(
                 RabbitMQConfig.STOCK_UPDATE_EXCHANGE,
                 RabbitMQConfig.STOCK_UPDATE_ROUTING_KEY,
-                products
+                products,
+                message -> {
+                    message.getMessageProperties().setContentType(MessageProperties.CONTENT_TYPE_JSON);
+                    return message;
+                }
             );
             log.info("Mensaje de actualización de stock enviado para orden: {}", order.getOrderId());
         } catch (Exception e) {

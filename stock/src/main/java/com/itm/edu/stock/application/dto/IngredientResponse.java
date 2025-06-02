@@ -3,9 +3,9 @@ package com.itm.edu.stock.application.dto;
 import java.math.BigDecimal;
 import java.util.UUID;
 import lombok.Builder;
-import lombok.Value;
+import lombok.Getter;
 
-@Value
+@Getter
 @Builder
 public class IngredientResponse {
     UUID id;

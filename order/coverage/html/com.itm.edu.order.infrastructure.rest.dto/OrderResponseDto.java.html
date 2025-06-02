@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OrderResponseDto.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">order</a> &gt; <a href="index.source.html" class="el_package">com.itm.edu.order.infrastructure.rest.dto</a> &gt; <span class="el_source">OrderResponseDto.java</span></div><h1>OrderResponseDto.java</h1><pre class="source lang-java linenums">package com.itm.edu.order.infrastructure.rest.dto;
+
+import com.itm.edu.order.domain.model.Order;
+import lombok.Builder;
+import lombok.Data;
+import lombok.Getter;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+@Getter
+<span class="pc" id="L15">@Builder</span>
+public class OrderResponseDto {
+<span class="fc" id="L17">    private UUID orderId;</span>
+<span class="fc" id="L18">    private ClientResponseDto client;</span>
+<span class="fc" id="L19">    private List&lt;OrderItemResponseDto&gt; products;</span>
+<span class="fc" id="L20">    private AddressResponseDto deliveryAddress;</span>
+<span class="fc" id="L21">    private MoneyResponseDto total;</span>
+<span class="fc" id="L22">    private LocalDateTime orderDate;</span>
+<span class="fc" id="L23">    private String orderStatus;</span>
+
+    @Getter
+<span class="pc" id="L26">    @Builder</span>
+    public static class ClientResponseDto {
+<span class="fc" id="L28">        private UUID id;</span>
+<span class="fc" id="L29">        private String name;</span>
+<span class="fc" id="L30">        private String email;</span>
+<span class="fc" id="L31">        private String phone;</span>
+    }
+
+    @Getter
+<span class="pc" id="L35">    @Builder</span>
+    public static class OrderItemResponseDto {
+<span class="fc" id="L37">        private ProductResponseDto product;</span>
+<span class="fc" id="L38">        private int quantity;</span>
+    }
+
+    @Getter
+<span class="pc" id="L42">    @Builder</span>
+    public static class ProductResponseDto {
+<span class="fc" id="L44">        private UUID id;</span>
+<span class="fc" id="L45">        private String name;</span>
+<span class="fc" id="L46">        private String description;</span>
+<span class="fc" id="L47">        private double price;</span>
+<span class="fc" id="L48">        private int stock;</span>
+    }
+
+    @Getter
+<span class="pc" id="L52">    @Builder</span>
+    public static class AddressResponseDto {
+<span class="fc" id="L54">        private String street;</span>
+<span class="fc" id="L55">        private String city;</span>
+<span class="fc" id="L56">        private String state;</span>
+<span class="fc" id="L57">        private String zipCode;</span>
+<span class="fc" id="L58">        private String country;</span>
+    }
+
+    @Getter
+<span class="pc" id="L62">    @Builder</span>
+    public static class MoneyResponseDto {
+<span class="fc" id="L64">        private BigDecimal amount;</span>
+<span class="fc" id="L65">        private String currency;</span>
+    }
+
+    public static OrderResponseDto fromDomain(Order order) {
+<span class="fc bfc" id="L69" title="All 2 branches covered.">        if (order == null) return null;</span>
+
+<span class="fc" id="L71">        return OrderResponseDto.builder()</span>
+<span class="fc" id="L72">                .orderId(order.getOrderId())</span>
+<span class="pc bpc" id="L73" title="1 of 2 branches missed.">                .client(order.getClient() != null ? ClientResponseDto.builder()</span>
+<span class="fc" id="L74">                        .id(order.getClient().getId())</span>
+<span class="fc" id="L75">                        .name(order.getClient().getName())</span>
+<span class="fc" id="L76">                        .email(order.getClient().getEmail())</span>
+<span class="fc" id="L77">                        .phone(order.getClient().getPhone())</span>
+<span class="pc" id="L78">                        .build() : null)</span>
+<span class="pc bpc" id="L79" title="1 of 2 branches missed.">                .products(order.getProducts() != null ? order.getProducts().stream()</span>
+<span class="fc" id="L80">                        .map(item -&gt; OrderItemResponseDto.builder()</span>
+<span class="fc" id="L81">                                .quantity(item.getQuantity())</span>
+<span class="pc bpc" id="L82" title="1 of 2 branches missed.">                                .product(item.getProduct() != null ? ProductResponseDto.builder()</span>
+<span class="fc" id="L83">                                        .id(item.getProduct().getId())</span>
+<span class="fc" id="L84">                                        .name(item.getProduct().getName())</span>
+<span class="fc" id="L85">                                        .description(item.getProduct().getDescription())</span>
+<span class="fc" id="L86">                                        .price(item.getProduct().getPrice().doubleValue())</span>
+<span class="fc" id="L87">                                        .stock(item.getProduct().getStock())</span>
+<span class="pc" id="L88">                                        .build() : null)</span>
+<span class="fc" id="L89">                                .build())</span>
+<span class="pc" id="L90">                        .collect(Collectors.toList()) : null)</span>
+<span class="pc bpc" id="L91" title="1 of 2 branches missed.">                .deliveryAddress(order.getDeliveryAddress() != null ? AddressResponseDto.builder()</span>
+<span class="fc" id="L92">                        .street(order.getDeliveryAddress().getStreet())</span>
+<span class="fc" id="L93">                        .city(order.getDeliveryAddress().getCity())</span>
+<span class="fc" id="L94">                        .state(order.getDeliveryAddress().getState())</span>
+<span class="fc" id="L95">                        .zipCode(order.getDeliveryAddress().getZipCode())</span>
+<span class="fc" id="L96">                        .country(order.getDeliveryAddress().getCountry())</span>
+<span class="pc" id="L97">                        .build() : null)</span>
+<span class="pc bpc" id="L98" title="1 of 2 branches missed.">                .total(order.getTotal() != null ? MoneyResponseDto.builder()</span>
+<span class="fc" id="L99">                        .amount(order.getTotal().getAmount())</span>
+<span class="fc" id="L100">                        .currency(order.getTotal().getCurrency())</span>
+<span class="pc" id="L101">                        .build() : null)</span>
+<span class="fc" id="L102">                .orderDate(order.getOrderDate())</span>
+<span class="fc" id="L103">                .orderStatus(order.getOrderStatus())</span>
+<span class="fc" id="L104">                .build();</span>
+    }
+} 
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

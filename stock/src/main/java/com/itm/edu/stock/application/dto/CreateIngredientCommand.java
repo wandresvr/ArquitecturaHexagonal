@@ -1,9 +1,12 @@
 package com.itm.edu.stock.application.dto;
 
 import java.math.BigDecimal;
-import lombok.Value;
 
-@Value
+import lombok.Getter;
+import lombok.AllArgsConstructor;
+
+@Getter
+@AllArgsConstructor
 public class CreateIngredientCommand {
     String name;
     String description;

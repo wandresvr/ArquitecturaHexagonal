@@ -7,27 +7,25 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 @Getter
-<span class="nc" id="L10">@NoArgsConstructor</span>
-<span class="nc" id="L11">@AllArgsConstructor</span>
-public class Stock {
-<span class="nc" id="L13">    private UUID id;</span>
-<span class="nc" id="L14">    private Ingredient ingredient;</span>
-<span class="nc" id="L15">    private Integer quantity;</span>
-<span class="nc" id="L16">    private String unit;</span>
-<span class="nc" id="L17">    private BigDecimal price;</span>
+<span class="nc" id="L10">public class Stock {</span>
+<span class="nc" id="L11">    private UUID id;</span>
+<span class="nc" id="L12">    private Ingredient ingredient;</span>
+<span class="nc" id="L13">    private Integer quantity;</span>
+<span class="nc" id="L14">    private String unit;</span>
+<span class="nc" id="L15">    private BigDecimal price;</span>
 
     public void updateQuantity(Integer newQuantity) {
-<span class="nc bnc" id="L20" title="All 2 branches missed.">        if (newQuantity &lt; 0) {</span>
-<span class="nc" id="L21">            throw new IllegalArgumentException(&quot;La cantidad no puede ser negativa&quot;);</span>
+<span class="nc bnc" id="L18" title="All 2 branches missed.">        if (newQuantity &lt; 0) {</span>
+<span class="nc" id="L19">            throw new IllegalArgumentException(&quot;La cantidad no puede ser negativa&quot;);</span>
         }
-<span class="nc" id="L23">        this.quantity = newQuantity;</span>
-<span class="nc" id="L24">    }</span>
+<span class="nc" id="L21">        this.quantity = newQuantity;</span>
+<span class="nc" id="L22">    }</span>
 
     public void updatePrice(BigDecimal newPrice) {
-<span class="nc bnc" id="L27" title="All 2 branches missed.">        if (newPrice.compareTo(BigDecimal.ZERO) &lt; 0) {</span>
-<span class="nc" id="L28">            throw new IllegalArgumentException(&quot;El precio no puede ser negativo&quot;);</span>
+<span class="nc bnc" id="L25" title="All 2 branches missed.">        if (newPrice.compareTo(BigDecimal.ZERO) &lt; 0) {</span>
+<span class="nc" id="L26">            throw new IllegalArgumentException(&quot;El precio no puede ser negativo&quot;);</span>
         }
-<span class="nc" id="L30">        this.price = newPrice;</span>
-<span class="nc" id="L31">    }</span>
+<span class="nc" id="L28">        this.price = newPrice;</span>
+<span class="nc" id="L29">    }</span>
 } 
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

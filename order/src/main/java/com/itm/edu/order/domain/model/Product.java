@@ -1,6 +1,7 @@
 package com.itm.edu.order.domain.model;
 
 import java.math.BigDecimal;
+import java.util.Objects;
 import java.util.UUID;
 
 public class Product {
@@ -16,6 +17,14 @@ public class Product {
         this.description = builder.description;
         this.price = builder.price;
         this.stock = builder.stock;
+    }
+
+    private Product(UUID id, String name, String description, BigDecimal price, Integer stock) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.price = price;
+        this.stock = stock;
     }
 
     public static Product create(String name, String description, BigDecimal price, Integer stock) {
@@ -48,6 +57,11 @@ public class Product {
                 .build();
     }
 
+    // Método especial para pruebas que no realiza validaciones
+    public static Product createForTesting(UUID id, String name, String description, BigDecimal price, Integer stock) {
+        return new Product(id, name, description, price, stock);
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -70,6 +84,23 @@ public class Product {
 
     public Integer getStock() {
         return stock;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Product product = (Product) o;
+        return Objects.equals(id, product.id) &&
+                Objects.equals(name, product.name) &&
+                Objects.equals(description, product.description) &&
+                Objects.equals(price, product.price) &&
+                Objects.equals(stock, product.stock);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, description, price, stock);
     }
 
     public static class Builder {

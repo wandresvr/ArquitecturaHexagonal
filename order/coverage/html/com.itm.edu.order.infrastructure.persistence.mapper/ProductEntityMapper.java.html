@@ -5,28 +5,28 @@ import com.itm.edu.order.infrastructure.persistence.entities.ProductEntity;
 import org.springframework.stereotype.Component;
 
 @Component
-<span class="nc" id="L8">public class ProductEntityMapper {</span>
+<span class="fc" id="L8">public class ProductEntityMapper {</span>
     
     public Product toDomain(ProductEntity entity) {
-<span class="nc bnc" id="L11" title="All 2 branches missed.">        if (entity == null) return null;</span>
-<span class="nc" id="L12">        return Product.builder()</span>
-<span class="nc" id="L13">                .id(entity.getId())</span>
-<span class="nc" id="L14">                .name(entity.getName())</span>
-<span class="nc" id="L15">                .description(entity.getDescription())</span>
-<span class="nc" id="L16">                .price(entity.getPrice())</span>
-<span class="nc" id="L17">                .stock(entity.getStock())</span>
-<span class="nc" id="L18">                .build();</span>
+<span class="fc bfc" id="L11" title="All 2 branches covered.">        if (entity == null) return null;</span>
+<span class="fc" id="L12">        return Product.builder()</span>
+<span class="fc" id="L13">                .id(entity.getId())</span>
+<span class="fc" id="L14">                .name(entity.getName())</span>
+<span class="fc" id="L15">                .description(entity.getDescription())</span>
+<span class="fc" id="L16">                .price(entity.getPrice())</span>
+<span class="fc" id="L17">                .stock(entity.getStock())</span>
+<span class="fc" id="L18">                .build();</span>
     }
 
     public ProductEntity toEntity(Product domain) {
-<span class="nc bnc" id="L22" title="All 2 branches missed.">        if (domain == null) return null;</span>
-<span class="nc" id="L23">        return ProductEntity.builder()</span>
-<span class="nc" id="L24">                .id(domain.getId())</span>
-<span class="nc" id="L25">                .name(domain.getName())</span>
-<span class="nc" id="L26">                .description(domain.getDescription())</span>
-<span class="nc" id="L27">                .price(domain.getPrice())</span>
-<span class="nc" id="L28">                .stock(domain.getStock())</span>
-<span class="nc" id="L29">                .build();</span>
+<span class="fc bfc" id="L22" title="All 2 branches covered.">        if (domain == null) return null;</span>
+<span class="fc" id="L23">        return ProductEntity.builder()</span>
+<span class="fc" id="L24">                .id(domain.getId())</span>
+<span class="fc" id="L25">                .name(domain.getName())</span>
+<span class="fc" id="L26">                .description(domain.getDescription())</span>
+<span class="fc" id="L27">                .price(domain.getPrice())</span>
+<span class="fc" id="L28">                .stock(domain.getStock())</span>
+<span class="fc" id="L29">                .build();</span>
     }
 } 
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

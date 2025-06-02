@@ -18,119 +18,141 @@ import static org.junit.jupiter.api.Assertions.*;
 class OrderResponseDtoTest {
 
     @Test
-    void shouldCreateOrderResponseDtoSuccessfully() {
+    void shouldCreateOrderResponseDtoWithAllFields() {
         // Arrange
         UUID orderId = UUID.randomUUID();
         LocalDateTime orderDate = LocalDateTime.now();
         String orderStatus = "PENDING";
 
-        OrderResponseDto.ClientResponseDto clientDto = OrderResponseDto.ClientResponseDto.builder()
-                .id(UUID.randomUUID())
-                .name("John Doe")
-                .email("john@example.com")
-                .phone("1234567890")
-                .build();
-
-        OrderResponseDto.ProductResponseDto productDto = OrderResponseDto.ProductResponseDto.builder()
-                .id(UUID.randomUUID())
-                .name("Test Product")
-                .description("Test Description")
-                .price(99.99)
-                .stock(100)
-                .build();
-
-        OrderResponseDto.OrderItemResponseDto orderItemDto = OrderResponseDto.OrderItemResponseDto.builder()
-                .product(productDto)
-                .quantity(2)
-                .build();
-
-        OrderResponseDto.AddressResponseDto addressDto = OrderResponseDto.AddressResponseDto.builder()
-                .street("123 Main St")
-                .city("New York")
-                .state("NY")
-                .zipCode("10001")
-                .country("USA")
-                .build();
-
-        OrderResponseDto.MoneyResponseDto totalDto = OrderResponseDto.MoneyResponseDto.builder()
-                .amount(new BigDecimal("199.98"))
-                .currency("USD")
-                .build();
-
         // Act
-        OrderResponseDto responseDto = OrderResponseDto.builder()
+        OrderResponseDto dto = OrderResponseDto.builder()
                 .orderId(orderId)
-                .client(clientDto)
-                .products(Arrays.asList(orderItemDto))
-                .deliveryAddress(addressDto)
-                .total(totalDto)
+                .client(OrderResponseDto.ClientResponseDto.builder()
+                        .id(UUID.randomUUID())
+                        .name("John Doe")
+                        .email("john@example.com")
+                        .phone("1234567890")
+                        .build())
+                .products(java.util.Arrays.asList(
+                        OrderResponseDto.OrderItemResponseDto.builder()
+                                .product(OrderResponseDto.ProductResponseDto.builder()
+                                        .id(UUID.randomUUID())
+                                        .name("Product 1")
+                                        .description("Description 1")
+                                        .price(99.99)
+                                        .stock(100)
+                                        .build())
+                                .quantity(2)
+                                .build()
+                ))
+                .deliveryAddress(OrderResponseDto.AddressResponseDto.builder()
+                        .street("123 Main St")
+                        .city("Test City")
+                        .state("Test State")
+                        .zipCode("12345")
+                        .country("Test Country")
+                        .build())
+                .total(OrderResponseDto.MoneyResponseDto.builder()
+                        .amount(new BigDecimal("199.98"))
+                        .currency("USD")
+                        .build())
                 .orderDate(orderDate)
                 .orderStatus(orderStatus)
                 .build();
 
         // Assert
-        assertNotNull(responseDto);
-        assertEquals(orderId, responseDto.getOrderId());
-        assertEquals(clientDto, responseDto.getClient());
-        assertEquals(1, responseDto.getProducts().size());
-        assertEquals(orderItemDto, responseDto.getProducts().get(0));
-        assertEquals(addressDto, responseDto.getDeliveryAddress());
-        assertEquals(totalDto, responseDto.getTotal());
-        assertEquals(orderDate, responseDto.getOrderDate());
-        assertEquals(orderStatus, responseDto.getOrderStatus());
+        assertNotNull(dto);
+        assertEquals(orderId, dto.getOrderId());
+        assertNotNull(dto.getClient());
+        assertNotNull(dto.getProducts());
+        assertEquals(1, dto.getProducts().size());
+        assertNotNull(dto.getDeliveryAddress());
+        assertNotNull(dto.getTotal());
+        assertEquals(orderDate, dto.getOrderDate());
+        assertEquals(orderStatus, dto.getOrderStatus());
     }
 
     @Test
-    void shouldCreateEmptyOrderResponseDto() {
+    void shouldCreateOrderResponseDtoWithNullFields() {
         // Act
-        OrderResponseDto responseDto = OrderResponseDto.builder().build();
+        OrderResponseDto dto = OrderResponseDto.builder()
+                .orderId(UUID.randomUUID())
+                .client(null)
+                .products(null)
+                .deliveryAddress(null)
+                .total(null)
+                .orderDate(LocalDateTime.now())
+                .orderStatus("PENDING")
+                .build();
 
         // Assert
-        assertNotNull(responseDto);
-        assertNull(responseDto.getOrderId());
-        assertNull(responseDto.getClient());
-        assertNull(responseDto.getProducts());
-        assertNull(responseDto.getDeliveryAddress());
-        assertNull(responseDto.getTotal());
-        assertNull(responseDto.getOrderDate());
-        assertNull(responseDto.getOrderStatus());
+        assertNotNull(dto);
+        assertNull(dto.getClient());
+        assertNull(dto.getProducts());
+        assertNull(dto.getDeliveryAddress());
+        assertNull(dto.getTotal());
     }
 
     @Test
-    void shouldCreateOrderItemResponseDtoSuccessfully() {
+    void shouldCreateClientResponseDtoWithAllFields() {
         // Arrange
-        OrderResponseDto.ProductResponseDto productDto = OrderResponseDto.ProductResponseDto.builder()
+        UUID id = UUID.randomUUID();
+        String name = "John Doe";
+        String email = "john@example.com";
+        String phone = "1234567890";
+
+        // Act
+        OrderResponseDto.ClientResponseDto dto = OrderResponseDto.ClientResponseDto.builder()
+                .id(id)
+                .name(name)
+                .email(email)
+                .phone(phone)
+                .build();
+
+        // Assert
+        assertNotNull(dto);
+        assertEquals(id, dto.getId());
+        assertEquals(name, dto.getName());
+        assertEquals(email, dto.getEmail());
+        assertEquals(phone, dto.getPhone());
+    }
+
+    @Test
+    void shouldCreateOrderItemResponseDtoWithAllFields() {
+        // Arrange
+        OrderResponseDto.ProductResponseDto product = OrderResponseDto.ProductResponseDto.builder()
                 .id(UUID.randomUUID())
-                .name("Test Product")
-                .description("Test Description")
+                .name("Product 1")
+                .description("Description 1")
                 .price(99.99)
                 .stock(100)
                 .build();
         int quantity = 2;
 
         // Act
-        OrderResponseDto.OrderItemResponseDto orderItemDto = OrderResponseDto.OrderItemResponseDto.builder()
-                .product(productDto)
+        OrderResponseDto.OrderItemResponseDto dto = OrderResponseDto.OrderItemResponseDto.builder()
+                .product(product)
                 .quantity(quantity)
                 .build();
 
         // Assert
-        assertNotNull(orderItemDto);
-        assertEquals(productDto, orderItemDto.getProduct());
-        assertEquals(quantity, orderItemDto.getQuantity());
+        assertNotNull(dto);
+        assertNotNull(dto.getProduct());
+        assertEquals(product.getId(), dto.getProduct().getId());
+        assertEquals(quantity, dto.getQuantity());
     }
 
     @Test
-    void shouldCreateProductResponseDtoSuccessfully() {
+    void shouldCreateProductResponseDtoWithAllFields() {
         // Arrange
         UUID id = UUID.randomUUID();
-        String name = "Test Product";
-        String description = "Test Description";
+        String name = "Product 1";
+        String description = "Description 1";
         double price = 99.99;
         int stock = 100;
 
         // Act
-        OrderResponseDto.ProductResponseDto productDto = OrderResponseDto.ProductResponseDto.builder()
+        OrderResponseDto.ProductResponseDto dto = OrderResponseDto.ProductResponseDto.builder()
                 .id(id)
                 .name(name)
                 .description(description)
@@ -139,30 +161,162 @@ class OrderResponseDtoTest {
                 .build();
 
         // Assert
-        assertNotNull(productDto);
-        assertEquals(id, productDto.getId());
-        assertEquals(name, productDto.getName());
-        assertEquals(description, productDto.getDescription());
-        assertEquals(price, productDto.getPrice());
-        assertEquals(stock, productDto.getStock());
+        assertNotNull(dto);
+        assertEquals(id, dto.getId());
+        assertEquals(name, dto.getName());
+        assertEquals(description, dto.getDescription());
+        assertEquals(price, dto.getPrice());
+        assertEquals(stock, dto.getStock());
     }
 
     @Test
-    void shouldMapFromDomainSuccessfully() {
+    void shouldCreateAddressResponseDtoWithAllFields() {
+        // Arrange
+        String street = "123 Main St";
+        String city = "Test City";
+        String state = "Test State";
+        String zipCode = "12345";
+        String country = "Test Country";
+
+        // Act
+        OrderResponseDto.AddressResponseDto dto = OrderResponseDto.AddressResponseDto.builder()
+                .street(street)
+                .city(city)
+                .state(state)
+                .zipCode(zipCode)
+                .country(country)
+                .build();
+
+        // Assert
+        assertNotNull(dto);
+        assertEquals(street, dto.getStreet());
+        assertEquals(city, dto.getCity());
+        assertEquals(state, dto.getState());
+        assertEquals(zipCode, dto.getZipCode());
+        assertEquals(country, dto.getCountry());
+    }
+
+    @Test
+    void shouldCreateMoneyResponseDtoWithAllFields() {
+        // Arrange
+        BigDecimal amount = new BigDecimal("199.98");
+        String currency = "USD";
+
+        // Act
+        OrderResponseDto.MoneyResponseDto dto = OrderResponseDto.MoneyResponseDto.builder()
+                .amount(amount)
+                .currency(currency)
+                .build();
+
+        // Assert
+        assertNotNull(dto);
+        assertEquals(amount, dto.getAmount());
+        assertEquals(currency, dto.getCurrency());
+    }
+
+    @Test
+    void shouldCreateOrderItemResponseDtoWithNullProduct() {
+        // Act
+        OrderResponseDto.OrderItemResponseDto dto = OrderResponseDto.OrderItemResponseDto.builder()
+                .product(null)
+                .quantity(2)
+                .build();
+
+        // Assert
+        assertNotNull(dto);
+        assertNull(dto.getProduct());
+        assertEquals(2, dto.getQuantity());
+    }
+
+    @Test
+    void shouldCreateProductResponseDtoWithNullFields() {
+        // Act
+        OrderResponseDto.ProductResponseDto dto = OrderResponseDto.ProductResponseDto.builder()
+                .id(null)
+                .name(null)
+                .description(null)
+                .price(0.0)
+                .stock(0)
+                .build();
+
+        // Assert
+        assertNotNull(dto);
+        assertNull(dto.getId());
+        assertNull(dto.getName());
+        assertNull(dto.getDescription());
+        assertEquals(0.0, dto.getPrice());
+        assertEquals(0, dto.getStock());
+    }
+
+    @Test
+    void shouldCreateAddressResponseDtoWithNullFields() {
+        // Act
+        OrderResponseDto.AddressResponseDto dto = OrderResponseDto.AddressResponseDto.builder()
+                .street(null)
+                .city(null)
+                .state(null)
+                .zipCode(null)
+                .country(null)
+                .build();
+
+        // Assert
+        assertNotNull(dto);
+        assertNull(dto.getStreet());
+        assertNull(dto.getCity());
+        assertNull(dto.getState());
+        assertNull(dto.getZipCode());
+        assertNull(dto.getCountry());
+    }
+
+    @Test
+    void shouldCreateMoneyResponseDtoWithNullFields() {
+        // Act
+        OrderResponseDto.MoneyResponseDto dto = OrderResponseDto.MoneyResponseDto.builder()
+                .amount(null)
+                .currency(null)
+                .build();
+
+        // Assert
+        assertNotNull(dto);
+        assertNull(dto.getAmount());
+        assertNull(dto.getCurrency());
+    }
+
+    @Test
+    void shouldCreateClientResponseDtoWithNullFields() {
+        // Act
+        OrderResponseDto.ClientResponseDto dto = OrderResponseDto.ClientResponseDto.builder()
+                .id(null)
+                .name(null)
+                .email(null)
+                .phone(null)
+                .build();
+
+        // Assert
+        assertNotNull(dto);
+        assertNull(dto.getId());
+        assertNull(dto.getName());
+        assertNull(dto.getEmail());
+        assertNull(dto.getPhone());
+    }
+
+    @Test
+    void shouldConvertFromDomainToDto() {
         // Arrange
         UUID orderId = UUID.randomUUID();
+        UUID clientId = UUID.randomUUID();
+        UUID productId = UUID.randomUUID();
         LocalDateTime orderDate = LocalDateTime.now();
-        String orderStatus = "PENDING";
-
+        
         Client client = Client.builder()
-                .id(UUID.randomUUID())
+                .id(clientId)
                 .name("John Doe")
                 .email("john@example.com")
                 .phone("1234567890")
                 .build();
 
         Product product = Product.builder()
-                .id(UUID.randomUUID())
+                .id(productId)
                 .name("Test Product")
                 .description("Test Description")
                 .price(new BigDecimal("99.99"))
@@ -171,66 +325,68 @@ class OrderResponseDtoTest {
 
         OrderItem orderItem = OrderItem.create(product, 2);
 
-        AddressShipping deliveryAddress = AddressShipping.builder()
+        AddressShipping address = AddressShipping.builder()
                 .street("123 Main St")
-                .city("New York")
-                .state("NY")
-                .zipCode("10001")
-                .country("USA")
+                .city("Test City")
+                .state("Test State")
+                .zipCode("12345")
+                .country("Test Country")
                 .build();
-
-        OrderTotalValue total = new OrderTotalValue(new BigDecimal("199.98"), "USD");
 
         Order order = Order.builder()
                 .orderId(orderId)
                 .client(client)
                 .products(Arrays.asList(orderItem))
-                .deliveryAddress(deliveryAddress)
-                .total(total)
+                .deliveryAddress(address)
+                .total(new OrderTotalValue(new BigDecimal("199.98"), "USD"))
                 .orderDate(orderDate)
-                .orderStatus(orderStatus)
+                .orderStatus("PENDING")
                 .build();
 
         // Act
-        OrderResponseDto responseDto = OrderResponseDto.fromDomain(order);
+        OrderResponseDto dto = OrderResponseDto.fromDomain(order);
 
         // Assert
-        assertNotNull(responseDto);
-        assertEquals(orderId, responseDto.getOrderId());
+        assertNotNull(dto);
+        assertEquals(orderId, dto.getOrderId());
+        assertNotNull(dto.getClient());
+        assertEquals(clientId, dto.getClient().getId());
+        assertEquals("John Doe", dto.getClient().getName());
+        assertEquals("john@example.com", dto.getClient().getEmail());
+        assertEquals("1234567890", dto.getClient().getPhone());
         
-        // Verify client mapping
-        assertNotNull(responseDto.getClient());
-        assertEquals(client.getId(), responseDto.getClient().getId());
-        assertEquals(client.getName(), responseDto.getClient().getName());
-        assertEquals(client.getEmail(), responseDto.getClient().getEmail());
-        assertEquals(client.getPhone(), responseDto.getClient().getPhone());
+        assertNotNull(dto.getProducts());
+        assertEquals(1, dto.getProducts().size());
+        OrderResponseDto.OrderItemResponseDto itemDto = dto.getProducts().get(0);
+        assertEquals(2, itemDto.getQuantity());
+        assertNotNull(itemDto.getProduct());
+        assertEquals(productId, itemDto.getProduct().getId());
+        assertEquals("Test Product", itemDto.getProduct().getName());
+        assertEquals("Test Description", itemDto.getProduct().getDescription());
+        assertEquals(99.99, itemDto.getProduct().getPrice());
+        assertEquals(100, itemDto.getProduct().getStock());
+        
+        assertNotNull(dto.getDeliveryAddress());
+        assertEquals("123 Main St", dto.getDeliveryAddress().getStreet());
+        assertEquals("Test City", dto.getDeliveryAddress().getCity());
+        assertEquals("Test State", dto.getDeliveryAddress().getState());
+        assertEquals("12345", dto.getDeliveryAddress().getZipCode());
+        assertEquals("Test Country", dto.getDeliveryAddress().getCountry());
+        
+        assertNotNull(dto.getTotal());
+        assertEquals(new BigDecimal("199.98"), dto.getTotal().getAmount());
+        assertEquals("USD", dto.getTotal().getCurrency());
+        
+        assertEquals(orderDate, dto.getOrderDate());
+        assertEquals("PENDING", dto.getOrderStatus());
+    }
 
-        // Verify products mapping
-        assertNotNull(responseDto.getProducts());
-        assertEquals(1, responseDto.getProducts().size());
-        OrderResponseDto.OrderItemResponseDto mappedItem = responseDto.getProducts().get(0);
-        assertEquals(orderItem.getQuantity(), mappedItem.getQuantity());
-        assertNotNull(mappedItem.getProduct());
-        assertEquals(product.getId(), mappedItem.getProduct().getId());
-        assertEquals(product.getName(), mappedItem.getProduct().getName());
-        assertEquals(product.getDescription(), mappedItem.getProduct().getDescription());
-        assertEquals(product.getPrice().doubleValue(), mappedItem.getProduct().getPrice());
-        assertEquals(product.getStock(), mappedItem.getProduct().getStock());
+    @Test
+    void shouldReturnNullWhenConvertingNullOrder() {
+        // Act
+        OrderResponseDto dto = OrderResponseDto.fromDomain(null);
 
-        // Verify address mapping
-        assertNotNull(responseDto.getDeliveryAddress());
-        assertEquals(deliveryAddress.getStreet(), responseDto.getDeliveryAddress().getStreet());
-        assertEquals(deliveryAddress.getCity(), responseDto.getDeliveryAddress().getCity());
-        assertEquals(deliveryAddress.getState(), responseDto.getDeliveryAddress().getState());
-        assertEquals(deliveryAddress.getZipCode(), responseDto.getDeliveryAddress().getZipCode());
-        assertEquals(deliveryAddress.getCountry(), responseDto.getDeliveryAddress().getCountry());
-
-        // Verify total mapping
-        assertNotNull(responseDto.getTotal());
-        assertEquals(total.getAmount(), responseDto.getTotal().getAmount());
-        assertEquals(total.getCurrency(), responseDto.getTotal().getCurrency());
-
-        assertEquals(orderDate, responseDto.getOrderDate());
-        assertEquals(orderStatus, responseDto.getOrderStatus());
+        // Assert
+        assertNull(dto);
     }
 } 

@@ -113,16 +113,6 @@ jacocoTestReport {
 			destination = file("${project.projectDir}/coverage/html")
 		}
 	}
-	afterEvaluate {
-		classDirectories.setFrom(files(classDirectories.files.collect {
-			fileTree(dir: it, exclude: [
-				'**/config/**',
-				'**/dto/**',
-				'**/exception/**',
-				'**/OrderApplication.class'
-			])
-		}))
-	}
 }
 
 jacocoTestCoverageVerification {

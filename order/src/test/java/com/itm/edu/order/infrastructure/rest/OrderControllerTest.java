@@ -1,34 +1,45 @@
 package com.itm.edu.order.infrastructure.rest;
 
-import com.itm.edu.order.application.ports.inputs.CreateOrderUseCase;
-import com.itm.edu.order.domain.model.Client;
-import com.itm.edu.order.domain.model.Order;
-import com.itm.edu.order.domain.valueobjects.AddressShipping;
-import com.itm.edu.order.infrastructure.rest.dto.CreateClientDto;
-import com.itm.edu.order.infrastructure.rest.dto.CreateOrderRequest;
+import com.itm.edu.order.application.ports.inputs.*;
+import com.itm.edu.order.domain.model.*;
+import com.itm.edu.order.domain.valueobjects.*;
+import com.itm.edu.order.infrastructure.rest.dto.*;
 import com.itm.edu.order.infrastructure.rest.mapper.OrderDtoMapper;
-import com.itm.edu.order.infrastructure.rest.dto.OrderDto;
+import com.itm.edu.order.domain.exception.BusinessException;
+import com.itm.edu.order.domain.exception.ApiError;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.springframework.http.ResponseEntity;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.time.LocalDateTime;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 class OrderControllerTest {
 
     @Mock
     private CreateOrderUseCase createOrderUseCase;
+
+    @Mock
+    private GetOrderUseCase getOrderUseCase;
+
+    @Mock
+    private DeleteOrderUseCase deleteOrderUseCase;
+
+    @Mock
+    private UpdateOrderUseCase updateOrderUseCase;
+
+    @Mock
+    private UpdateShippingAddressUseCase updateShippingAddressUseCase;
 
     @Mock
     private OrderDtoMapper orderDtoMapper;
@@ -36,227 +47,284 @@ class OrderControllerTest {
     @InjectMocks
     private OrderController orderController;
 
+    private CreateOrderRequest createOrderRequest;
+    private Order order;
+    private OrderDto orderDto;
+    private UUID orderId;
+
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
-    }
-
-    @Test
-    void testCreateOrderSuccess() {
-        // Arrange
-        CreateClientDto clientDto = CreateClientDto.builder()
-                .name("John Doe")
-                .email("john@example.com")
-                .phone("1234567890")
-                .build();
-
+        orderId = UUID.randomUUID();
         UUID productId = UUID.randomUUID();
+
+        // Configurar CreateOrderRequest
+        CreateClientDto clientDto = CreateClientDto.builder()
+            .name("John Doe")
+            .email("john@example.com")
+            .phone("1234567890")
+            .build();
+
+        AddressShipping addressShipping = AddressShipping.builder()
+            .street("123 Main St")
+            .city("Medellín")
+            .state("Antioquia")
+            .zipCode("050001")
+            .country("Colombia")
+            .build();
+
         Map<UUID, BigDecimal> productQuantities = new HashMap<>();
         productQuantities.put(productId, new BigDecimal("2"));
 
-        AddressShipping addressShipping = AddressShipping.builder()
-                .street("123 Main St")
-                .city("New York")
-                .state("NY")
-                .zipCode("10001")
-                .country("USA")
-                .build();
+        createOrderRequest = CreateOrderRequest.builder()
+            .client(clientDto)
+            .addressShipping(addressShipping)
+            .productQuantities(productQuantities)
+            .build();
 
-        CreateOrderRequest request = CreateOrderRequest.builder()
-                .client(clientDto)
-                .productQuantities(productQuantities)
-                .addressShipping(addressShipping)
-                .build();
+        // Configurar Order
+        Client client = Client.builder()
+            .id(UUID.randomUUID())
+            .name("John Doe")
+            .email("john@example.com")
+            .phone("1234567890")
+            .build();
 
-        Client expectedClient = Client.builder()
-                .name(clientDto.getName())
-                .email(clientDto.getEmail())
-                .phone(clientDto.getPhone())
-                .build();
+        order = Order.builder()
+            .orderId(orderId)
+            .client(client)
+            .deliveryAddress(addressShipping)
+            .orderStatus("PENDING")
+            .orderDate(LocalDateTime.now())
+            .build();
 
-        Order expectedOrder = Order.builder()
-                .orderStatus("PENDING_VALIDATION")
-                .client(expectedClient)
-                .deliveryAddress(addressShipping)
-                .build();
+        // Configurar OrderDto
+        orderDto = OrderDto.builder()
+            .orderId(orderId)
+            .orderStatus("PENDING")
+            .build();
+    }
 
-        OrderDto expectedOrderDto = OrderDto.builder()
-                .orderStatus("PENDING_VALIDATION")
-                .build();
-
-        when(createOrderUseCase.createOrder(any(), any(), any())).thenReturn(expectedOrder);
-        when(orderDtoMapper.toDto(expectedOrder)).thenReturn(expectedOrderDto);
+    @Test
+    void shouldCreateOrderSuccessfully() {
+        // Arrange
+        when(createOrderUseCase.createOrder(
+            any(CreateClientDto.class),
+            anyMap(),
+            any(AddressShipping.class)
+        )).thenReturn(order);
+        when(orderDtoMapper.toDto(order)).thenReturn(orderDto);
 
         // Act
-        ResponseEntity<?> response = orderController.createOrder(request);
+        ResponseEntity<?> response = orderController.createOrder(createOrderRequest);
 
         // Assert
-        assertNotNull(response);
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
-        assertEquals(expectedOrderDto, response.getBody());
-        verify(createOrderUseCase).createOrder(any(), any(), any());
-        verify(orderDtoMapper).toDto(expectedOrder);
+        assertEquals(orderDto, response.getBody());
+        verify(createOrderUseCase).createOrder(
+            any(CreateClientDto.class),
+            anyMap(),
+            any(AddressShipping.class)
+        );
+        verify(orderDtoMapper).toDto(order);
     }
 
     @Test
-    void testCreateOrderWithInvalidData() {
+    void shouldReturnUnprocessableEntityWhenClientIsNull() {
         // Arrange
-        CreateClientDto clientDto = CreateClientDto.builder()
-                .name("John Doe")
-                .email("john@example.com")
-                .phone("1234567890")
-                .build();
+        createOrderRequest.setClient(null);
 
-        UUID productId = UUID.randomUUID();
+        // Act
+        ResponseEntity<?> response = orderController.createOrder(createOrderRequest);
+
+        // Assert
+        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
+        assertTrue(response.getBody() instanceof ApiError);
+        ApiError apiError = (ApiError) response.getBody();
+        assertEquals("El cliente no puede ser nulo", apiError.getMessage());
+    }
+
+    @Test
+    void shouldReturnUnprocessableEntityWhenAddressIsNull() {
+        // Arrange
+        createOrderRequest.setAddressShipping(null);
+
+        // Act
+        ResponseEntity<?> response = orderController.createOrder(createOrderRequest);
+
+        // Assert
+        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
+        assertTrue(response.getBody() instanceof ApiError);
+        ApiError apiError = (ApiError) response.getBody();
+        assertEquals("La dirección de envío no puede ser nula", apiError.getMessage());
+    }
+
+    @Test
+    void shouldReturnUnprocessableEntityWhenProductQuantitiesIsEmpty() {
+        // Arrange
+        createOrderRequest.setProductQuantities(new HashMap<>());
+
+        // Act
+        ResponseEntity<?> response = orderController.createOrder(createOrderRequest);
+
+        // Assert
+        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
+        assertTrue(response.getBody() instanceof ApiError);
+        ApiError apiError = (ApiError) response.getBody();
+        assertEquals("Debe especificar al menos un producto", apiError.getMessage());
+    }
+
+    @Test
+    void shouldReturnUnprocessableEntityWhenQuantityIsZero() {
+        // Arrange
         Map<UUID, BigDecimal> productQuantities = new HashMap<>();
-        productQuantities.put(productId, BigDecimal.ZERO);
-
-        AddressShipping addressShipping = AddressShipping.builder()
-                .street("123 Main St")
-                .city("New York")
-                .state("NY")
-                .zipCode("10001")
-                .country("USA")
-                .build();
-
-        CreateOrderRequest request = CreateOrderRequest.builder()
-                .client(clientDto)
-                .productQuantities(productQuantities)
-                .addressShipping(addressShipping)
-                .build();
+        productQuantities.put(UUID.randomUUID(), BigDecimal.ZERO);
+        createOrderRequest.setProductQuantities(productQuantities);
 
         // Act
-        ResponseEntity<?> response = orderController.createOrder(request);
+        ResponseEntity<?> response = orderController.createOrder(createOrderRequest);
 
         // Assert
-        assertNotNull(response);
         assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
-        verifyNoInteractions(createOrderUseCase);
+        assertTrue(response.getBody() instanceof ApiError);
+        ApiError apiError = (ApiError) response.getBody();
+        assertEquals("La cantidad debe ser mayor a cero", apiError.getMessage());
     }
 
     @Test
-    void testCreateOrderWithNullClient() {
+    void shouldReturnUnprocessableEntityWhenBusinessExceptionOccurs() {
         // Arrange
-        UUID productId = UUID.randomUUID();
-        Map<UUID, BigDecimal> productQuantities = new HashMap<>();
-        productQuantities.put(productId, new BigDecimal("1"));
-
-        AddressShipping addressShipping = AddressShipping.builder()
-                .street("123 Main St")
-                .city("New York")
-                .state("NY")
-                .zipCode("10001")
-                .country("USA")
-                .build();
-
-        CreateOrderRequest request = CreateOrderRequest.builder()
-                .client(null)
-                .productQuantities(productQuantities)
-                .addressShipping(addressShipping)
-                .build();
+        when(createOrderUseCase.createOrder(
+            any(CreateClientDto.class),
+            anyMap(),
+            any(AddressShipping.class)
+        )).thenThrow(new BusinessException("Error de negocio"));
 
         // Act
-        ResponseEntity<?> response = orderController.createOrder(request);
+        ResponseEntity<?> response = orderController.createOrder(createOrderRequest);
 
         // Assert
-        assertNotNull(response);
         assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
-        verifyNoInteractions(createOrderUseCase);
+        assertTrue(response.getBody() instanceof ApiError);
+        ApiError apiError = (ApiError) response.getBody();
+        assertEquals("Error de negocio", apiError.getMessage());
     }
 
     @Test
-    void testCreateOrderWithNullAddress() {
+    void shouldGetOrderSuccessfully() {
         // Arrange
-        CreateClientDto clientDto = CreateClientDto.builder()
-                .name("John Doe")
-                .email("john@example.com")
-                .phone("1234567890")
-                .build();
-
-        UUID productId = UUID.randomUUID();
-        Map<UUID, BigDecimal> productQuantities = new HashMap<>();
-        productQuantities.put(productId, new BigDecimal("1"));
-
-        CreateOrderRequest request = CreateOrderRequest.builder()
-                .client(clientDto)
-                .productQuantities(productQuantities)
-                .addressShipping(null)
-                .build();
+        when(getOrderUseCase.getOrder(orderId)).thenReturn(Optional.of(order));
+        when(orderDtoMapper.toDto(order)).thenReturn(orderDto);
 
         // Act
-        ResponseEntity<?> response = orderController.createOrder(request);
+        ResponseEntity<OrderDto> response = orderController.getOrder(orderId);
 
         // Assert
-        assertNotNull(response);
-        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
-        verifyNoInteractions(createOrderUseCase);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(orderDto, response.getBody());
+        verify(getOrderUseCase).getOrder(orderId);
+        verify(orderDtoMapper).toDto(order);
     }
 
     @Test
-    void testCreateOrderWithEmptyProductQuantities() {
+    void shouldReturnNotFoundWhenOrderDoesNotExist() {
         // Arrange
-        CreateClientDto clientDto = CreateClientDto.builder()
-                .name("John Doe")
-                .email("john@example.com")
-                .phone("1234567890")
-                .build();
-
-        AddressShipping addressShipping = AddressShipping.builder()
-                .street("123 Main St")
-                .city("New York")
-                .state("NY")
-                .zipCode("10001")
-                .country("USA")
-                .build();
-
-        CreateOrderRequest request = CreateOrderRequest.builder()
-                .client(clientDto)
-                .productQuantities(new HashMap<>())
-                .addressShipping(addressShipping)
-                .build();
+        when(getOrderUseCase.getOrder(orderId)).thenReturn(Optional.empty());
 
         // Act
-        ResponseEntity<?> response = orderController.createOrder(request);
+        ResponseEntity<OrderDto> response = orderController.getOrder(orderId);
 
         // Assert
-        assertNotNull(response);
-        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
-        verifyNoInteractions(createOrderUseCase);
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        verify(getOrderUseCase).getOrder(orderId);
+        verify(orderDtoMapper, never()).toDto(any());
     }
 
     @Test
-    void testCreateOrderWithNegativeQuantity() {
+    void shouldGetAllOrdersSuccessfully() {
         // Arrange
-        CreateClientDto clientDto = CreateClientDto.builder()
-                .name("John Doe")
-                .email("john@example.com")
-                .phone("1234567890")
-                .build();
-
-        UUID productId = UUID.randomUUID();
-        Map<UUID, BigDecimal> productQuantities = new HashMap<>();
-        productQuantities.put(productId, new BigDecimal("-1"));
-
-        AddressShipping addressShipping = AddressShipping.builder()
-                .street("123 Main St")
-                .city("New York")
-                .state("NY")
-                .zipCode("10001")
-                .country("USA")
-                .build();
-
-        CreateOrderRequest request = CreateOrderRequest.builder()
-                .client(clientDto)
-                .productQuantities(productQuantities)
-                .addressShipping(addressShipping)
-                .build();
+        List<Order> orders = Arrays.asList(order);
+        List<OrderDto> orderDtos = Arrays.asList(orderDto);
+        when(getOrderUseCase.getAllOrders()).thenReturn(orders);
+        when(orderDtoMapper.toDto(order)).thenReturn(orderDto);
 
         // Act
-        ResponseEntity<?> response = orderController.createOrder(request);
+        ResponseEntity<List<OrderDto>> response = orderController.getAllOrders();
 
         // Assert
-        assertNotNull(response);
-        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
-        verifyNoInteractions(createOrderUseCase);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(orderDtos, response.getBody());
+        verify(getOrderUseCase).getAllOrders();
+        verify(orderDtoMapper).toDto(order);
+    }
+
+    @Test
+    void shouldUpdateOrderSuccessfully() {
+        // Arrange
+        when(updateOrderUseCase.updateOrder(eq(orderId), any(Order.class))).thenReturn(order);
+        when(orderDtoMapper.toDto(order)).thenReturn(orderDto);
+
+        // Act
+        ResponseEntity<OrderDto> response = orderController.updateOrder(orderId, orderDto);
+
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(orderDto, response.getBody());
+        verify(updateOrderUseCase).updateOrder(eq(orderId), any(Order.class));
+        verify(orderDtoMapper).toDto(order);
+    }
+
+    @Test
+    void shouldDeleteOrderSuccessfully() {
+        // Act
+        ResponseEntity<?> response = orderController.deleteOrder(orderId);
+
+        // Assert
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        verify(deleteOrderUseCase).deleteOrder(orderId);
+    }
+
+    @Test
+    void shouldReturnBadRequestWhenDeleteOrderThrowsBusinessException() {
+        // Arrange
+        doThrow(new BusinessException("Error al eliminar la orden"))
+            .when(deleteOrderUseCase).deleteOrder(orderId);
+
+        // Act
+        ResponseEntity<?> response = orderController.deleteOrder(orderId);
+
+        // Assert
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertTrue(response.getBody() instanceof ApiError);
+        ApiError apiError = (ApiError) response.getBody();
+        assertEquals("Error al eliminar la orden", apiError.getMessage());
+    }
+
+    @Test
+    void shouldUpdateShippingAddressSuccessfully() {
+        // Arrange
+        AddressShipping addressShipping = AddressShipping.builder()
+            .street("456 New St")
+            .city("Bogotá")
+            .state("Cundinamarca")
+            .zipCode("110111")
+            .country("Colombia")
+            .build();
+
+        UpdateShippingAddressRequest request = UpdateShippingAddressRequest.builder()
+            .addressShipping(addressShipping)
+            .build();
+
+        when(updateShippingAddressUseCase.updateShippingAddress(eq(orderId), any(AddressShipping.class)))
+            .thenReturn(order);
+        when(orderDtoMapper.toDto(order)).thenReturn(orderDto);
+
+        // Act
+        ResponseEntity<OrderDto> response = orderController.updateShippingAddress(orderId, request);
+
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(orderDto, response.getBody());
+        verify(updateShippingAddressUseCase).updateShippingAddress(eq(orderId), any(AddressShipping.class));
+        verify(orderDtoMapper).toDto(order);
     }
 } 

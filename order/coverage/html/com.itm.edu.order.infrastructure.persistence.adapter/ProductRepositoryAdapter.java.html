@@ -13,7 +13,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Component
-<span class="nc" id="L16">@RequiredArgsConstructor</span>
+<span class="fc" id="L16">@RequiredArgsConstructor</span>
 public class ProductRepositoryAdapter implements ProductRepositoryPort {
     
     private final JpaProductRepository jpaProductRepository;
@@ -21,27 +21,27 @@ public class ProductRepositoryAdapter implements ProductRepositoryPort {
 
     @Override
     public Product save(Product product) {
-<span class="nc" id="L24">        var entity = productMapper.toEntity(product);</span>
-<span class="nc" id="L25">        var savedEntity = jpaProductRepository.save(entity);</span>
-<span class="nc" id="L26">        return productMapper.toDomain(savedEntity);</span>
+<span class="fc" id="L24">        var entity = productMapper.toEntity(product);</span>
+<span class="fc" id="L25">        var savedEntity = jpaProductRepository.save(entity);</span>
+<span class="fc" id="L26">        return productMapper.toDomain(savedEntity);</span>
     }
 
     @Override
     public Optional&lt;Product&gt; findById(UUID id) {
-<span class="nc" id="L31">        return jpaProductRepository.findById(id)</span>
-<span class="nc" id="L32">                .map(productMapper::toDomain);</span>
+<span class="fc" id="L31">        return jpaProductRepository.findById(id)</span>
+<span class="fc" id="L32">                .map(productMapper::toDomain);</span>
     }
 
     @Override
     public List&lt;Product&gt; findAll() {
-<span class="nc" id="L37">        return jpaProductRepository.findAll().stream()</span>
-<span class="nc" id="L38">                .map(productMapper::toDomain)</span>
-<span class="nc" id="L39">                .collect(Collectors.toList());</span>
+<span class="fc" id="L37">        return jpaProductRepository.findAll().stream()</span>
+<span class="fc" id="L38">                .map(productMapper::toDomain)</span>
+<span class="fc" id="L39">                .collect(Collectors.toList());</span>
     }
 
     @Override
     public void deleteById(UUID id) {
-<span class="nc" id="L44">        jpaProductRepository.deleteById(id);</span>
-<span class="nc" id="L45">    }</span>
+<span class="fc" id="L44">        jpaProductRepository.deleteById(id);</span>
+<span class="fc" id="L45">    }</span>
 } 
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

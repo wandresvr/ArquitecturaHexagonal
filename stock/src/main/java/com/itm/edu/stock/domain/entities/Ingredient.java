@@ -5,14 +5,10 @@ import java.util.UUID;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import lombok.With;
 
 @Getter
 @Builder(toBuilder = true)
 @AllArgsConstructor
-@NoArgsConstructor
-@With
 public class Ingredient {
     private UUID id;
     private String name;

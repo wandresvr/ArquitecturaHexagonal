@@ -1,10 +1,15 @@
 package com.itm.edu.order.infrastructure.exception;
 
-import com.itm.edu.order.domain.exception.ApiError;
 import com.itm.edu.order.domain.exception.BusinessException;
 import com.itm.edu.order.domain.exception.HttpStatusException;
+import com.itm.edu.order.domain.exception.OrderNotFoundException;
+import com.itm.edu.order.domain.exception.ProductNotFoundException;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -12,8 +17,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.ConstraintViolationException;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -22,111 +26,163 @@ import static org.mockito.Mockito.*;
 
 class GlobalExceptionHandlerTest {
 
-    private GlobalExceptionHandler exceptionHandler;
+    private GlobalExceptionHandler globalExceptionHandler;
+
+    @Mock
+    private BindingResult bindingResult;
 
     @BeforeEach
     void setUp() {
-        exceptionHandler = new GlobalExceptionHandler();
+        MockitoAnnotations.openMocks(this);
+        globalExceptionHandler = new GlobalExceptionHandler();
     }
 
     @Test
-    void shouldHandleBusinessException() {
+    void handleBusinessException_ShouldReturnBadRequest() {
         // Arrange
         String errorMessage = "Error de negocio";
-        BusinessException exception = new BusinessException(errorMessage);
+        BusinessException ex = new BusinessException(errorMessage);
 
         // Act
-        ResponseEntity<ApiError> response = exceptionHandler.handleBusinessException(exception);
+        ResponseEntity<ErrorResponse> response = globalExceptionHandler.handleBusinessException(ex);
 
         // Assert
         assertNotNull(response);
-        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(HttpStatus.BAD_REQUEST.value(), response.getBody().getStatus());
         assertEquals(errorMessage, response.getBody().getMessage());
+        assertNotNull(response.getBody().getTimestamp());
     }
 
     @Test
-    void shouldHandleHttpStatusException() {
+    void handleHttpStatusException_ShouldReturnSpecifiedStatus() {
         // Arrange
         String errorMessage = "Error HTTP";
-        HttpStatusException exception = HttpStatusException.badRequest(errorMessage);
+        HttpStatus status = HttpStatus.FORBIDDEN;
+        HttpStatusException ex = new HttpStatusException(status, errorMessage);
 
         // Act
-        ResponseEntity<ApiError> response = exceptionHandler.handleHttpStatusException(exception);
+        ResponseEntity<ErrorResponse> response = globalExceptionHandler.handleHttpStatusException(ex);
 
         // Assert
         assertNotNull(response);
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals(status, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(status.value(), response.getBody().getStatus());
         assertEquals(errorMessage, response.getBody().getMessage());
+        assertNotNull(response.getBody().getTimestamp());
     }
 
     @Test
-    void shouldHandleMethodArgumentNotValidException() {
+    void handleValidationExceptions_ShouldReturnBadRequest() {
         // Arrange
-        MethodArgumentNotValidException exception = mock(MethodArgumentNotValidException.class);
-        BindingResult bindingResult = mock(BindingResult.class);
-        when(exception.getBindingResult()).thenReturn(bindingResult);
-        
-        FieldError fieldError = new FieldError("objectName", "field", "mensaje de error");
-        when(bindingResult.getFieldErrors()).thenReturn(java.util.Collections.singletonList(fieldError));
+        FieldError fieldError = new FieldError("object", "field", "error message");
+        when(bindingResult.getFieldErrors()).thenReturn(Collections.singletonList(fieldError));
+        MethodArgumentNotValidException ex = new MethodArgumentNotValidException(null, bindingResult);
 
         // Act
-        ResponseEntity<ApiError> response = exceptionHandler.handleValidationExceptions(exception);
+        ResponseEntity<ErrorResponse> response = globalExceptionHandler.handleValidationExceptions(ex);
 
         // Assert
         assertNotNull(response);
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertTrue(response.getBody().getMessage().contains("field: mensaje de error"));
+        assertNotNull(response.getBody());
+        assertEquals(HttpStatus.BAD_REQUEST.value(), response.getBody().getStatus());
+        assertTrue(response.getBody().getMessage().contains("field: error message"));
+        assertNotNull(response.getBody().getTimestamp());
     }
 
     @Test
-    void shouldHandleConstraintViolationException() {
+    void handleConstraintViolationException_ShouldReturnBadRequest() {
         // Arrange
         Set<ConstraintViolation<?>> violations = new HashSet<>();
-        ConstraintViolation<?> violation = mock(ConstraintViolation.class);
-        when(violation.getMessage()).thenReturn("mensaje de error");
-        when(violation.getPropertyPath()).thenReturn(mock(jakarta.validation.Path.class));
-        when(violation.getPropertyPath().toString()).thenReturn("field");
-        violations.add(violation);
-        
-        ConstraintViolationException exception = new ConstraintViolationException("Error de validación", violations);
+        ConstraintViolationException ex = new ConstraintViolationException(violations);
 
         // Act
-        ResponseEntity<ApiError> response = exceptionHandler.handleConstraintViolationException(exception);
+        ResponseEntity<ErrorResponse> response = globalExceptionHandler.handleConstraintViolationException(ex);
 
         // Assert
         assertNotNull(response);
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertTrue(response.getBody().getMessage().contains("field: mensaje de error"));
+        assertNotNull(response.getBody());
+        assertEquals(HttpStatus.BAD_REQUEST.value(), response.getBody().getStatus());
+        assertNotNull(response.getBody().getMessage());
+        assertNotNull(response.getBody().getTimestamp());
     }
 
     @Test
-    void shouldHandleMethodArgumentTypeMismatchException() {
+    void handleTypeMismatch_ShouldReturnBadRequest() {
         // Arrange
-        MethodArgumentTypeMismatchException exception = mock(MethodArgumentTypeMismatchException.class);
-        when(exception.getName()).thenReturn("paramName");
-        when(exception.getValue()).thenReturn("invalidValue");
+        String paramName = "id";
+        String paramValue = "abc";
+        MethodArgumentTypeMismatchException ex = mock(MethodArgumentTypeMismatchException.class);
+        when(ex.getName()).thenReturn(paramName);
+        when(ex.getValue()).thenReturn(paramValue);
 
         // Act
-        ResponseEntity<ApiError> response = exceptionHandler.handleTypeMismatch(exception);
+        ResponseEntity<ErrorResponse> response = globalExceptionHandler.handleTypeMismatch(ex);
 
         // Assert
         assertNotNull(response);
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertTrue(response.getBody().getMessage().contains("paramName"));
-        assertTrue(response.getBody().getMessage().contains("invalidValue"));
+        assertNotNull(response.getBody());
+        assertEquals(HttpStatus.BAD_REQUEST.value(), response.getBody().getStatus());
+        assertTrue(response.getBody().getMessage().contains(paramName));
+        assertTrue(response.getBody().getMessage().contains(paramValue));
+        assertNotNull(response.getBody().getTimestamp());
     }
 
     @Test
-    void shouldHandleGenericException() {
+    void handleProductNotFoundException_ShouldReturnNotFound() {
         // Arrange
-        Exception exception = new RuntimeException("Error inesperado");
+        String errorMessage = "Producto no encontrado";
+        ProductNotFoundException ex = new ProductNotFoundException(errorMessage);
 
         // Act
-        ResponseEntity<ApiError> response = exceptionHandler.handleGenericException(exception);
+        ResponseEntity<ErrorResponse> response = globalExceptionHandler.handleProductNotFoundException(ex);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(HttpStatus.NOT_FOUND.value(), response.getBody().getStatus());
+        assertEquals(errorMessage, response.getBody().getMessage());
+        assertNotNull(response.getBody().getTimestamp());
+    }
+
+    @Test
+    void handleOrderNotFoundException_ShouldReturnNotFound() {
+        // Arrange
+        String errorMessage = "Orden no encontrada";
+        OrderNotFoundException ex = new OrderNotFoundException(errorMessage);
+
+        // Act
+        ResponseEntity<ErrorResponse> response = globalExceptionHandler.handleOrderNotFoundException(ex);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(HttpStatus.NOT_FOUND.value(), response.getBody().getStatus());
+        assertEquals(errorMessage, response.getBody().getMessage());
+        assertNotNull(response.getBody().getTimestamp());
+    }
+
+    @Test
+    void handleGenericException_ShouldReturnInternalServerError() {
+        // Arrange
+        Exception ex = new RuntimeException("Error interno");
+
+        // Act
+        ResponseEntity<ErrorResponse> response = globalExceptionHandler.handleGenericException(ex);
 
         // Assert
         assertNotNull(response);
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), response.getBody().getStatus());
         assertEquals("Error interno del servidor", response.getBody().getMessage());
+        assertNotNull(response.getBody().getTimestamp());
     }
 } 

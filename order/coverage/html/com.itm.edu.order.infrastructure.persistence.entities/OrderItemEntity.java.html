@@ -12,30 +12,30 @@ import java.util.UUID;
 @Entity
 @Table(name = &quot;order_items&quot;)
 @Getter
-<span class="nc" id="L15">@Setter</span>
+<span class="pc" id="L15">@Setter</span>
 <span class="nc" id="L16">@NoArgsConstructor</span>
-<span class="nc" id="L17">@AllArgsConstructor</span>
-<span class="nc" id="L18">@Builder</span>
+<span class="fc" id="L17">@AllArgsConstructor</span>
+<span class="pc" id="L18">@Builder</span>
 public class OrderItemEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-<span class="nc" id="L22">    private UUID id;</span>
+<span class="fc" id="L22">    private UUID id;</span>
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = &quot;order_id&quot;, nullable = false)
-<span class="nc" id="L26">    private OrderEntity order;</span>
+<span class="fc" id="L26">    private OrderEntity order;</span>
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = &quot;product_id&quot;, nullable = false)
-<span class="nc" id="L30">    private ProductEntity product;</span>
+<span class="fc" id="L30">    private ProductEntity product;</span>
 
-<span class="nc" id="L32">    private int quantity;</span>
+<span class="fc" id="L32">    private int quantity;</span>
 
     public void setOrder(OrderEntity order) {
-<span class="nc" id="L35">        this.order = order;</span>
-<span class="nc bnc" id="L36" title="All 4 branches missed.">        if (order != null &amp;&amp; !order.getProducts().contains(this)) {</span>
-<span class="nc" id="L37">            order.getProducts().add(this);</span>
+<span class="fc" id="L35">        this.order = order;</span>
+<span class="pc bpc" id="L36" title="2 of 4 branches missed.">        if (order != null &amp;&amp; !order.getProducts().contains(this)) {</span>
+<span class="fc" id="L37">            order.getProducts().add(this);</span>
         }
-<span class="nc" id="L39">    }</span>
+<span class="fc" id="L39">    }</span>
 } 
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

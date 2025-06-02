@@ -12,51 +12,51 @@ public class OrderMapper implements DomainMapper&lt;Order, OrderEntity&gt; {
     private final OrderItemMapper orderItemMapper;
     private final ClientMapper clientMapper;
 
-<span class="nc" id="L15">    public OrderMapper(OrderItemMapper orderItemMapper, ClientMapper clientMapper) {</span>
-<span class="nc" id="L16">        this.orderItemMapper = orderItemMapper;</span>
-<span class="nc" id="L17">        this.clientMapper = clientMapper;</span>
-<span class="nc" id="L18">    }</span>
+<span class="fc" id="L15">    public OrderMapper(OrderItemMapper orderItemMapper, ClientMapper clientMapper) {</span>
+<span class="fc" id="L16">        this.orderItemMapper = orderItemMapper;</span>
+<span class="fc" id="L17">        this.clientMapper = clientMapper;</span>
+<span class="fc" id="L18">    }</span>
 
     @Override
     public Order toDomain(OrderEntity entity) {
-<span class="nc bnc" id="L22" title="All 2 branches missed.">        if (entity == null) return null;</span>
+<span class="fc bfc" id="L22" title="All 2 branches covered.">        if (entity == null) return null;</span>
         
-<span class="nc" id="L24">        return Order.builder()</span>
-<span class="nc" id="L25">                .orderId(entity.getOrderId())</span>
-<span class="nc" id="L26">                .products(entity.getProducts().stream()</span>
-<span class="nc" id="L27">                        .map(orderItemMapper::toDomain)</span>
-<span class="nc" id="L28">                        .collect(Collectors.toList()))</span>
-<span class="nc" id="L29">                .orderStatus(entity.getOrderStatus())</span>
-<span class="nc" id="L30">                .orderDate(entity.getOrderDate())</span>
-<span class="nc" id="L31">                .deliveryAddress(entity.getDeliveryAddress())</span>
-<span class="nc" id="L32">                .total(entity.getTotal())</span>
-<span class="nc" id="L33">                .client(clientMapper.toDomain(entity.getClient()))</span>
-<span class="nc" id="L34">                .build();</span>
+<span class="fc" id="L24">        return Order.builder()</span>
+<span class="fc" id="L25">                .orderId(entity.getOrderId())</span>
+<span class="fc" id="L26">                .products(entity.getProducts().stream()</span>
+<span class="fc" id="L27">                        .map(orderItemMapper::toDomain)</span>
+<span class="fc" id="L28">                        .collect(Collectors.toList()))</span>
+<span class="fc" id="L29">                .orderStatus(entity.getOrderStatus())</span>
+<span class="fc" id="L30">                .orderDate(entity.getOrderDate())</span>
+<span class="fc" id="L31">                .deliveryAddress(entity.getDeliveryAddress())</span>
+<span class="fc" id="L32">                .total(entity.getTotal())</span>
+<span class="fc" id="L33">                .client(clientMapper.toDomain(entity.getClient()))</span>
+<span class="fc" id="L34">                .build();</span>
     }
 
     @Override
     public OrderEntity toEntity(Order domain) {
-<span class="nc bnc" id="L39" title="All 2 branches missed.">        if (domain == null) return null;</span>
+<span class="fc bfc" id="L39" title="All 2 branches covered.">        if (domain == null) return null;</span>
 
-<span class="nc" id="L41">        OrderEntity orderEntity = OrderEntity.builder()</span>
-<span class="nc" id="L42">                .orderId(domain.getOrderId())</span>
-<span class="nc" id="L43">                .orderStatus(domain.getOrderStatus())</span>
-<span class="nc" id="L44">                .orderDate(domain.getOrderDate())</span>
-<span class="nc" id="L45">                .deliveryAddress(domain.getDeliveryAddress())</span>
-<span class="nc" id="L46">                .total(domain.getTotal())</span>
-<span class="nc" id="L47">                .client(clientMapper.toEntity(domain.getClient()))</span>
-<span class="nc" id="L48">                .build();</span>
+<span class="fc" id="L41">        OrderEntity orderEntity = OrderEntity.builder()</span>
+<span class="fc" id="L42">                .orderId(domain.getOrderId())</span>
+<span class="fc" id="L43">                .orderStatus(domain.getOrderStatus())</span>
+<span class="fc" id="L44">                .orderDate(domain.getOrderDate())</span>
+<span class="fc" id="L45">                .deliveryAddress(domain.getDeliveryAddress())</span>
+<span class="fc" id="L46">                .total(domain.getTotal())</span>
+<span class="fc" id="L47">                .client(clientMapper.toEntity(domain.getClient()))</span>
+<span class="fc" id="L48">                .build();</span>
 
         // Establecer la relación bidireccional a nivel de infraestructura
-<span class="nc" id="L51">        orderEntity.setProducts(domain.getProducts().stream()</span>
-<span class="nc" id="L52">                .map(item -&gt; {</span>
-<span class="nc" id="L53">                    var itemEntity = orderItemMapper.toEntity(item);</span>
-<span class="nc" id="L54">                    itemEntity.setOrder(orderEntity);</span>
-<span class="nc" id="L55">                    return itemEntity;</span>
+<span class="fc" id="L51">        orderEntity.setProducts(domain.getProducts().stream()</span>
+<span class="fc" id="L52">                .map(item -&gt; {</span>
+<span class="fc" id="L53">                    var itemEntity = orderItemMapper.toEntity(item);</span>
+<span class="fc" id="L54">                    itemEntity.setOrder(orderEntity);</span>
+<span class="fc" id="L55">                    return itemEntity;</span>
                 })
-<span class="nc" id="L57">                .collect(Collectors.toList()));</span>
+<span class="fc" id="L57">                .collect(Collectors.toList()));</span>
 
-<span class="nc" id="L59">        return orderEntity;</span>
+<span class="fc" id="L59">        return orderEntity;</span>
     }
 } 
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

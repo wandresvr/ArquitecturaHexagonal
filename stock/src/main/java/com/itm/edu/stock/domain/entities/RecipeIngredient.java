@@ -4,7 +4,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
-import lombok.With;
 import java.math.BigDecimal;
 import java.util.UUID;
 
@@ -12,7 +11,6 @@ import java.util.UUID;
 @Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
-@With
 public class RecipeIngredient {
     private UUID id;
     private UUID recipeId;

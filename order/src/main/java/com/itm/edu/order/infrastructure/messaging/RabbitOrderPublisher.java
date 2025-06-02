@@ -17,6 +17,10 @@ public class RabbitOrderPublisher implements OrderPublisherPort {
 
     @Override
     public void publish(OrderMessageDTO orderMessage) {
+        if (orderMessage == null) {
+            throw new IllegalArgumentException("El mensaje de orden no puede ser nulo");
+        }
+
         try {
             rabbitTemplate.convertAndSend(
                 RabbitMQConfig.ORDER_EXCHANGE,
@@ -26,7 +30,7 @@ public class RabbitOrderPublisher implements OrderPublisherPort {
             log.info("✅ Mensaje de orden enviado a {}: {}", RabbitMQConfig.ORDER_EXCHANGE, orderMessage);
         } catch (Exception e) {
             log.error("❌ Error enviando mensaje: {}", e.getMessage());
-            e.printStackTrace();
+
             throw e;
         }
     }
