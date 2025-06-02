@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS recipes (
     cooking_time INTEGER,
     servings INTEGER,
     instructions TEXT,
+    difficulty VARCHAR(20) NOT NULL DEFAULT 'MEDIA',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -42,6 +43,16 @@ BEGIN
         AND column_name = 'instructions'
     ) THEN
         ALTER TABLE recipes ADD COLUMN instructions TEXT;
+    END IF;
+
+    -- Agregar columna difficulty si no existe
+    IF NOT EXISTS (
+        SELECT 1 
+        FROM information_schema.columns 
+        WHERE table_name = 'recipes' 
+        AND column_name = 'difficulty'
+    ) THEN
+        ALTER TABLE recipes ADD COLUMN difficulty VARCHAR(20) NOT NULL DEFAULT 'MEDIA';
     END IF;
 
     -- Agregar columna updated_at si no existe
@@ -83,21 +94,21 @@ DECLARE
     v_ingredient_id UUID;
 BEGIN
     -- Insertar recetas si no existen
-    INSERT INTO recipes (id, name, description, preparation_time, cooking_time, servings, instructions)
+    INSERT INTO recipes (id, name, description, preparation_time, cooking_time, servings, instructions, difficulty)
     VALUES 
-        (gen_random_uuid(), 'Ensalada César', 'Ensalada clásica con pollo a la parrilla', 15, 20, 2, 'Mezclar todos los ingredientes y servir')
+        (gen_random_uuid(), 'Ensalada César', 'Ensalada clásica con pollo a la parrilla', 15, 20, 2, 'Mezclar todos los ingredientes y servir', 'FÁCIL')
     ON CONFLICT (id) DO NOTHING
     RETURNING id INTO v_recipe_id;
 
-    INSERT INTO recipes (id, name, description, preparation_time, cooking_time, servings, instructions)
+    INSERT INTO recipes (id, name, description, preparation_time, cooking_time, servings, instructions, difficulty)
     VALUES 
-        (gen_random_uuid(), 'Pasta Carbonara', 'Pasta con salsa cremosa y panceta', 10, 20, 4, 'Cocer la pasta y mezclar con la salsa')
+        (gen_random_uuid(), 'Pasta Carbonara', 'Pasta con salsa cremosa y panceta', 10, 20, 4, 'Cocer la pasta y mezclar con la salsa', 'MEDIA')
     ON CONFLICT (id) DO NOTHING
     RETURNING id INTO v_recipe_id;
 
-    INSERT INTO recipes (id, name, description, preparation_time, cooking_time, servings, instructions)
+    INSERT INTO recipes (id, name, description, preparation_time, cooking_time, servings, instructions, difficulty)
     VALUES 
-        (gen_random_uuid(), 'Pizza Margherita', 'Pizza clásica con tomate y mozzarella', 20, 15, 4, 'Estirar la masa y hornear')
+        (gen_random_uuid(), 'Pizza Margherita', 'Pizza clásica con tomate y mozzarella', 20, 15, 4, 'Estirar la masa y hornear', 'MEDIA')
     ON CONFLICT (id) DO NOTHING
     RETURNING id INTO v_recipe_id;
 

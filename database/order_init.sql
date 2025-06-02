@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS products (
     name VARCHAR(255) NOT NULL,
     description TEXT,
     price DECIMAL(10,2) NOT NULL,
-    recipe_id UUID NOT NULL,
+    recipe_id UUID NOT NULL UNIQUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -85,11 +85,18 @@ CREATE TEMPORARY TABLE temp_recipe_ids (
 -- Copiar IDs de recetas desde el archivo CSV
 COPY temp_recipe_ids FROM '/tmp/recipe_ids.csv' WITH CSV;
 
+-- Limpiar productos existentes
+DELETE FROM products;
+
 -- Insertar productos basados en las recetas
 INSERT INTO products (id, name, description, price, recipe_id)
 SELECT 
     gen_random_uuid(),
-    r.name,
+    CASE 
+        WHEN r.name = 'Ensalada César' THEN 'Ensalada César Premium'
+        WHEN r.name = 'Pasta Carbonara' THEN 'Pasta Carbonara Individual'
+        WHEN r.name = 'Pizza Margherita' THEN 'Pizza Margherita Familiar'
+    END,
     'Producto basado en ' || r.name,
     CASE 
         WHEN r.name = 'Ensalada César' THEN 12.99
@@ -98,10 +105,7 @@ SELECT
         ELSE 10.99
     END,
     r.id
-FROM temp_recipe_ids r
-WHERE NOT EXISTS (
-    SELECT 1 FROM products p WHERE p.recipe_id = r.id
-);
+FROM temp_recipe_ids r;
 
 -- Eliminar tabla temporal
 DROP TABLE temp_recipe_ids; 
