@@ -27,8 +27,7 @@ public class OrderEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID orderId;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "order_id")
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<OrderItemEntity> products = new ArrayList<>();
 
@@ -44,4 +43,14 @@ public class OrderEntity {
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "client_id")
     private ClientEntity client;
+
+    public void addProduct(OrderItemEntity product) {
+        products.add(product);
+        product.setOrder(this);
+    }
+
+    public void removeProduct(OrderItemEntity product) {
+        products.remove(product);
+        product.setOrder(null);
+    }
 } 

@@ -22,7 +22,7 @@ public class OrderItemEntity {
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_id", nullable = false)
+    @JoinColumn(name = "order_id", nullable = true)
     private OrderEntity order;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -32,8 +32,11 @@ public class OrderItemEntity {
     private int quantity;
 
     public void setOrder(OrderEntity order) {
+        if (this.order != null) {
+            this.order.getProducts().remove(this);
+        }
         this.order = order;
-        if (order != null && !order.getProducts().contains(this)) {
+        if (order != null) {
             order.getProducts().add(this);
         }
     }
