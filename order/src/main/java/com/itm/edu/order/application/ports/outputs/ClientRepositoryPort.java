@@ -7,4 +7,5 @@ import java.util.UUID;
 public interface ClientRepositoryPort {
     Client save(Client client);
     Optional<Client> findById(UUID id);
+    Optional<Client> findByEmail(String email);
 } 

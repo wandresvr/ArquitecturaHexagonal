@@ -45,6 +45,14 @@ public class JpaClientRepository implements ClientRepository {
     public void deleteById(UUID id) {
         jpaRepository.deleteById(id);
     }
+
+    @Override
+    public Optional<Client> findByEmail(String email) {
+        return jpaRepository.findByEmail(email)
+                .map(clientMapper::toDomain);
+    }
 }
 
-interface SpringJpaClientRepository extends JpaRepository<ClientEntity, UUID> {} 
+interface SpringJpaClientRepository extends JpaRepository<ClientEntity, UUID> {
+    Optional<ClientEntity> findByEmail(String email);
+} 

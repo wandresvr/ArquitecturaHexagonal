@@ -23,4 +23,9 @@ public class ClientRepositoryAdapter implements ClientRepositoryPort {
     public Optional<Client> findById(UUID id) {
         return clientRepository.findById(id);
     }
+
+    @Override
+    public Optional<Client> findByEmail(String email) {
+        return clientRepository.findByEmail(email);
+    }
 } 

@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -63,6 +64,25 @@ public class CreateOrderService implements CreateOrderUseCase {
     }
 
     private Client createClient(CreateClientDto clientDto) {
+        // Primero buscar si ya existe un cliente con el mismo email
+        Optional<Client> existingClient = clientRepository.findByEmail(clientDto.getEmail());
+        
+        if (existingClient.isPresent()) {
+            // Si existe, actualizar los datos si es necesario
+            Client client = existingClient.get();
+            if (!client.getName().equals(clientDto.getName()) || !client.getPhone().equals(clientDto.getPhone())) {
+                client = Client.builder()
+                    .id(client.getId())
+                    .name(clientDto.getName())
+                    .email(clientDto.getEmail())
+                    .phone(clientDto.getPhone())
+                    .build();
+                return clientRepository.save(client);
+            }
+            return client;
+        }
+        
+        // Si no existe, crear uno nuevo
         Client client = Client.builder()
             .id(UUID.randomUUID())
             .name(clientDto.getName())
