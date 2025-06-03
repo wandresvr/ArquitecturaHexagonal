@@ -49,11 +49,7 @@ public class OrderMapper implements DomainMapper<Order, OrderEntity> {
 
         // Establecer la relación bidireccional a nivel de infraestructura
         orderEntity.setProducts(domain.getProducts().stream()
-                .map(item -> {
-                    var itemEntity = orderItemMapper.toEntity(item);
-                    itemEntity.setOrder(orderEntity);
-                    return itemEntity;
-                })
+                .map(item -> orderItemMapper.toEntityWithOrder(item, orderEntity))
                 .collect(Collectors.toList()));
 
         return orderEntity;
