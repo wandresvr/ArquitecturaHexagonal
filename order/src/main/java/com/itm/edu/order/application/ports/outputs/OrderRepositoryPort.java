@@ -12,4 +12,5 @@ public interface OrderRepositoryPort {
     List<Order> findAll();
     void deleteById(UUID orderId);
     Order update(Order order);
+    void flush();
 } 

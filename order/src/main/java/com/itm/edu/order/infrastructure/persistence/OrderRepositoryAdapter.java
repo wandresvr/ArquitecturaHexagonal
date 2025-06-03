@@ -51,4 +51,9 @@ public class OrderRepositoryAdapter implements OrderRepositoryPort {
         OrderEntity updatedEntity = jpaOrderRepository.save(entity);
         return orderMapper.toDomain(updatedEntity);
     }
+
+    @Override
+    public void flush() {
+        jpaOrderRepository.flush();
+    }
 } 

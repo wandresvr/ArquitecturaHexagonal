@@ -53,6 +53,9 @@ public class CreateOrderService implements CreateOrderUseCase {
         // Persistir la orden
         order = orderRepository.save(order);
         
+        // Forzar el flush de la transacción para asegurar que la orden se guarde
+        orderRepository.flush();
+        
         // Publicar el evento de orden creada
         publishOrderMessage(order);
 
