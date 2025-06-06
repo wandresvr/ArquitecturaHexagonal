@@ -4,23 +4,13 @@ Esta desarrollada usando Sprint Booot, Gradle y Lombok, usa una arquitecura hexa
 # Contenido
 
 * Estructura
-* Diagrama del dominio
+* Diagrama UML del dominio
 * Headers
 * Endpoints
-  * Parámetros
-  * Ejemplo body
-  * Ejemplo usando Curl
-  * Notas
+* Swagger
 * Lanzamiento del docker
-  * Construir la imagen
-  * Ejecutar el docker
-  * Iniciar tanto el servicio como la base de datos
 * Ajustes del docker
-  * Variables de entorno de PostgreSQL:
-  * Versión de PostgreSQL:
-* Casos de prueba
-  * Ejecución
-  * Cobertura
+* Calidad y pruebas
 
 
 ## Estructura:
@@ -31,10 +21,13 @@ Esta desarrollada usando Sprint Booot, Gradle y Lombok, usa una arquitecura hexa
 │ ├── main/
 │ │ ├── java/com/wilson/order/
 │ │ │ ├── application/
+│ │ │ │ └── services/
+│ │ │ │ ├── mapper/
+│ │ │ │ ├── dto/
+│ │ │ │ │ └── events/
 │ │ │ │ ├── ports/
 │ │ │ │ │ └── inputs/
 │ │ │ │ │ └── outputs/
-│ │ │ │ └── services/
 │ │ │ ├── domain/
 │ │ │ │ ├── exception/
 │ │ │ │ ├── model/
@@ -42,10 +35,16 @@ Esta desarrollada usando Sprint Booot, Gradle y Lombok, usa una arquitecura hexa
 │ │ │ │ └── valueobjects/
 │ │ │ ├── infrastructure/
 │ │ │ │ ├── config/
+│ │ │ │ ├── exception/
+│ │ │ │ ├── messaging/
+│ │ │ │ ├── persistence/
+│ │ │ │ │ ├── adapter/
+│ │ │ │ │ ├── entitites/
+│ │ │ │ │ ├── mapper/
+│ │ │ │ │ ├── repository/
 │ │ │ │ ├── rest/
 │ │ │ │ │ ├── dto/
 │ │ │ │ │ ├── mapper/
-│ │ │ │ └── persistence/
 │ ├── test/
 ├── coverage/
 
@@ -115,153 +114,254 @@ classDiagram
     OrderRepository  <|..  Order : 
 ```
 
-## Headers
+# Headers
 ``` Content-Type: application/json ```
 
 # Endpoints
-  
-## 1. Ingresar Ordenes de pedido
-``` POST /api/orders ```
 
-### Parámetros:
+### Nota
+Se usa Localhost por defecto lanzado desde local, pero en realidad es la IP donde se encuentra el microservicio.
 
-- client (Dictionary): Información del cliente con:
-  - name (String): Nombre del cliente
-  - email (String): Correo del cliente
-  - phone (String): Teléfono del cliente
-- products (Array): Lista de productos en la orden con:
-  - productId (UUID): Identificador único del producto.
-  - quantity (Number): Cantidad de ese producto.
-- shippingAddress (Dictionary): Información de envio con:
-  - street (String): Dirección
-  - city (String): Ciudad
-  - state (String): Departamento/estado/provincia
-  - zipCode (String): Código postal
-  - country (String): País
 
-### Ejemplo Body:
-``` json
-{
-    "client": {
-        "name": "Juan Pérez",
-        "email": "juan@example.com",
-        "phone": "1234567890"
-    },
-    "products": [
-        {
-            "productId": "123e4567-e89b-12d3-a456-426614174000",
-            "quantity": 2
-        }
-    ],
-    "shippingAddress": {
-        "street": "123 Main St",
-        "city": "New York",
-        "state": "NY",
-        "zipCode": "10001",
-        "country": "USA"
-    }
-}
+  ## Órdenes
+
+API para la gestión de órdenes
+
+### Obtener todas las órdenes
+
+```http
+GET http://localhost:8080/api/v1/orders
 ```
 
-### Ejemplo usando curl:
-``` sh
-curl -X POST http://localhost:8080/api/orders \
--H "Content-Type: application/json" \
--d '{
-    "client": {
-        "name": "Juan Pérez",
-        "email": "juan@example.com",
-        "phone": "1234567890"
-    },
-    "products": [
-        {
-            "productId": "123e4567-e89b-12d3-a456-426614174000",
-            "quantity": 2
-        }
-    ],
-    "shippingAddress": {
-        "street": "123 Main St",
-        "city": "New York",
-        "state": "NY",
-        "zipCode": "10001",
-        "country": "USA"
-    }
-}'
+#### Respuestas
+
+| Código | Descripción |
+|--------|-------------|
+| 200 | Lista de órdenes obtenida exitosamente |
+| 500 | Error interno del servidor |
+
+### Crear una nueva orden
+
+```http
+POST http://localhost:8080/api/v1/orders
 ```
 
-### Notas:
+#### Parámetros
 
-- Se debe tener productos en la base de datos creados antes de crear ordenes.
-- La relación entre la orden y los productos se encuentran en la tabla ```Total_Order```.
+| Posición | Nombre | Tipo | Descripción |
+|----------|--------|------|-------------|
+| body | body | CreateOrderRequest | |
 
+#### Respuestas
 
-## 2. Crear un producto
-  ``` POST /api/product ```
+| Código | Descripción |
+|--------|-------------|
+| 200 | Orden creada exitosamente |
+| 400 | Solicitud inválida |
+| 422 | Error de validación |
+| 500 | Error interno del servidor |
 
-### Parámetros:
+### Eliminar una orden
 
-- name (String): Nombre del producto
-- description (String): Descripción del producto
-- price (Float): Precio del producto por unidad
-- stock (Int): Cantidad del producto en stock
-
-
-### Ejemplo Body:
-
-``` json
-{
-    "name": "Pizza Margarita",
-    "description": "Pizza clásica italiana",
-    "price": 15.99,
-    "stock": 50
-}
+```http
+DELETE http://localhost:8080/api/v1/orders/{id}
 ```
 
-### Ejemplo usando curl:
+#### Parámetros
 
-``` sh
-curl -X POST http://localhost:8080/api/products \
--H "Content-Type: application/json" \
--d '{
-    "name": "Pizza Margarita",
-    "description": "Pizza clásica italiana",
-    "price": 15.99,
-    "stock": 50
-}'
+| Posición | Nombre | Tipo | Descripción |
+|----------|--------|------|-------------|
+| path | id | string | |
+
+#### Respuestas
+
+| Código | Descripción |
+|--------|-------------|
+| 200 | Orden eliminada exitosamente |
+| 400 | Solicitud inválida |
+| 404 | Orden no encontrada |
+| 500 | Error interno del servidor |
+
+### Obtener una orden por su ID
+
+```http
+GET http://localhost:8080/api/v1/orders/{id}
 ```
 
-## 3. Obtener un producto
-``` GET /api/product/{product} ```
+#### Parámetros
 
-### Parámetros:
-{product} : id del producto
+| Posición | Nombre | Tipo | Descripción |
+|----------|--------|------|-------------|
+| path | id | string | |
 
-### Ejemplo usando curl:
+#### Respuestas
 
-``` sh
-curl -X GET http://localhost:8080/api/products/123e4567-e89b-12d3-a456-426614174000
+| Código | Descripción |
+|--------|-------------|
+| 200 | Orden encontrada |
+| 404 | Orden no encontrada |
+| 500 | Error interno del servidor |
+
+### Actualizar una orden
+
+```http
+PUT http://localhost:8080/api/v1/orders/{id}
 ```
 
-### Notas:
-- Para obtener todos los productos sólo se debe omitir el parametro
+#### Parámetros
 
-Ejemplo:
-``` sh
-curl -X GET http://localhost:8080/api/products/
+| Posición | Nombre | Tipo | Descripción |
+|----------|--------|------|-------------|
+| path | id | string | ID de la orden |
+| body | body | OrderDto | |
+
+#### Respuestas
+
+| Código | Descripción |
+|--------|-------------|
+| 200 | Orden actualizada exitosamente |
+| 400 | Solicitud inválida |
+| 404 | Orden no encontrada |
+| 422 | Error de validación |
+| 500 | Error interno del servidor |
+
+### Actualizar la dirección de envío de una orden
+
+```http
+PUT http://localhost:8080/api/v1/orders/{orderId}/shipping-address
 ```
 
-## Lanzamiento del docker
+#### Parámetros
 
-### Construir la imagen
-Primero se debe construir la imagen con:
-``` sh
-docker build -t order-service .
+| Posición | Nombre | Tipo | Descripción |
+|----------|--------|------|-------------|
+| path | orderId | string | ID de la orden |
+| body | body | UpdateShippingAddressRequest | |
+
+#### Respuestas
+
+| Código | Descripción |
+|--------|-------------|
+| 200 | Dirección de envío actualizada exitosamente |
+| 400 | Solicitud inválida |
+| 404 | Orden no encontrada |
+| 422 | Error de validación |
+| 500 | Error interno del servidor |
+
+## Productos
+
+API para la gestión de productos
+
+### Obtener todos los productos
+
+```http
+GET http://localhost:8080/api/v1/products
 ```
 
-### Ejecutar el docker
-``` sh
-docker run -p 8080:8080 order-service
+#### Respuestas
+
+| Código | Descripción |
+|--------|-------------|
+| 200 | Lista de productos obtenida exitosamente |
+| 500 | Error interno del servidor |
+
+### Crear un nuevo producto
+
+```http
+POST http://localhost:8080/api/v1/products
 ```
+
+#### Parámetros
+
+| Posición | Nombre | Tipo | Descripción |
+|----------|--------|------|-------------|
+| body | body | ProductDto | |
+
+#### Respuestas
+
+| Código | Descripción |
+|--------|-------------|
+| 201 | Producto creado exitosamente |
+| 400 | Solicitud inválida |
+| 409 | Conflicto - Ya existe un producto con ese nombre |
+| 422 | Error de validación |
+| 500 | Error interno del servidor |
+
+### Eliminar un producto
+
+```http
+DELETE http://localhost:8080/api/v1/products/{id}
+```
+
+#### Parámetros
+
+| Posición | Nombre | Tipo | Descripción |
+|----------|--------|------|-------------|
+| path | id | string | |
+
+#### Respuestas
+
+| Código | Descripción |
+|--------|-------------|
+| 204 | Producto eliminado exitosamente |
+| 400 | ID inválido |
+| 404 | Producto no encontrado |
+| 500 | Error interno del servidor |
+
+### Obtener un producto por ID
+
+```http
+GET http://localhost:8080/api/v1/products/{id}
+```
+
+#### Parámetros
+
+| Posición | Nombre | Tipo | Descripción |
+|----------|--------|------|-------------|
+| path | id | string | |
+
+#### Respuestas
+
+| Código | Descripción |
+|--------|-------------|
+| 200 | Producto encontrado |
+| 400 | ID inválido |
+| 404 | Producto no encontrado |
+| 500 | Error interno del servidor |
+
+### Actualizar un producto
+
+```http
+PUT http://localhost:8080/api/v1/products/{id}
+```
+
+#### Parámetros
+
+| Posición | Nombre | Tipo | Descripción |
+|----------|--------|------|-------------|
+| path | id | string | |
+| body | body | ProductDto | |
+
+#### Respuestas
+
+| Código | Descripción |
+|--------|-------------|
+| 200 | Producto actualizado exitosamente |
+| 400 | ID inválido o solicitud inválida |
+| 404 | Producto no encontrado |
+| 409 | Conflicto - Ya existe un producto con ese nombre |
+| 422 | Error de validación |
+| 500 | Error interno del servidor |
+
+
+# Swagger
+
+El Swagger es una documentación más detallada de los endpoints, para acceder a ella el microservicio debe estar corriendo:
+
+http://localhost:8080/swagger-ui/index.htm
+
+
+# Lanzamiento del docker
 
 ### Iniciar tanto el servicio como la base de datos
 ``` sh
@@ -281,18 +381,16 @@ docker-compose up
 ### Versión de PostgreSQL:
    - Actualmente se usa postgres 15
 
-## Casos de prueba
 
-### Ejecución
-Para ejecutar los casos de prueba solo se debe ejecutar:
-``` sh
-./gradlew test
-```
-
-### Cobertura
+# Calidad y pruebas
 Para validar la cobertura se debe ejecutar:
 ``` sh
 ./gradlew clean test jacocoTestReport
 ```
 
 se creará la carpeta [coverage](coverage), para ver la cobertura abra el archivo de [reporte](coverage/html/index.html) (index.html) dentro de un navegador.
+
+### SobarQube
+
+Se puede hacer uso de SonarQube para leer la cobertura y hacer analisis de código estatico, el token debe ser ajustado en
+```sonar.properties```.

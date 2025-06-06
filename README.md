@@ -25,6 +25,30 @@ Es el microservicio encargado de la gestión del inventario.
 - En caso de que no exista la receta, no existan los ingredientes o no haya suficiente cantidad de ingredientes para prepararla se rechaza el pedido.
 - En caso de que exista la receta y estén disponibles sus ingredientes como sus cantidades, se acepta el pedido y se procede a disminuir la cantidad de los ingredientes en inventario según la cantidad necesaria en cada receta.
 
+``` mermaid
+sequenceDiagram
+    participant Cliente
+    participant Order
+    participant Stock
+    participant Broker
+
+    Cliente->>Order: Hacer pedido
+    Order->>Broker: ¿Tiene receta y stock?
+    
+    alt 
+        Broker->>Stock: Verificar
+        Stock-->>Broker: Sí (con ingredientes y receta)
+        Broker->>Order: Aprobar
+        Order->>Stock: Quitar ingredientes
+        Order->>Cliente: Pedido con stock
+    else Algo falta
+        Broker->>Stock: Verificar
+        Stock-->>Broker: No (Sin receta o ingredientes)
+        Broker->>Order: Rechazar
+        Order->>Cliente: Pedido sin stock
+    end
+```
+
 
 ## Implementaciones y dependecias
 
